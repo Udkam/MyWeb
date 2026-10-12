@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f4f3ed">
+  <meta name="description" content="留白，一张安静的专注工作台。安排今日任务，专注眼前一件事，随手记下灵感。">
+  <title>留白 · Focus Desk</title>
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <a class="skip" href="#workspace">跳到工作台</a>
+  <div class="page-shell">
+    <header class="site-header">
+      <a class="brand" href="./" aria-label="留白首页"><img src="./icon.svg" alt="" width="34" height="34"><span>留白 <small>FOCUS DESK</small></span></a>
+      <div class="header-right"><span class="save-status" id="save-status"><i></i>已存于此浏览器</span><button class="icon-button" id="settings-open" aria-label="设置与备份" title="设置与备份"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7h16M4 17h16M8 4v6M16 14v6"/></svg></button></div>
+    </header>
+
+    <section class="intro" aria-labelledby="page-title">
+      <div><div class="eyebrow"><span class="tiny-star">✳</span><span id="today-label">今天</span><span class="rule"></span>把时间还给自己</div><h1 id="page-title">今天，<em>留点白。</em></h1><p>不用一次完成所有事。先做好眼前这一件。</p></div>
+      <div class="daily-stats" aria-label="今日进度">
+        <div><span class="stat-value" id="stat-minutes">0<span>min</span></span><span class="stat-name">今日专注</span></div>
+        <div><span class="stat-value" id="stat-sessions">0</span><span class="stat-name">完成专注</span></div>
+        <div><span class="stat-value" id="stat-tasks">0</span><span class="stat-name">完成任务</span></div>
+      </div>
+    </section>
+
+    <main class="workspace" id="workspace">
+      <section class="task-panel panel" aria-labelledby="tasks-heading">
+        <div class="section-heading"><h2 id="tasks-heading"><span class="section-number">01</span>今日清单</h2><span class="count" id="task-count">0 项待办</span></div>
+        <p class="section-description">把想做的事，变成下一步。</p>
+        <form id="task-form" class="add-task"><label class="sr-only" for="task-input">添加任务</label><input id="task-input" placeholder="接下来，想完成什么？" maxlength="120" autocomplete="off" required><button aria-label="添加任务" title="添加任务" type="submit">+</button></form>
+        <div class="task-tabs" role="group" aria-label="任务筛选"><button class="selected" data-filter="all" aria-pressed="true">全部</button><button data-filter="todo" aria-pressed="false">待完成</button><button data-filter="done" aria-pressed="false">已完成</button></div>
+        <ul class="task-list" id="task-list"></ul>
+        <div class="empty-state" id="task-empty"><svg viewBox="0 0 80 80" fill="none" aria-hidden="true"><path d="M23 14h35v48H23zM16 24v44h32" stroke="currentColor" stroke-width="1.2"/><path d="M31 28h18M31 37h13M31 46h16" stroke="currentColor" stroke-width="1.2"/><circle cx="58" cy="60" r="11" fill="#f8f8f3" stroke="currentColor" stroke-width="1.2"/><path d="m54 60 3 3 5-6" stroke="currentColor" stroke-width="1.2"/></svg><p id="empty-title">清单留白，心也轻一点。</p><span id="empty-description">写下一件小事，从这里开始。</span></div>
+        <div class="task-footer"><span id="task-hint">一次专注，一件小事。</span><button id="clear-done" class="text-button" hidden>清理已完成</button></div>
+      </section>
+
+      <section class="focus-panel panel" aria-labelledby="focus-heading">
+        <div class="section-heading"><h2 id="focus-heading"><span class="section-number">02</span>专注当下</h2><button class="text-button" id="duration-open" title="自定义时长">调整时长 ↗</button></div>
+        <div class="mode-tabs" role="group" aria-label="计时模式"><button class="selected" data-mode="focus" aria-pressed="true">专注</button><button data-mode="short" aria-pressed="false">短休息</button><button data-mode="long" aria-pressed="false">长休息</button></div>
+        <div class="timer-dial" id="timer-dial">
+          <svg class="dial-rings" viewBox="0 0 320 320" aria-hidden="true"><circle class="dial-track" cx="160" cy="160" r="143"/><circle id="timer-progress" class="dial-progress" cx="160" cy="160" r="143" pathLength="100"/><circle class="dial-inner" cx="160" cy="160" r="126"/><path class="dial-ticks" d="M160 15v8M160 297v8M15 160h8M297 160h8"/></svg>
+          <div class="timer-center"><span class="timer-caption" id="timer-caption">留一段完整的时间</span><div class="timer-digits" id="timer-display" role="timer" aria-label="剩余 25 分钟">25:00</div><span class="timer-state" id="timer-state"><i></i>准备好，就开始</span></div>
+        </div>
+        <div class="active-task" id="active-task"><span>正在为自己留白</span></div>
+        <div class="timer-actions"><button class="start-button" id="timer-start"><span id="start-icon">▶</span><span id="start-label">开始专注</span></button><button class="reset-button" id="timer-reset" aria-label="重置当前计时" title="重置当前计时">↺</button></div>
+        <p class="focus-tip" id="focus-tip">把分心的念头，暂时写进随手记。</p>
+        <div class="completion" id="completion" role="status" hidden><span>这一段时间，属于你。</span><button class="text-button" id="take-break">休息 5 分钟 →</button></div>
+      </section>
+
+      <section class="notes-panel panel" aria-labelledby="notes-heading">
+        <div class="section-heading"><h2 id="notes-heading"><span class="section-number">03</span>随手记</h2><span class="note-mark" aria-hidden="true">↗</span></div>
+        <p class="section-description">先记下来，专注之后再处理。</p>
+        <label class="sr-only" for="notes">随手记内容</label><textarea id="notes" maxlength="10000" placeholder="一个灵感、一件待办，&#10;或只是脑海里路过的想法。"></textarea>
+        <div class="notes-footer"><span><i class="small-dot"></i>自动保存</span><span id="note-count">0 字</span></div>
+        <div class="paper-corner" aria-hidden="true"></div>
+      </section>
+    </main>
+
+    <section class="rhythm" aria-labelledby="rhythm-heading"><div class="rhythm-intro"><span class="eyebrow">A LITTLE, EVERY DAY</span><h2 id="rhythm-heading">一点点，也算前进。</h2><p id="week-summary">从今天的第一段专注开始。</p></div><div class="week-chart" id="week-chart" role="img" aria-label="近七天专注时长"></div><div class="rhythm-note"><span class="ink-leaf" aria-hidden="true">✳</span><p>专注无需完美，<br>只需一次次回来。</p></div></section>
+    <footer class="site-footer"><span>留白 <span class="footer-divider">/</span> MAKE ROOM FOR WHAT MATTERS.</span><span>数据保存在此浏览器 <button class="text-button" id="backup-open">备份与迁移 ↗</button></span></footer>
+  </div>
+  <dialog id="settings-dialog" aria-labelledby="settings-title"><form method="dialog"><button class="dialog-close icon-button" aria-label="关闭设置">×</button></form><span class="eyebrow">YOUR DESK, YOUR PACE</span><h2 id="settings-title">照自己的节奏来。</h2><form id="settings-form"><fieldset><legend>计时时长 <small>1–120 分钟</small></legend><div class="duration-fields"><label>专注<input id="duration-focus" type="number" min="1" max="120" required></label><label>短休息<input id="duration-short" type="number" min="1" max="120" required></label><label>长休息<input id="duration-long" type="number" min="1" max="120" required></label></div></fieldset><label class="sound-label"><input id="sound-enabled" type="checkbox">结束时播放轻提示音</label><p class="dialog-help">调整时长会重置当前计时；任务和已完成记录会保留。</p><button class="start-button" type="submit">保存设置</button></form><section class="backup-section"><h3>给这张工作台，留一份备份。</h3><p>任务、便笺和专注记录只存于当前浏览器。换设备或清理浏览器前，可导出备份。</p><div class="backup-actions"><button class="outline-button" id="export-data">导出备份</button><button class="outline-button" id="import-open">导入备份</button><input id="import-file" type="file" accept=".json,application/json" hidden></div></section></dialog>
+  <dialog id="confirm-dialog" aria-labelledby="confirm-title"><h2 id="confirm-title">确认操作</h2><p id="confirm-description"></p><div class="confirm-actions"><button class="outline-button" id="confirm-cancel">取消</button><button class="start-button" id="confirm-accept">确认</button></div></dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <noscript><p class="noscript">请开启 JavaScript，以使用计时、任务和本地保存功能。</p></noscript>
+</body>
+</html>
