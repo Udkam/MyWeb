@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-09-04T21:40:01.532Z",
+  "source": {
+    "assetRepository": "https://github.com/CaptExcellent/kits-library-assets",
+    "assetRevision": "c67532ddf21cef61827de203344282cc9c2cecae"
+  },
+  "license": {
+    "id": "CC0-1.0",
+    "name": "CC0 1.0 Universal",
+    "url": "https://creativecommons.org/publicdomain/zero/1.0/"
+  },
+  "totalAssets": 2043,
+  "totalKits": 13
+}

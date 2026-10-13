@@ -1,290 +1,972 @@
-import { STORAGE_KEY, LIMITS, createState, sanitizeState, exportState, todayKey, deriveTimer, startTimer, pauseTimer, resetTimer, setTimerMode, settleTimer } from './model.js';
+import * as M from "./model.js";
+import {
+  TOOLS,
+  REGIONS,
+  FRIENDS,
+  DECOR,
+  LETTERS,
+  THEMES,
+  PLOTS,
+} from "./content.js";
+import { createScene } from "./scene.js";
 
 const $ = (selector) => document.querySelector(selector);
-const $$ = (selector) => [...document.querySelectorAll(selector)];
-let state = createState(Date.now());
-let loadProblem = '';
-let soundEnabled = false;
+const find = (items, id) => items.find((item) => item.id === id);
+const esc = (value) =>
+  String(value ?? "").replace(
+    /[&<>"']/g,
+    (c) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
+        c
+      ],
+  );
+const KEY = "mosslight-post-v1";
+function sameData(a, b) {
+  if (a === b) return true;
+  if (
+    !a ||
+    !b ||
+    typeof a !== "object" ||
+    typeof b !== "object" ||
+    Array.isArray(a) !== Array.isArray(b)
+  )
+    return false;
+  const keys = Object.keys(a);
+  return (
+    keys.length === Object.keys(b).length &&
+    keys.every((key) => Object.hasOwn(b, key) && sameData(a[key], b[key]))
+  );
+}
+let state = M.createState(),
+  tab = "home",
+  screen = "home",
+  letterId = "letter-1";
+let selectedDecor = null,
+  selectedPlot = null,
+  selectedNode = null,
+  friendId = null;
+let storageOK = true,
+  corruptRaw = null,
+  scene,
+  toastTimer,
+  audioReady = false,
+  modalReturnFocus;
+let busy = false,
+  atlas,
+  artImages = {};
+const reduced = matchMedia("(prefers-reduced-motion: reduce)");
+const music = new Audio(new URL("./assets/music.ogg", import.meta.url));
+music.loop = true;
+music.volume = 0.28;
+music.preload = "none";
+const sounds = {
+  tick: new Audio(new URL("./assets/ui-tick.wav", import.meta.url)),
+  accept: new Audio(new URL("./assets/ui-accept.wav", import.meta.url)),
+};
+Object.values(sounds).forEach((a) => {
+  a.volume = 0.18;
+  a.preload = "none";
+});
 try {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (raw) state = sanitizeState(JSON.parse(raw), Date.now());
-  soundEnabled = localStorage.getItem('focus-desk:sound') === 'on';
-} catch { loadProblem = '未能读取原有数据。本次仍可使用，请及时导出备份。'; }
-let selectedTaskId = state.timer.taskId;
-let taskFilter = 'all';
-let toastTimer;
-let timerTick;
-let audio;
-let currentDateKey = '';
-let pendingConfirmation;
-let storageAvailable = true;
-const modeLabels = { focus: '专注', short: '短休息', long: '长休息' };
+  const raw = localStorage.getItem(KEY);
+  if (raw) {
+    try {
+      state = M.parseState(raw);
+    } catch {
+      corruptRaw = raw;
+    }
+  }
+} catch {
+  storageOK = false;
+}
+// Shared writes require a real browser lock. Older browsers remain exportable
+// in memory instead of risking two tabs overwriting each other's progress.
+if (!navigator.locks) storageOK = false;
+if (state.trip) {
+  screen = "journey";
+  letterId = state.trip.letterId;
+}
 
 function toast(message) {
-  $('#toast').textContent = message;
-  $('#toast').classList.add('visible');
+  $("#toast").textContent = message;
+  $("#toast").classList.add("show");
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => $('#toast').classList.remove('visible'), 4300);
+  toastTimer = setTimeout(() => $("#toast").classList.remove("show"), 3500);
 }
-
-function persist() {
+function sound(name = "tick") {
+  if (!state.settings.sound || document.hidden) return;
+  const audio = sounds[name];
+  audio.currentTime = 0;
+  audio.play().catch(() => {});
+}
+function warning() {
+  const element = $("#save-warning");
+  element.hidden = storageOK && corruptRaw === null;
+  element.textContent =
+    corruptRaw !== null
+      ? "原存档未能读取，已保留原文。请在恢复窗口处理后继续。"
+      : !navigator.locks
+        ? "此浏览器暂不支持安全保存。进度仅在本页，离开前请在设置里导出；建议使用新版浏览器。"
+        : "此浏览器暂时不能保存。本页进度会保留，请先在设置里导出备份。";
+  $("#save-status").textContent =
+    storageOK && corruptRaw === null
+      ? state.savedAt
+        ? "已自动保存 · 此浏览器"
+        : "每一步，自动保存在此浏览器"
+      : "当前进度仅在本页，请导出备份";
+}
+function applyRemote(raw) {
+  if (!storageOK) {
+    toast("另一页有新进度。本页未保存的进度已保留，请先导出备份。");
+    return false;
+  }
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    storageAvailable = true;
-    $('#save-status').innerHTML = '<i></i>已存于此浏览器';
+    const next = raw ? M.parseState(raw) : M.createState();
+    const recovering = corruptRaw !== null;
+    if (raw && !recovering && next.revision < state.revision) return false;
+    if (raw && !recovering && next.revision === state.revision) {
+      if (!sameData(next, state)) {
+        storageOK = false;
+        warning();
+        toast("发现同时写入的不同进度。本页内容已保留，请先导出备份。");
+      }
+      return false;
+    }
+    corruptRaw = null;
+    if (recovering && $("#modal").open) closeDialog();
+    state = next;
+    screen = state.trip ? "journey" : "home";
+    tab = "home";
+    selectedNode = null;
+    selectedDecor = null;
+    if (state.trip) letterId = state.trip.letterId;
+    render();
+    syncAudio();
+    toast("已同步另一个标签页的进度。");
+    return true;
   } catch {
-    storageAvailable = false;
-    $('#save-status').textContent = '未能保存，请导出备份';
+    toast("另一个标签页的存档无法读取，当前进度已保留。");
+    return false;
   }
 }
-
-function update(next, { tasks = true, summary = true } = {}) {
-  // A button can settle an expired timer before the next scheduled tick.
-  // Refresh even when a timer-only action requested the cheaper render path.
-  const sessionsChanged = next.sessions !== state.sessions;
-  state = next;
-  persist();
-  if (tasks) renderTasks();
-  if (summary || sessionsChanged) renderSummary();
-  renderTimer();
-}
-
-function confirmAction(title, description, accept = '确认') {
-  if (pendingConfirmation) return Promise.resolve(false);
-  $('#confirm-title').textContent = title;
-  $('#confirm-description').textContent = description;
-  $('#confirm-accept').textContent = accept;
-  $('#confirm-dialog').showModal();
-  $('#confirm-cancel').focus();
-  return new Promise((resolve) => { pendingConfirmation = resolve; });
-}
-function finishConfirmation(accepted) {
-  $('#confirm-dialog').close();
-  pendingConfirmation?.(accepted);
-  pendingConfirmation = null;
-}
-$('#confirm-cancel').addEventListener('click', () => finishConfirmation(false));
-$('#confirm-accept').addEventListener('click', () => finishConfirmation(true));
-$('#confirm-dialog').addEventListener('cancel', (event) => { event.preventDefault(); finishConfirmation(false); });
-
-function makeButton(label, text, className, action) {
-  const button = document.createElement('button');
-  button.type = 'button';
-  button.className = className;
-  button.textContent = text;
-  button.setAttribute('aria-label', label);
-  button.title = label;
-  button.addEventListener('click', action);
-  return button;
-}
-
-function renderTasks() {
-  const list = $('#task-list');
-  list.replaceChildren();
-  const visible = state.tasks.filter(task => taskFilter === 'all' || (taskFilter === 'done' ? task.done : !task.done));
-  for (const task of visible) {
-    const item = document.createElement('li');
-    item.className = `task-item${task.done ? ' done' : ''}${task.id === selectedTaskId ? ' active' : ''}`;
-    const check = makeButton(`${task.done ? '恢复' : '完成'}任务：${task.title}`, task.done ? '✓' : '', 'task-check', () => {
-      update({ ...state, tasks: state.tasks.map(t => t.id === task.id ? { ...t, done: !t.done, completedAt: t.done ? null : Date.now() } : t) });
-      if (!task.done) toast('又完成了一件事。');
-    });
-    check.setAttribute('aria-pressed', String(task.done));
-    const title = document.createElement('span');
-    title.className = 'task-title';
-    title.textContent = task.title;
-    const actions = document.createElement('span');
-    actions.className = 'task-item-actions';
-    if (!task.done) actions.append(makeButton(`选为专注任务：${task.title}`, '▷', 'task-action', () => chooseTask(task.id)));
-    actions.append(makeButton(`删除任务：${task.title}`, '×', 'task-action delete', async () => {
-      if (!await confirmAction('把这件事放下？', `将删除「${task.title}」。已完成的专注记录会保留。`, '删除任务')) return;
-      if (selectedTaskId === task.id) selectedTaskId = null;
-      update({ ...state, tasks: state.tasks.filter(t => t.id !== task.id) });
-      toast('任务已删除。');
-    }));
-    item.append(check, title, actions);
-    list.append(item);
+async function change(operation, after, audio = "tick", replace = false) {
+  if (busy) return false;
+  if (corruptRaw !== null && !replace) {
+    showRecovery();
+    return false;
   }
-  const todo = state.tasks.filter(task => !task.done).length;
-  const done = state.tasks.length - todo;
-  $('#task-count').textContent = `${todo} 项待办`;
-  $('#task-empty').hidden = visible.length > 0;
-  $('#empty-title').textContent = taskFilter === 'done' ? '每一件完成，都值得记下。' : taskFilter === 'todo' && state.tasks.length ? '清单里的事，都完成了。' : '清单留白，心也轻一点。';
-  $('#empty-description').textContent = taskFilter === 'done' ? '完成的任务会出现在这里。' : '写下一件小事，从这里开始。';
-  $('#clear-done').hidden = done === 0;
-  $('#task-hint').textContent = done ? `${done} / ${state.tasks.length} 项已完成` : '一次专注，一件小事。';
-}
-
-function renderSummary() {
-  const now = Date.now();
-  const key = todayKey(now);
-  currentDateKey = key;
-  const sessions = state.sessions.filter(s => todayKey(s.completedAt) === key);
-  const minutes = Math.floor(sessions.reduce((sum, s) => sum + s.durationSeconds, 0) / 60);
-  $('#stat-minutes').replaceChildren(document.createTextNode(String(minutes)));
-  const unit = document.createElement('span'); unit.textContent = 'min'; $('#stat-minutes').append(unit);
-  $('#stat-sessions').textContent = String(sessions.length);
-  $('#stat-tasks').textContent = String(state.tasks.filter(t => t.done && todayKey(t.completedAt) === key).length);
-  $('#today-label').textContent = new Intl.DateTimeFormat('zh-CN', { month: 'long', day: 'numeric', weekday: 'long' }).format(now);
-  const days = Array.from({ length: 7 }, (_, i) => {
-    const date = new Date(now); date.setHours(12, 0, 0, 0); date.setDate(date.getDate() - 6 + i);
-    const day = todayKey(date.getTime());
-    const duration = Math.floor(state.sessions.filter(s => todayKey(s.completedAt) === day).reduce((sum, s) => sum + s.durationSeconds, 0) / 60);
-    return { day, date, duration, label: i === 6 ? '今天' : `${date.getMonth() + 1}/${date.getDate()}` };
-  });
-  const total = days.reduce((sum, day) => sum + day.duration, 0);
-  $('#week-summary').textContent = total ? `近 7 天，为重要的事留出了 ${total} 分钟。` : '从今天的第一段专注开始。';
-  const chart = $('#week-chart'); chart.replaceChildren();
-  chart.setAttribute('aria-label', `近七天专注时长：${days.map(d => `${d.label} ${d.duration} 分钟`).join('，')}`);
-  const peak = Math.max(60, ...days.map(d => d.duration));
-  for (const day of days) {
-    const column = document.createElement('div'); column.className = `day-column${day.day === key ? ' today' : ''}`;
-    column.title = `${day.day} · ${day.duration} 分钟`;
-    const bar = document.createElement('div'); bar.className = 'day-bar'; bar.style.height = `${Math.max(3, day.duration / peak * 54)}px`;
-    const label = document.createElement('span'); label.className = 'day-name'; label.textContent = day.label;
-    column.append(bar, label); chart.append(column);
-  }
-}
-
-function renderTimer() {
-  const timer = deriveTimer(state, Date.now());
-  const minutes = Math.floor(timer.remainingSeconds / 60);
-  const seconds = timer.remainingSeconds % 60;
-  const display = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-  $('#timer-display').textContent = display;
-  $('#timer-display').setAttribute('aria-label', `剩余 ${minutes} 分 ${seconds} 秒`);
-  $('#timer-progress').style.strokeDashoffset = String(timer.progress * 100);
-  $('#timer-dial').classList.toggle('running', timer.isRunning);
-  const stateText = timer.isRunning ? (timer.mode === 'focus' ? '眼前这一件，值得专注' : '停一停，也很好') : timer.remainingSeconds === 0 ? '完成了，好好伸个懒腰' : state.timer.runId ? '已暂停，等你回来' : '准备好，就开始';
-  $('#timer-state').replaceChildren(document.createElement('i'), document.createTextNode(stateText));
-  $('#timer-caption').textContent = timer.mode === 'focus' ? '留一段完整的时间' : '给思绪一点呼吸';
-  $('#start-label').textContent = timer.isRunning ? '暂停' : state.timer.runId && timer.remainingSeconds > 0 ? '继续' : `开始${modeLabels[timer.mode]}`;
-  $('#start-icon').textContent = timer.isRunning ? 'Ⅱ' : '▶';
-  $('#timer-start').setAttribute('aria-label', $('#start-label').textContent);
-  const active = state.tasks.find(t => t.id === selectedTaskId);
-  $('#active-task span').textContent = active ? active.title : timer.mode === 'focus' ? '正在为自己留白' : '暂时，把清单放在一边';
-  $('#active-task').title = active?.title ?? '';
-  $('#focus-tip').textContent = timer.mode === 'focus' ? (matchMedia('(max-width: 640px)').matches ? '把分心的念头，暂时写进随手记。' : '把分心的念头，暂时写在右边。') : '抬头，远望，让肩膀放松下来。';
-  $('#completion').hidden = timer.remainingSeconds !== 0 || timer.mode !== 'focus';
-  $('#take-break').textContent = `休息 ${state.durations.short} 分钟 →`;
-  $$('.mode-tabs button').forEach(button => {
-    const selected = button.dataset.mode === timer.mode;
-    button.classList.toggle('selected', selected); button.setAttribute('aria-pressed', String(selected));
-  });
-  document.title = timer.isRunning ? `${display} · ${modeLabels[timer.mode]} — 留白` : '留白 · Focus Desk';
-}
-
-function enableAudio() {
-  if (!soundEnabled) return;
-  try { audio ??= new (window.AudioContext || window.webkitAudioContext)(); void audio.resume(); } catch { /* Timer remains usable when audio is unavailable. */ }
-}
-function playChime() {
-  if (!soundEnabled || !audio || audio.state !== 'running') return;
-  [660, 880].forEach((frequency, index) => {
-    const oscillator = audio.createOscillator(); const gain = audio.createGain(); const start = audio.currentTime + index * .22;
-    oscillator.frequency.value = frequency; oscillator.type = 'sine'; gain.gain.setValueAtTime(0, start); gain.gain.linearRampToValueAtTime(.09, start + .03); gain.gain.exponentialRampToValueAtTime(.001, start + .7);
-    oscillator.connect(gain); gain.connect(audio.destination); oscillator.start(start); oscillator.stop(start + .75);
-    oscillator.addEventListener('ended', () => { oscillator.disconnect(); gain.disconnect(); });
-  });
-}
-
-function tick() {
-  clearTimeout(timerTick);
-  const next = settleTimer(state, Date.now());
-  if (next !== state) {
-    const wasFocus = state.timer.mode === 'focus';
-    update(next);
-    toast(wasFocus ? '专注完成，给自己一个小小的肯定。' : '休息结束，准备好再出发。');
-    playChime();
-  } else renderTimer();
-  if (todayKey(Date.now()) !== currentDateKey) renderSummary();
-  if (!document.hidden) timerTick = setTimeout(tick, 1000);
-}
-
-function timerHasProgress() { return !!state.timer.runId && deriveTimer(state, Date.now()).remainingSeconds > 0; }
-async function chooseTask(id) {
-  if (id === selectedTaskId && state.timer.mode === 'focus') return;
-  if (timerHasProgress() && !await confirmAction('切换专注任务？', '当前未完成的计时会重置，已经完成的记录会保留。', '切换任务')) return;
-  selectedTaskId = id;
-  update(setTimerMode(state, 'focus', Date.now()));
-  toast('已选好任务，准备好就开始。');
-}
-
-$('#task-form').addEventListener('submit', (event) => {
-  event.preventDefault();
-  const input = $('#task-input'); const title = input.value.trim();
-  if (!title) return;
-  if (state.tasks.length >= LIMITS.tasks) { toast('清单已达 200 项，请先清理一些已完成任务。'); return; }
-  const task = { id: crypto.randomUUID(), title, done: false, createdAt: Date.now(), completedAt: null };
-  taskFilter = 'all'; updateFilterButtons();
-  update({ ...state, tasks: [...state.tasks, task] }); input.value = ''; input.focus();
-  if (!storageAvailable) toast('当前无法自动保存，请使用导出备份。');
-});
-function updateFilterButtons() { $$('.task-tabs button').forEach(button => { const selected = button.dataset.filter === taskFilter; button.classList.toggle('selected', selected); button.setAttribute('aria-pressed', String(selected)); }); }
-$$('.task-tabs button').forEach(button => button.addEventListener('click', () => { taskFilter = button.dataset.filter; updateFilterButtons(); renderTasks(); }));
-$('#clear-done').addEventListener('click', async () => {
-  if (!await confirmAction('清理已完成任务？', '将从清单中删除已完成任务，今日完成任务数会随之更新；专注记录和时长会保留。', '清理')) return;
-  update({ ...state, tasks: state.tasks.filter(t => !t.done) });
-});
-$('#notes').value = state.notes;
-$('#note-count').textContent = `${state.notes.length} 字`;
-$('#notes').addEventListener('input', () => { state = { ...state, notes: $('#notes').value }; persist(); $('#note-count').textContent = `${state.notes.length} 字`; });
-$('#timer-start').addEventListener('click', () => { enableAudio(); update(state.timer.running ? pauseTimer(state, Date.now()) : startTimer(state, Date.now(), selectedTaskId), { tasks: false, summary: false }); tick(); });
-$('#timer-reset').addEventListener('click', async () => {
-  if (timerHasProgress() && !await confirmAction('重新开始这一段？', '当前未完成的计时会清零，已完成的专注记录会保留。', '重置计时')) return;
-  update(resetTimer(state, Date.now()));
-});
-$$('.mode-tabs button').forEach(button => button.addEventListener('click', async () => {
-  const mode = button.dataset.mode; if (state.timer.mode === mode) return;
-  if (timerHasProgress() && !await confirmAction(`切换到${modeLabels[mode]}？`, '当前未完成的计时会重置。', '切换模式')) return;
-  update(setTimerMode(state, mode, Date.now()), { tasks: false });
-}));
-$('#take-break').addEventListener('click', () => { update(setTimerMode(state, 'short', Date.now())); });
-
-function openSettings() {
-  for (const mode of ['focus', 'short', 'long']) $(`#duration-${mode}`).value = String(state.durations[mode]);
-  $('#sound-enabled').checked = soundEnabled;
-  $('#settings-dialog').showModal();
-}
-['settings-open', 'duration-open', 'backup-open'].forEach(id => $(`#${id}`).addEventListener('click', openSettings));
-$('#settings-form').addEventListener('submit', async (event) => {
-  event.preventDefault();
-  const durations = Object.fromEntries(['focus', 'short', 'long'].map(mode => [mode, Number($(`#duration-${mode}`).value)]));
-  if (Object.values(durations).some(value => !Number.isInteger(value) || value < 1 || value > 120)) { toast('请输入 1–120 的整数分钟。'); return; }
-  const changed = Object.keys(durations).some(mode => durations[mode] !== state.durations[mode]);
-  if (changed && timerHasProgress() && !await confirmAction('保存并重置当前计时？', '新的时长会从头开始计算，已完成记录会保留。', '保存设置')) return;
-  soundEnabled = $('#sound-enabled').checked;
-  try { localStorage.setItem('focus-desk:sound', soundEnabled ? 'on' : 'off'); } catch { /* Main persistence status handles restricted storage. */ }
-  if (changed) update(resetTimer({ ...state, durations }, Date.now()));
-  $('#settings-dialog').close(); toast('已按你的节奏设置。');
-});
-$('#export-data').addEventListener('click', () => {
-  const now = Date.now();
-  update(settleTimer(state, now), { tasks: false, summary: false });
-  const content = exportState(state, now);
-  const url = URL.createObjectURL(new Blob([content], { type: 'application/json' }));
-  const link = document.createElement('a'); link.href = url; link.download = `liubai-${todayKey(now)}.json`; document.body.append(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
-  toast('备份已导出，请妥善保存。');
-});
-$('#import-open').addEventListener('click', () => $('#import-file').click());
-$('#import-file').addEventListener('change', async (event) => {
-  const file = event.target.files?.[0]; event.target.value = ''; if (!file) return;
-  if (file.size > 1_000_000) { toast('备份过大，请选择小于 1 MB 的留白 JSON 文件。'); return; }
-  let restored;
-  try { restored = sanitizeState(JSON.parse(await file.text()), Date.now()); } catch { toast('这不是有效的留白备份，现有数据未更改。'); return; }
-  if (!await confirmAction('用备份恢复工作台？', `备份包含 ${restored.tasks.length} 项任务和 ${restored.sessions.length} 段专注。\n恢复会替换此浏览器的当前数据，建议先导出一份备份。`, '恢复备份')) return;
-  state = settleTimer(restored, Date.now()); selectedTaskId = state.timer.taskId; taskFilter = 'all'; updateFilterButtons();
-  $('#notes').value = state.notes; $('#note-count').textContent = `${state.notes.length} 字`;
-  update(state); $('#settings-dialog').close(); toast('已恢复备份，欢迎回来。'); tick();
-});
-window.addEventListener('storage', (event) => {
-  if (event.key !== STORAGE_KEY) return;
+  busy = true;
+  const commit = async () => {
+    if (storageOK) {
+      try {
+        const raw = localStorage.getItem(KEY);
+        if (raw) {
+          const latest = M.parseState(raw);
+          if (
+            latest.revision > state.revision ||
+            (latest.revision === state.revision && !sameData(latest, state))
+          ) {
+            if (replace) state = latest;
+            else {
+              applyRemote(raw);
+              return false;
+            }
+          }
+        }
+      } catch {
+        if (!replace) storageOK = false;
+      }
+    }
+    try {
+      const next = operation(state);
+      if (next !== state) {
+        next.savedAt = Date.now();
+        const raw = M.serializeState(next);
+        if (storageOK) {
+          try {
+            localStorage.setItem(KEY, raw);
+          } catch {
+            storageOK = false;
+            toast("自动保存未成功，请在设置导出备份。");
+          }
+        }
+        state = next;
+      }
+      after?.();
+      render();
+      sound(audio);
+      return true;
+    } catch (error) {
+      toast(error.message || "这一步暂时未能完成。");
+      return false;
+    }
+  };
   try {
-    state = event.newValue ? sanitizeState(JSON.parse(event.newValue), Date.now()) : createState(Date.now());
-    selectedTaskId = state.timer.taskId; $('#notes').value = state.notes; $('#note-count').textContent = `${state.notes.length} 字`;
-    renderTasks(); renderSummary(); tick();
-  } catch { toast('另一标签页的数据暂时无法读取。'); }
+    return navigator.locks
+      ? await navigator.locks.request(KEY, commit)
+      : await commit();
+  } finally {
+    busy = false;
+  }
+}
+window.addEventListener("storage", (event) => {
+  if (event.key === KEY) applyRemote(event.newValue);
 });
-document.addEventListener('visibilitychange', () => { if (document.hidden) clearTimeout(timerTick); else tick(); });
-renderTasks(); renderSummary(); tick();
-if (loadProblem) { $('#save-status').textContent = '原有数据读取失败'; toast(loadProblem); }
+
+function button(label, action, classes = "primary", attrs = "") {
+  return `<button class="${classes}" data-action="${action}" ${attrs}>${label}</button>`;
+}
+function animal(friend, unknown = false) {
+  return `<span class="animal${unknown ? " unknown" : ""}" aria-hidden="true" style="background-image:url('./assets/art/${friend.species}.png')"></span>`;
+}
+function progressStats() {
+  const p = M.getProgress(state);
+  return `<div class="stats"><div class="stat"><strong>${p.lettersDone}<small> / 9</small></strong><span>封信已送达</span></div><div class="stat"><strong>${p.friendsMet}<small> / 6</small></strong><span>林间朋友</span></div><div class="stat"><strong>${state.materials}</strong><span>枝叶</span></div></div>`;
+}
+function currentLetter() {
+  return find(LETTERS, letterId) || LETTERS[0];
+}
+function head(title, subtitle = "", right = "") {
+  return `<div class="panel-head"><div><span class="eyebrow">${subtitle}</span><h2>${title}</h2></div>${right}</div>`;
+}
+function homePanel() {
+  const p = M.getProgress(state),
+    next = LETTERS[p.lettersDone];
+  if (state.trip)
+    return `${head("信还在路上", "A LITTLE JOURNEY")}<p class="intro">你停在${esc(find(find(REGIONS, state.trip.regionId).nodes, state.trip.position).name)}。<br>行囊和走过的路，都替你记着。</p>${progressStats()}${button("继续这趟旅途 →", "resume", "primary full")}<p class="inline-note">随时关掉页面也没关系，下次从这里继续。</p>`;
+  return `${head(p.ending ? "这里，已经是家。" : p.lettersDone ? "小院又有了新模样。" : "一间小屋，一封来信。", "YOUR QUIET CORNER")}
+    <p class="intro">${p.ending ? "九封信写到了这里。<br>剩下的日子，留给布置和偶尔的相见。" : p.lettersDone ? "送信时顺路见个朋友。<br>回来，再添一点喜欢的东西。" : "住进溪边的小屋，替林间的邻居送几封信。<br>不赶时间，路上也可以坐坐。"}</p>${progressStats()}
+    ${p.ending ? `<div class="ending"><h3>九封信，都有了回音。</h3><p class="subtle">故事已经完成。你可以自由布置小院，也可以带着旧信再去看朋友。没有需要按时完成的事。</p>${button("布置我的小院", "go-decor", "primary full")}</div>${button("翻看旧信与路线", "go-letters", "secondary full")}` : `<p class="section-label">${p.lettersDone ? "新的来信" : "从这里开始"}</p><article class="letter-card"><div class="letter-meta"><span>第 ${p.lettersDone + 1} 封 / 9</span><span class="stamp">林间邮便</span></div><h3>${esc(next.title)}</h3><p>${esc(find(REGIONS, next.regionId).name)} · 寄往${esc(next.recipient)}</p>${button("收好信，整理行囊 →", "prepare", "primary full", `data-id="${next.id}"`)}</article>`}
+    ${state.lastTrip ? button("看看上次带回了什么", "recap", "text-button full") : '<p class="inline-note">每一步自动保存。没有签到、喂养或离线倒计时。</p>'}`;
+}
+function lettersPanel() {
+  return `${head("窗边的信匣", `${state.completedLetters.length} / 9 LETTERS`)}<p class="subtle">${state.completedLetters.length === 9 ? "故事已完成。旧信仍可带你回到熟悉的路上。" : "送达并回家后，下一封信会来到窗边。"}</p><div class="letter-list spaced">${LETTERS.map(
+    (letter, index) => {
+      const done = state.completedLetters.includes(letter.id),
+        available = index <= state.completedLetters.length;
+      return `<button class="letter-row ${available ? "" : "locked"}" data-action="read-letter" data-id="${letter.id}" ${available ? "" : "disabled"}><span class="letter-no">${String(index + 1).padStart(2, "0")}</span><span><strong>${esc(letter.title)}</strong><small>${done ? "已送达 · 可以重访" : available ? "新来信 · 等你启程" : "前一封送达后开启"}</small></span><span class="letter-arrow">${done ? "✓" : available ? "↗" : "·"}</span></button>`;
+    },
+  ).join("")}</div>`;
+}
+function letterPanel() {
+  const l = currentLetter(),
+    done = state.completedLetters.includes(l.id);
+  return `${button("← 返回信匣", "go-letters", "text-button back")}${head(esc(l.title), `LETTER ${LETTERS.indexOf(l) + 1} / 9`)}<p class="subtle">寄往 ${esc(l.recipient)}</p><div class="mail-paper">${esc(l.body)}</div>${done ? `<p class="section-label">收到的回信</p><div class="mini-reply">${esc(l.reply)}</div><p class="inline-note">已领取首通信件奖励。重访仍可会友、采集。</p>` : '<p class="inline-note">首次送达并回家：获得 2 份枝叶。</p>'}${state.trip ? button("继续正在进行的旅途", "resume", "primary full") : button(done ? "再走一趟 →" : "整理行囊 →", "prepare", "primary full", `data-id="${l.id}"`)}`;
+}
+function preparePanel() {
+  const l = currentLetter(),
+    region = find(REGIONS, l.regionId),
+    used = state.pack.reduce((n, id) => n + find(TOOLS, id).slots, 0);
+  const result = M.getReachableOutcomes(region.id, state.pack);
+  return `${button("← 放回信匣", "go-letters", "text-button back")}${head("出门前，带些什么？", esc(region.name))}<p class="subtle">${esc(l.title)} · 本趟 ${region.energy} 点精力</p><div class="pack-head"><span class="section-label" style="margin:0">行囊 ${used} / 4 格</span><span class="slot-indicator" aria-hidden="true">${[0, 1, 2, 3].map((i) => `<i class="${i < used ? "filled" : ""}"></i>`).join("")}</span></div><div class="tool-grid">${TOOLS.map((tool) => `<button class="tool" data-action="tool" data-id="${tool.id}" aria-pressed="${state.pack.includes(tool.id)}"><span class="tool-top"><strong>${tool.name}</strong><small>${tool.slots} 格 ${state.pack.includes(tool.id) ? "✓" : "＋"}</small></span><p>${tool.description}</p></button>`).join("")}</div>
+  <div class="outcomes"><strong>这套行囊，可以……</strong><p>${
+    result.visitorIds.length
+      ? result.visitorIds
+          .map((id) => {
+            const f = find(FRIENDS, id);
+            return `拜访${f.name}${state.friendVisits[id] ? "（老朋友）" : `，获得${find(DECOR, f.gift).name}`}`;
+          })
+          .join("；")
+      : "沿途送信，或顺路采集"
+  }</p><p>采集路线最多带回 <strong>${result.collectionMax}</strong> 份枝叶。</p><p class="subtle">会友与最多采集可能是不同路线；出发后逐段选择。</p></div>${button("信收好了，出发 →", "start", "primary full", result.deliverable ? "" : "disabled")}<p class="inline-note">只影响这一趟，不消耗家中物品。点选已装工具可取出。</p>`;
+}
+function rewardText(route) {
+  const r = route.reward,
+    rewards = [];
+  if (r.delivery) rewards.push("送达信件");
+  if (r.guestId) {
+    const f = find(FRIENDS, r.guestId);
+    rewards.push(
+      `拜访${f.name}${state.friendVisits[f.id] ? "" : ` · ${find(DECOR, f.gift).name}`}`,
+    );
+  }
+  if (r.collection) rewards.push(`枝叶 +${r.collection}`);
+  if (r.energyRestore) rewards.push(`喝茶恢复 ${r.energyRestore} 精力`);
+  if (route.to === "home") rewards.push("收好本趟所得");
+  return rewards.join(" · ") || "继续向前，下一处再选路";
+}
+function journeyPanel() {
+  const trip = state.trip;
+  if (!trip) {
+    screen = "home";
+    return homePanel();
+  }
+  const region = find(REGIONS, trip.regionId),
+    routes = M.getRoutes(trip),
+    node = find(region.nodes, trip.position);
+  const terrain = {
+    forest: "林路",
+    rain: "雨路",
+    plain: "小径",
+    tunnel: "隧道",
+  };
+  return `${head(esc(node.name), esc(region.name), button("暂回小屋", "rest", "text-button"))}<div class="energy-bar"><span class="subtle">本趟精力 <strong>${trip.energy} / ${region.energy}</strong></span><span class="energy-dots" aria-hidden="true">${Array.from({ length: region.energy }, (_, i) => `<i class="${i < trip.energy ? "on" : ""}"></i>`).join("")}</span></div><p class="journey-bag">${trip.tools.map((id) => find(TOOLS, id).name).join(" · ")}${trip.teaUsed ? "（茶已饮）" : ""}</p><div class="row between"><p class="section-label">下一段，走哪里？</p><span class="subtle">枝叶 ${trip.collection} · ${trip.delivered ? "信已送达" : "信在行囊"}</span></div>
+  <div class="route-list">${routes.map((route) => `<button class="route-option${selectedNode === route.to ? " selected" : ""}" data-action="step" data-id="${route.id}" ${route.safeAvailable ? "" : "disabled"}><span class="route-title"><strong>${esc(route.name)}</strong><span class="route-cost">−${route.cost} 精力 · ${terrain[route.terrain]}</span></span><p>${esc(rewardText(route))}</p>${route.safeAvailable ? `<p class="subtle">到达后余 ${route.energyAfter} 点 · 可完成归途 →</p>` : `<p class="reason">${esc(route.reason)}${route.missingTool ? "回家重新整理行囊可更换工具。" : ""}</p>`}</button>`).join("")}</div>
+  <div class="row between spaced">${button("← 退回上一处", "rewind", "text-button", trip.path.length ? "" : "disabled")}${button("放下这趟旅途", "abandon", "text-button")}</div><p class="inline-note">每段都已确认有路回家。奖励归家时收好；退回不会损失家中物品。</p>`;
+}
+function recapPanel() {
+  const result = state.lastTrip;
+  if (!result) {
+    screen = "home";
+    return homePanel();
+  }
+  const l = find(LETTERS, result.letterId),
+    gift = result.newDecor.map((id) => find(DECOR, id)),
+    theme = result.newThemes.map((id) => find(THEMES, id));
+  return `${head("回到小屋了。", result.firstDelivery ? "A LETTER, DELIVERED" : "A FAMILIAR PATH")}<p class="subtle">${esc(l.title)} · ${result.firstDelivery ? "已送达" : "重访归来"}</p><div class="mini-reply">${esc(l.reply)}</div><div class="trip-summary"><div class="summary-item"><strong>＋${result.collection + (result.firstDelivery ? l.reward : 0)}</strong><small>枝叶${result.firstDelivery ? ` · 含送信 ${l.reward}` : ""}</small></div><div class="summary-item"><strong>${result.guestId ? find(FRIENDS, result.guestId).name : "一段静路"}</strong><small>${result.guestId ? "今天拜访的朋友" : "沿途采集，安然归家"}</small></div></div>${gift.length ? `<div class="letter-card"><p class="section-label">带回的小心意</p><h3>${gift.map((d) => d.name).join("、")}</h3><p>${gift.map((d) => d.description).join(" ")}</p><p class="inline-note">${gift.some((d) => state.plots.includes(d.id)) ? "已放在小院的空位，随时可以挪动。" : "院里已满，可以在布置中替换喜欢的位置。"}</p></div>` : result.guestId ? '<p class="inline-note">老朋友的礼物已经收好，这次留下一段相见。</p>' : ""}${theme.length ? `<div class="outcomes">新院景：<strong>${theme.map((t) => t.name).join("、")}</strong><br>在「布置」中随时切换。</div>` : ""}${M.getProgress(state).ending && result.firstDelivery ? '<div class="ending"><h3>九封信，都有了回音。</h3><p class="subtle">故事完成了。小院和朋友都会留下来。</p></div>' : ""}${button("在家坐一会儿", "go-home", "primary full")}${gift.length ? button("挪挪新陈设", "go-decor", "text-button full") : ""}`;
+}
+function friendsPanel() {
+  if (friendId) {
+    const friend = find(FRIENDS, friendId),
+      memories = M.getFriendMemories(state, friendId),
+      gift = find(DECOR, friend.gift),
+      region = REGIONS.find((r) =>
+        r.nodes.some((n) => n.guestId === friend.id),
+      );
+    return `${button("← 林间的朋友", "friends-list", "text-button back")}<div class="row">${animal(friend, !memories.length)}${head(friend.name, friend.role)}</div><p class="subtle">${memories.length ? `带来的礼物：${gift.name}` : `在${region.name}，顺路去坐坐。`}</p>${memories.length ? memories.map((memory, i) => `<div class="memory"><span class="memory-index">${["初见", "渐熟", "自在相处"][i]}</span>${esc(memory)}</div>`).join("") : `<div class="mail-paper">还没正式见过面。带好行囊，路过时去打个招呼吧。</div>`}<p class="inline-note">${memories.length < 3 ? "相处的记忆会随信的故事展开，不需要反复拜访刷次数。" : "有些朋友，不必每天见面也会惦记。"}</p>${button("去信匣看看路线", "go-letters", "secondary full")}`;
+  }
+  return `${head("林间的朋友", `${M.getProgress(state).friendsMet} / 6 NEIGHBORS`)}<p class="subtle">见过面后，他们会把一份小心意留在院里。</p><div class="friend-list spaced">${FRIENDS.map((friend) => `<button class="friend-card" data-action="friend" data-id="${friend.id}">${animal(friend, !state.friendVisits[friend.id])}<span><strong>${friend.name}</strong><small>${friend.role} · ${state.friendVisits[friend.id] ? "已经相识" : "等待初见"}</small></span><span class="letter-arrow">↗</span></button>`).join("")}</div>`;
+}
+function decorPanel() {
+  const chosen = find(DECOR, selectedDecor);
+  return `${head("慢慢布置，慢慢喜欢。", `${state.unlockedDecor.length} / 12 LITTLE THINGS`)}<div class="row between"><span class="subtle">枝叶 <strong>${state.materials}</strong></span><span class="subtle">拥有后可反复摆放</span></div><div class="theme-switch" aria-label="小院主题">${THEMES.map((theme, i) => `<button data-action="theme" data-id="${theme.id}" aria-pressed="${state.theme === theme.id}" ${state.unlockedThemes.includes(theme.id) ? "" : "disabled"}>${theme.name}${state.unlockedThemes.includes(theme.id) ? "" : ` · ${i * 3}封信`}</button>`).join("")}</div><div class="selected-decor"><strong>${chosen ? `已选：${chosen.name}` : selectedDecor === "remove" ? "收起陈设" : "选一件，再点小院里的圆圈"}</strong><p class="subtle">${chosen ? "点击一个位置摆放。不会消耗物品。" : selectedDecor === "remove" ? "点选位置即可收起，物件仍然拥有。" : "朋友的礼物自动放进空位，也能随时挪动。"}</p>${button("收起一个位置", "remove-decor", "text-button")}</div><div class="decor-grid">${DECOR.map(
+    (decor) => {
+      const owned = state.unlockedDecor.includes(decor.id);
+      return `<button class="decor-card${selectedDecor === decor.id ? " selected" : ""}" data-action="decor" data-id="${decor.id}"><span class="decor-tag">${owned ? "已拥有" : decor.friendId ? "朋友赠礼" : `${decor.cost} 枝叶`}</span><div class="decor-thumb"><canvas data-sprite="${decor.sprite}" width="96" height="64" aria-hidden="true"></canvas></div><strong>${decor.name}</strong><small>${owned ? "选择并摆放" : decor.friendId ? `拜访${find(FRIENDS, decor.friendId).name}获得` : "点击查看并购置"}</small></button>`;
+    },
+  ).join("")}</div>`;
+}
+function render() {
+  warning();
+  $("#new-letter-dot").hidden = state.completedLetters.length === 9;
+  document.querySelectorAll("[data-tab]").forEach((button) => {
+    button.setAttribute(
+      "aria-current",
+      button.dataset.tab === tab ? "page" : "false",
+    );
+  });
+  const focus = document.activeElement?.dataset,
+    scroll = $("#panel").scrollTop;
+  const view =
+    screen === "prepare"
+      ? preparePanel
+      : screen === "journey"
+        ? journeyPanel
+        : screen === "recap"
+          ? recapPanel
+          : screen === "letter"
+            ? letterPanel
+            : tab === "letters"
+              ? lettersPanel
+              : tab === "friends"
+                ? friendsPanel
+                : tab === "decor"
+                  ? decorPanel
+                  : homePanel;
+  $("#panel").innerHTML = view();
+  $("#panel").scrollTop = scroll;
+  if (focus?.action) {
+    const candidate = [...$("#panel").querySelectorAll("[data-action]")].find(
+      (e) =>
+        e.dataset.action === focus.action &&
+        e.dataset.id === focus.id &&
+        !e.disabled,
+    );
+    candidate?.focus({ preventScroll: true });
+  }
+  renderScene();
+  renderThumbs();
+  syncControls();
+}
+function renderScene() {
+  if (!scene) return;
+  const routeMode = screen === "journey" || screen === "prepare",
+    region = routeMode
+      ? find(REGIONS, state.trip?.regionId || currentLetter().regionId)
+      : null;
+  const trip = screen === "journey" ? state.trip : null,
+    routes = trip ? M.getRoutes(trip) : [];
+  scene.render({
+    mode: routeMode ? "route" : "home",
+    theme: routeMode ? region.theme : state.theme,
+    plots: state.plots,
+    residents: FRIENDS.filter((f) => state.friendVisits[f.id]).map(
+      (f) => f.species,
+    ),
+    region,
+    trip,
+    selectedPlot,
+    routes,
+  });
+  scene.setMotion(state.settings.motion && !reduced.matches);
+  $("#scene-title").textContent = routeMode
+    ? region.name
+    : tab === "decor"
+      ? "把喜欢的，留下来。"
+      : state.completedLetters.length === 9
+        ? "这里，已经是家。"
+        : "今天，也慢慢来。";
+  $("#scene-eyebrow").textContent = routeMode
+    ? trip
+      ? "一封信的归途"
+      : "看看今天的路"
+    : "溪边的一隅";
+  $("#scene-badge").textContent = routeMode
+    ? trip
+      ? `${trip.energy} 点精力`
+      : `出发精力 ${region.energy}`
+    : find(THEMES, state.theme).name;
+  $("#scene-caption").textContent = routeMode
+    ? "点地图查看，在手记中选路前进。"
+    : "信会送到，路也会等你。";
+  $("#postcard").hidden = routeMode;
+  $("#scene-note").innerHTML =
+    tab === "decor" && !routeMode
+      ? "<span>选好物件后，点一个圆圈摆放</span>"
+      : routeMode && selectedNode
+        ? `<span>${esc(find(region.nodes, selectedNode)?.name || "")} · ${trip?.position === selectedNode ? "现在在这里" : "在手记中选择下一段路"}</span>`
+        : "";
+  let targets = scene.getHitTargets();
+  if (routeMode)
+    targets = region.nodes.map((n) => ({
+      kind: "node",
+      id: n.id,
+      x: n.x,
+      y: n.y,
+      label: n.name,
+    }));
+  $("#scene-targets").innerHTML = targets
+    .filter(
+      (t) =>
+        t.kind === "node" ||
+        (t.kind === "friend" && tab !== "decor") ||
+        (t.kind === "plot" && tab === "decor"),
+    )
+    .map((target) => {
+      const plotIndex =
+        target.kind === "plot"
+          ? PLOTS.findIndex((p) => p.id === target.id)
+          : -1;
+      const current = target.kind === "node" && trip?.position === target.id,
+        available =
+          target.kind === "node" &&
+          routes.some((r) => r.to === target.id && r.safeAvailable);
+      return `<button class="world-target ${target.kind}${current ? " current" : ""}${available ? " available" : ""}${selectedNode === target.id || (selectedPlot === plotIndex && plotIndex >= 0) ? " selected" : ""}" style="left:clamp(22px,${target.x / 2.88}%,calc(100% - 22px));top:clamp(22px,${target.y / 2.88}%,calc(100% - 22px))" data-action="world-${target.kind}" data-id="${esc(target.id)}" aria-label="${esc(target.label)}${target.kind === "plot" ? "，摆放陈设" : ""}">${target.kind === "plot" ? "+" : target.kind === "node" ? `<span class="node-label">${esc(target.label)}</span>` : ""}</button>`;
+    })
+    .join("");
+}
+async function loadAtlas() {
+  try {
+    atlas = await fetch(
+      new URL("./assets/asset-map.json", import.meta.url),
+    ).then((r) => r.json());
+    await Promise.all(
+      Object.entries(atlas.files).map(async ([id, file]) => {
+        const image = new Image();
+        image.src = new URL(`./assets/${file}`, import.meta.url);
+        await image.decode();
+        artImages[id] = image;
+      }),
+    );
+    renderThumbs();
+  } catch {
+    toast("部分物件预览暂未载入，可刷新重试。");
+  }
+}
+function renderThumbs() {
+  if (!atlas) return;
+  document.querySelectorAll("[data-sprite]").forEach((canvas) => {
+    const sprite = atlas.sprites[canvas.dataset.sprite],
+      image = sprite && artImages[sprite.file];
+    if (!image) return;
+    const [x, y, w, h] = sprite.rect,
+      ctx = canvas.getContext("2d");
+    ctx.imageSmoothingEnabled = false;
+    ctx.clearRect(0, 0, 96, 64);
+    const scale = Math.min(2, 84 / w, 60 / h);
+    ctx.drawImage(
+      image,
+      x,
+      y,
+      w,
+      h,
+      (96 - w * scale) / 2,
+      (64 - h * scale) / 2,
+      w * scale,
+      h * scale,
+    );
+  });
+}
+function go(nextTab, nextScreen = nextTab) {
+  tab = nextTab;
+  screen = nextScreen;
+  selectedNode = null;
+  friendId = null;
+  $("#panel").scrollTop = 0;
+  render();
+}
+function focusPanel() {
+  if (matchMedia("(max-width:760px)").matches) {
+    $(".journal").scrollIntoView({ block: "start", behavior: "instant" });
+  }
+  $("#panel").focus({ preventScroll: true });
+}
+function openDialog(title, html) {
+  modalReturnFocus = document.activeElement;
+  $("#modal-title").textContent = title;
+  $("#modal-content").innerHTML = html;
+  if (!$("#modal").open) $("#modal").showModal();
+}
+function closeDialog() {
+  $("#modal").close();
+  modalReturnFocus?.focus?.({ preventScroll: true });
+}
+$("#modal-close").addEventListener("click", closeDialog);
+$("#modal").addEventListener("click", (event) => {
+  if (event.target === $("#modal")) {
+    const r = $("#modal").getBoundingClientRect();
+    if (
+      event.clientX < r.left ||
+      event.clientX > r.right ||
+      event.clientY < r.top ||
+      event.clientY > r.bottom
+    )
+      closeDialog();
+  }
+});
+function download(content, name, type = "application/json") {
+  const url = URL.createObjectURL(new Blob([content], { type })),
+    anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = name;
+  anchor.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+function settings() {
+  openDialog(
+    "把小事安排好",
+    `<div class="setting-row"><span><strong>音乐</strong><small>Pixel-boy & AAA · Peaceful</small></span>${button(state.settings.music ? "开" : "关", "setting", "switch", `data-id="music" aria-pressed="${state.settings.music}"`)}</div><div class="setting-row"><span><strong>轻声音效</strong><small>选取与归家的小回声</small></span>${button(state.settings.sound ? "开" : "关", "setting", "switch", `data-id="sound" aria-pressed="${state.settings.sound}"`)}</div><div class="setting-row"><span><strong>场景微动</strong><small>${reduced.matches ? "系统已要求减少动态效果" : "水纹和动物的轻微变化"}</small></span>${button(state.settings.motion ? "开" : "关", "setting", "switch", `data-id="motion" aria-pressed="${state.settings.motion}"`)}</div><p class="inline-note">进度只保存在此浏览器。更换设备、清除浏览器数据前，请导出备份；没有账号或云同步。</p><div class="row spaced">${button("导出进度", "export", "secondary")}${button("导入备份", "import", "secondary")}</div>${button("怎么游玩", "help", "text-button full")}`,
+  );
+}
+function showRecovery() {
+  openDialog(
+    "先把原来的进度收好",
+    `<div class="dialog-copy"><p>浏览器里有一份暂时无法读取的存档。原文还在，尚未被覆盖。</p><p>可以先下载原存档，或导入之前的备份。选择重新开始才会替换它。</p></div><div class="row spaced">${button("下载原存档", "export-raw", "secondary")}${button("导入备份", "import", "secondary")}</div>${button("确认重新开始", "reset-corrupt", "danger full")}`,
+  );
+}
+function syncControls() {
+  const playing = state.settings.music && !music.paused;
+  $("#music-toggle").setAttribute("aria-pressed", String(playing));
+  $("#music-toggle").setAttribute(
+    "aria-label",
+    playing ? "关闭音乐" : state.settings.music ? "继续音乐" : "开启音乐",
+  );
+  $("#music-label").textContent = playing ? "音乐开" : "音乐关";
+}
+async function syncAudio() {
+  if (state.settings.music && audioReady && !document.hidden) {
+    try {
+      await music.play();
+    } catch {
+      toast("音乐暂未播放，点一下音乐按钮重试。");
+    }
+  } else music.pause();
+  syncControls();
+}
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    music.pause();
+    Object.values(sounds).forEach((audio) => audio.pause());
+  } else syncAudio();
+});
+reduced.addEventListener("change", () =>
+  scene?.setMotion(state.settings.motion && !reduced.matches),
+);
+$("#settings-open").addEventListener("click", settings);
+$("#credits-open").addEventListener("click", () =>
+  openDialog(
+    "林间小物的来处",
+    `<div class="dialog-copy"><p>美术、音乐与音效来自 <a href="https://pixel-boy.itch.io/ninja-adventure-asset-pack" target="_blank" rel="noopener">Ninja Adventure · Pixel-boy & AAA ↗</a>，使用作者提供的原始资源，许可 CC0。</p><p>背景曲：5 - Peaceful。角色采用原图的两帧状态，场景由原始图块组合。设计、程序与文字：4c。</p><p><a href="./assets/art/LICENSE-Ninja-Adventure.txt" target="_blank">查看原始素材许可 ↗</a></p></div>`,
+  ),
+);
+$("#music-toggle").addEventListener("click", async () => {
+  audioReady = true;
+  const next = music.paused ? true : false;
+  await change((s) => M.setSetting(s, "music", next));
+  await syncAudio();
+});
+$("#postcard").addEventListener("click", () => {
+  if (!scene) return;
+  const a = document.createElement("a");
+  a.href = scene.toDataURL();
+  a.download = "苔光来信-我的小院.png";
+  a.click();
+  toast("小院图片已准备下载。");
+});
+document.addEventListener("click", async (event) => {
+  const element = event.target.closest("[data-action],[data-tab]");
+  if (!element || element.disabled) return;
+  if (element.dataset.tab) {
+    go(element.dataset.tab);
+    sound();
+    return;
+  }
+  const { action, id } = element.dataset;
+  if (action === "go-home") {
+    go("home");
+    return;
+  }
+  if (action === "go-letters") {
+    go("letters");
+    return;
+  }
+  if (action === "go-decor") {
+    go("decor");
+    return;
+  }
+  if (action === "read-letter") {
+    letterId = id;
+    go("letters", "letter");
+    return;
+  }
+  if (action === "prepare") {
+    if (state.trip) {
+      toast("先收好正在路上的那封信吧。");
+      return;
+    }
+    letterId = id || letterId;
+    go("letters", "prepare");
+    focusPanel();
+    return;
+  }
+  if (action === "tool") {
+    await change((s) =>
+      M.setPack(
+        s,
+        s.pack.includes(id) ? s.pack.filter((x) => x !== id) : [...s.pack, id],
+      ),
+    );
+    return;
+  }
+  if (action === "start") {
+    await change(
+      (s) => M.beginTrip(s, letterId),
+      () => {
+        screen = "journey";
+        tab = "home";
+      },
+      "accept",
+    );
+    focusPanel();
+    return;
+  }
+  if (action === "resume") {
+    screen = "journey";
+    tab = "home";
+    letterId = state.trip.letterId;
+    render();
+    focusPanel();
+    return;
+  }
+  if (action === "rest") {
+    go("home");
+    return;
+  }
+  if (action === "step") {
+    const wasDelivery = state.trip?.delivered;
+    await change(
+      (s) => M.stepTrip(s, id),
+      () => {
+        selectedNode = null;
+        if (!state.trip) {
+          screen = "recap";
+          tab = "home";
+        } else if (!wasDelivery && state.trip.delivered)
+          toast("信已送达，沿路慢慢回家。");
+      },
+      id.endsWith("11") || id.endsWith("12") ? "accept" : "tick",
+    );
+    return;
+  }
+  if (action === "rewind") {
+    await change(M.rewindTrip, () => {
+      selectedNode = null;
+    });
+    return;
+  }
+  if (action === "abandon") {
+    openDialog(
+      "这趟先放一放？",
+      `<p class="dialog-copy">本趟还没带回家的枝叶和礼物会放回原处。家里的布置、朋友和已完成的信都保留。</p><div class="row spaced">${button("继续走走", "close", "secondary")}${button("回家重新准备", "confirm-abandon", "primary")}</div>`,
+    );
+    return;
+  }
+  if (action === "confirm-abandon") {
+    await change(M.abandonTrip, () => {
+      closeDialog();
+      screen = "prepare";
+      tab = "letters";
+    });
+    return;
+  }
+  if (action === "recap") {
+    screen = "recap";
+    tab = "home";
+    render();
+    return;
+  }
+  if (action === "friend") {
+    friendId = id;
+    tab = "friends";
+    screen = "friends";
+    render();
+    return;
+  }
+  if (action === "friends-list") {
+    friendId = null;
+    render();
+    return;
+  }
+  if (action === "theme") {
+    await change((s) => M.setTheme(s, id));
+    return;
+  }
+  if (action === "remove-decor") {
+    selectedDecor = "remove";
+    render();
+    return;
+  }
+  if (action === "decor") {
+    const decor = find(DECOR, id);
+    if (state.unlockedDecor.includes(id)) {
+      selectedDecor = id;
+      render();
+      if (matchMedia("(max-width:760px)").matches) {
+        $(".scene-frame").scrollIntoView({
+          block: "center",
+          behavior: "instant",
+        });
+      }
+      return;
+    }
+    if (decor.friendId) {
+      toast(
+        `到${REGIONS.find((r) => r.nodes.some((n) => n.guestId === decor.friendId)).name}拜访${find(FRIENDS, decor.friendId).name}，就会收到这份礼物。`,
+      );
+      return;
+    }
+    openDialog(
+      `把${decor.name}带回家`,
+      `<p class="dialog-copy">${esc(decor.description)}<br>需要 ${decor.cost} 份枝叶，现有 ${state.materials} 份。拥有后可自由摆放、反复使用。</p>${button(`用 ${decor.cost} 枝叶购置`, "buy", "primary full", `data-id="${id}" ${state.materials < decor.cost ? "disabled" : ""}`)}`,
+    );
+    return;
+  }
+  if (action === "buy") {
+    await change(
+      (s) => M.buyDecor(s, id),
+      () => {
+        selectedDecor = id;
+        closeDialog();
+      },
+      "accept",
+    );
+    return;
+  }
+  if (action === "world-plot") {
+    const index = PLOTS.findIndex((p) => p.id === id);
+    selectedPlot = index;
+    if (!selectedDecor) {
+      toast("先在布置中选一件喜欢的物品。");
+      renderScene();
+      return;
+    }
+    await change((s) =>
+      M.placeDecor(s, index, selectedDecor === "remove" ? null : selectedDecor),
+    );
+    return;
+  }
+  if (action === "world-friend") {
+    const friend = FRIENDS.find((f) => f.id === id || f.species === id);
+    if (friend) {
+      friendId = friend.id;
+      tab = "friends";
+      screen = "friends";
+      render();
+      focusPanel();
+    }
+    return;
+  }
+  if (action === "world-node") {
+    selectedNode = id;
+    render();
+    return;
+  }
+  if (action === "setting") {
+    audioReady = true;
+    await change((s) => M.setSetting(s, id, !s.settings[id]));
+    await syncAudio();
+    settings();
+    return;
+  }
+  if (action === "export") {
+    download(M.serializeState(state), "苔光来信-进度备份.json");
+    toast("备份已准备下载。");
+    return;
+  }
+  if (action === "export-raw") {
+    download(corruptRaw, "苔光来信-原存档.json");
+    return;
+  }
+  if (action === "reset-corrupt") {
+    if (!navigator.locks) {
+      toast("请先下载原存档，再使用新版浏览器恢复；本页不会删除原数据。");
+      return;
+    }
+    await navigator.locks.request(KEY, async () => {
+      try {
+        const currentRaw = localStorage.getItem(KEY);
+        if (currentRaw !== corruptRaw) {
+          try {
+            M.parseState(currentRaw);
+            storageOK = true;
+            applyRemote(currentRaw);
+          } catch {
+            corruptRaw = currentRaw;
+            showRecovery();
+          }
+          toast("存档已在另一页更新，这次重新开始已取消。");
+          return;
+        }
+        localStorage.removeItem(KEY);
+        storageOK = true;
+        corruptRaw = null;
+        state = M.createState();
+        closeDialog();
+        go("home");
+      } catch {
+        toast("尚未修改原存档。请先下载备份，再重试。");
+      }
+    });
+    return;
+  }
+  if (action === "import") {
+    $("#import-file").value = "";
+    $("#import-file").click();
+    return;
+  }
+  if (action === "confirm-import") {
+    const imported = pendingImport;
+    if (!imported) return;
+    await change(
+      (s) => ({
+        ...imported,
+        revision: Math.max(s.revision, imported.revision) + 1,
+      }),
+      () => {
+        corruptRaw = null;
+        pendingImport = null;
+        closeDialog();
+        tab = "home";
+        screen = state.trip ? "journey" : "home";
+        if (state.trip) letterId = state.trip.letterId;
+      },
+      "accept",
+      true,
+    );
+    await syncAudio();
+    return;
+  }
+  if (action === "help") {
+    openDialog(
+      "一封信的时间",
+      `<div class="dialog-copy"><p>① 在信匣选一封信，整理四格行囊。工具会改变路段的精力和收获。</p><p>② 点路线前，看看要花的精力和能带回的东西。送达后走到「归家」，这趟的收获才会放进小屋。途中可以退回上一步。</p><p>③ 伙伴的礼物自动放进空位。用采集的枝叶购置其他陈设，在「布置」选择物品，再点小院圆圈摆放。</p><p>九封信有一个结尾。之后可随心布置和重访，没有每日任务。按 F 切换全屏，Esc 退出。</p></div>`,
+    );
+    return;
+  }
+  if (action === "close") closeDialog();
+});
+let pendingImport = null;
+$("#import-file").addEventListener("change", async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+  try {
+    if (file.size > 200000)
+      throw new Error("这份备份太大，请选择苔光来信导出的 JSON。");
+    pendingImport = M.parseState(await file.text());
+    const p = M.getProgress(pendingImport);
+    openDialog(
+      "用这份备份继续？",
+      `<p class="dialog-copy">备份中已送达 ${p.lettersDone} 封信，结识 ${p.friendsMet} 位朋友，拥有 ${pendingImport.materials} 份枝叶。${pendingImport.trip ? "有一趟尚未归家的旅途。" : ""}<br>确认后会替换此浏览器的当前进度。</p><div class="row spaced">${button("暂时不用", "close", "secondary")}${button("确认导入", "confirm-import", "primary")}</div>`,
+    );
+  } catch (error) {
+    pendingImport = null;
+    toast(error.message || "这份备份暂时无法读取。");
+  }
+});
+document.addEventListener("keydown", (event) => {
+  if (
+    event.key.toLowerCase() === "f" &&
+    !$("#modal").open &&
+    !["INPUT", "TEXTAREA"].includes(event.target.tagName)
+  ) {
+    if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
+    else document.documentElement.requestFullscreen?.().catch(() => {});
+  }
+});
+window.render_game_to_text = () =>
+  JSON.stringify({
+    title: "苔光来信",
+    tab,
+    screen,
+    coordinateSystem: "top-left origin; x right, y down; scene 288×288",
+    progress: M.getProgress(state),
+    materials: state.materials,
+    theme: state.theme,
+    plots: state.plots,
+    pack: state.pack,
+    trip: state.trip
+      ? {
+          letterId: state.trip.letterId,
+          regionId: state.trip.regionId,
+          position: state.trip.position,
+          energy: state.trip.energy,
+          delivered: state.trip.delivered,
+          collection: state.trip.collection,
+          path: state.trip.path,
+          routes: M.getRoutes(state.trip).map((r) => ({
+            id: r.id,
+            name: r.name,
+            cost: r.cost,
+            safeAvailable: r.safeAvailable,
+            reason: r.reason,
+            reward: r.reward,
+          })),
+        }
+      : null,
+    lastTrip: state.lastTrip,
+    storage: storageOK ? "local" : "memory",
+    revision: state.revision,
+    audio: { enabled: state.settings.music, playing: !music.paused },
+  });
+window.advanceTime = (ms) => {
+  scene?.advanceTime(ms);
+  return Promise.resolve();
+};
+window.addEventListener("pagehide", () => {
+  music.pause();
+  scene?.setMotion(false);
+});
+window.addEventListener("pageshow", () => {
+  scene?.setMotion(state.settings.motion && !reduced.matches);
+});
+render();
+try {
+  scene = await createScene($("#world"));
+  renderScene();
+  loadAtlas();
+  if (corruptRaw !== null) showRecovery();
+} catch (error) {
+  $("#scene-note").innerHTML =
+    "<span>场景未能载入，请刷新重试；存档仍保留。</span>";
+  console.error("Scene load failed", error);
+}

@@ -1,0 +1,753 @@
+{
+  "version": 1,
+  "generatedBy": "Exhaustive pure-model search, no browser state injection.",
+  "start": "Use the UI to start a fresh local save.",
+  "letters": [
+    {
+      "letterId": "letter-1",
+      "title": "小屋的第一封信",
+      "regionId": "rain-valley",
+      "pack": [
+        "basket",
+        "map",
+        "tea"
+      ],
+      "packNames": [
+        "采集篮",
+        "地图",
+        "热茶"
+      ],
+      "edgeIds": [
+        "r0",
+        "r2",
+        "r4",
+        "r11"
+      ],
+      "steps": [
+        {
+          "edgeId": "r0",
+          "from": "camp",
+          "to": "fork",
+          "name": "溪口岔路",
+          "cost": 1,
+          "energyAfter": 5
+        },
+        {
+          "edgeId": "r2",
+          "from": "fork",
+          "to": "carpenter",
+          "name": "阿木的木工棚",
+          "cost": 3,
+          "energyAfter": 4
+        },
+        {
+          "edgeId": "r4",
+          "from": "carpenter",
+          "to": "post",
+          "name": "溪边磨坊",
+          "cost": 3,
+          "energyAfter": 1
+        },
+        {
+          "edgeId": "r11",
+          "from": "post",
+          "to": "home",
+          "name": "归家",
+          "cost": 1,
+          "energyAfter": 0
+        }
+      ],
+      "expected": {
+        "guestId": "carpenter",
+        "collection": 3,
+        "firstDelivery": true,
+        "newDecor": [
+          "bench"
+        ],
+        "newThemes": [],
+        "materialsBefore": 0,
+        "materialsAfter": 5,
+        "journeys": 1,
+        "completedLetters": 1
+      }
+    },
+    {
+      "letterId": "letter-2",
+      "title": "山坡上的新地址",
+      "regionId": "hill-post",
+      "pack": [
+        "basket",
+        "map",
+        "tea"
+      ],
+      "packNames": [
+        "采集篮",
+        "地图",
+        "热茶"
+      ],
+      "edgeIds": [
+        "h0",
+        "h2",
+        "h4"
+      ],
+      "steps": [
+        {
+          "edgeId": "h0",
+          "from": "camp",
+          "to": "post",
+          "name": "山坡邮局",
+          "cost": 2,
+          "energyAfter": 5
+        },
+        {
+          "edgeId": "h2",
+          "from": "post",
+          "to": "beekeeper",
+          "name": "米粒的蜂房",
+          "cost": 4,
+          "energyAfter": 3
+        },
+        {
+          "edgeId": "h4",
+          "from": "beekeeper",
+          "to": "home",
+          "name": "归家",
+          "cost": 3,
+          "energyAfter": 0
+        }
+      ],
+      "expected": {
+        "guestId": "beekeeper",
+        "collection": 3,
+        "firstDelivery": true,
+        "newDecor": [
+          "lantern"
+        ],
+        "newThemes": [],
+        "materialsBefore": 5,
+        "materialsAfter": 10,
+        "journeys": 2,
+        "completedLetters": 2
+      }
+    },
+    {
+      "letterId": "letter-3",
+      "title": "留一扇亮窗",
+      "regionId": "dusk-woods",
+      "pack": [
+        "basket",
+        "map",
+        "tea"
+      ],
+      "packNames": [
+        "采集篮",
+        "地图",
+        "热茶"
+      ],
+      "edgeIds": [
+        "d0",
+        "d2",
+        "d3",
+        "d4",
+        "d12"
+      ],
+      "steps": [
+        {
+          "edgeId": "d0",
+          "from": "camp",
+          "to": "fork",
+          "name": "雨林入口",
+          "cost": 1,
+          "energyAfter": 8
+        },
+        {
+          "edgeId": "d2",
+          "from": "fork",
+          "to": "ranger",
+          "name": "栗子的巡林亭",
+          "cost": 2,
+          "energyAfter": 8
+        },
+        {
+          "edgeId": "d3",
+          "from": "ranger",
+          "to": "ridge",
+          "name": "长坡林缘",
+          "cost": 4,
+          "energyAfter": 4
+        },
+        {
+          "edgeId": "d4",
+          "from": "ridge",
+          "to": "post",
+          "name": "山顶驿站",
+          "cost": 3,
+          "energyAfter": 1
+        },
+        {
+          "edgeId": "d12",
+          "from": "post",
+          "to": "home",
+          "name": "归家",
+          "cost": 1,
+          "energyAfter": 0
+        }
+      ],
+      "expected": {
+        "guestId": "ranger",
+        "collection": 4,
+        "firstDelivery": true,
+        "newDecor": [
+          "log"
+        ],
+        "newThemes": [
+          "blossom"
+        ],
+        "materialsBefore": 10,
+        "materialsAfter": 16,
+        "journeys": 3,
+        "completedLetters": 3
+      }
+    },
+    {
+      "letterId": "letter-4",
+      "title": "白花开的时候",
+      "regionId": "rain-valley",
+      "pack": [
+        "basket",
+        "tea",
+        "lantern"
+      ],
+      "packNames": [
+        "采集篮",
+        "热茶",
+        "提灯"
+      ],
+      "edgeIds": [
+        "r0",
+        "r5",
+        "r7",
+        "r8",
+        "r11"
+      ],
+      "steps": [
+        {
+          "edgeId": "r0",
+          "from": "camp",
+          "to": "fork",
+          "name": "溪口岔路",
+          "cost": 1,
+          "energyAfter": 5
+        },
+        {
+          "edgeId": "r5",
+          "from": "fork",
+          "to": "meadow",
+          "name": "雨后草甸",
+          "cost": 2,
+          "energyAfter": 3
+        },
+        {
+          "edgeId": "r7",
+          "from": "meadow",
+          "to": "herbalist",
+          "name": "苔生的小渡口",
+          "cost": 1,
+          "energyAfter": 4
+        },
+        {
+          "edgeId": "r8",
+          "from": "herbalist",
+          "to": "post",
+          "name": "溪边磨坊",
+          "cost": 3,
+          "energyAfter": 1
+        },
+        {
+          "edgeId": "r11",
+          "from": "post",
+          "to": "home",
+          "name": "归家",
+          "cost": 1,
+          "energyAfter": 0
+        }
+      ],
+      "expected": {
+        "guestId": "herbalist",
+        "collection": 3,
+        "firstDelivery": true,
+        "newDecor": [
+          "whiteflowers"
+        ],
+        "newThemes": [],
+        "materialsBefore": 16,
+        "materialsAfter": 21,
+        "journeys": 4,
+        "completedLetters": 4
+      }
+    },
+    {
+      "letterId": "letter-5",
+      "title": "借一页空白",
+      "regionId": "hill-post",
+      "pack": [
+        "basket",
+        "map",
+        "tea"
+      ],
+      "packNames": [
+        "采集篮",
+        "地图",
+        "热茶"
+      ],
+      "edgeIds": [
+        "h0",
+        "h5",
+        "h6",
+        "h8"
+      ],
+      "steps": [
+        {
+          "edgeId": "h0",
+          "from": "camp",
+          "to": "post",
+          "name": "山坡邮局",
+          "cost": 2,
+          "energyAfter": 5
+        },
+        {
+          "edgeId": "h5",
+          "from": "post",
+          "to": "grove",
+          "name": "林缘草地",
+          "cost": 1,
+          "energyAfter": 4
+        },
+        {
+          "edgeId": "h6",
+          "from": "grove",
+          "to": "teacher",
+          "name": "小满的夜校",
+          "cost": 4,
+          "energyAfter": 2
+        },
+        {
+          "edgeId": "h8",
+          "from": "teacher",
+          "to": "home",
+          "name": "归家",
+          "cost": 2,
+          "energyAfter": 0
+        }
+      ],
+      "expected": {
+        "guestId": "teacher",
+        "collection": 6,
+        "firstDelivery": true,
+        "newDecor": [
+          "table"
+        ],
+        "newThemes": [],
+        "materialsBefore": 21,
+        "materialsAfter": 29,
+        "journeys": 5,
+        "completedLetters": 5
+      }
+    },
+    {
+      "letterId": "letter-6",
+      "title": "沿溪而来的风",
+      "regionId": "dusk-woods",
+      "pack": [
+        "basket",
+        "map"
+      ],
+      "packNames": [
+        "采集篮",
+        "地图"
+      ],
+      "edgeIds": [
+        "d0",
+        "d5",
+        "d7",
+        "d12"
+      ],
+      "steps": [
+        {
+          "edgeId": "d0",
+          "from": "camp",
+          "to": "fork",
+          "name": "雨林入口",
+          "cost": 1,
+          "energyAfter": 8
+        },
+        {
+          "edgeId": "d5",
+          "from": "fork",
+          "to": "astronomer",
+          "name": "桃子的观星台",
+          "cost": 4,
+          "energyAfter": 4
+        },
+        {
+          "edgeId": "d7",
+          "from": "astronomer",
+          "to": "post",
+          "name": "山顶驿站",
+          "cost": 3,
+          "energyAfter": 1
+        },
+        {
+          "edgeId": "d12",
+          "from": "post",
+          "to": "home",
+          "name": "归家",
+          "cost": 1,
+          "energyAfter": 0
+        }
+      ],
+      "expected": {
+        "guestId": "astronomer",
+        "collection": 3,
+        "firstDelivery": true,
+        "newDecor": [
+          "tent"
+        ],
+        "newThemes": [
+          "riverside"
+        ],
+        "materialsBefore": 29,
+        "materialsAfter": 34,
+        "journeys": 6,
+        "completedLetters": 6
+      }
+    },
+    {
+      "letterId": "letter-7",
+      "title": "又一个空位",
+      "regionId": "rain-valley",
+      "pack": [
+        "basket",
+        "map",
+        "cape"
+      ],
+      "packNames": [
+        "采集篮",
+        "地图",
+        "雨披"
+      ],
+      "edgeIds": [
+        "r0",
+        "r5",
+        "r9",
+        "r10",
+        "r11"
+      ],
+      "steps": [
+        {
+          "edgeId": "r0",
+          "from": "camp",
+          "to": "fork",
+          "name": "溪口岔路",
+          "cost": 1,
+          "energyAfter": 5
+        },
+        {
+          "edgeId": "r5",
+          "from": "fork",
+          "to": "meadow",
+          "name": "雨后草甸",
+          "cost": 1,
+          "energyAfter": 4
+        },
+        {
+          "edgeId": "r9",
+          "from": "meadow",
+          "to": "cache",
+          "name": "无人果园",
+          "cost": 1,
+          "energyAfter": 3
+        },
+        {
+          "edgeId": "r10",
+          "from": "cache",
+          "to": "post",
+          "name": "溪边磨坊",
+          "cost": 2,
+          "energyAfter": 1
+        },
+        {
+          "edgeId": "r11",
+          "from": "post",
+          "to": "home",
+          "name": "归家",
+          "cost": 1,
+          "energyAfter": 0
+        }
+      ],
+      "expected": {
+        "guestId": null,
+        "collection": 8,
+        "firstDelivery": true,
+        "newDecor": [],
+        "newThemes": [],
+        "materialsBefore": 34,
+        "materialsAfter": 44,
+        "journeys": 7,
+        "completedLetters": 7
+      }
+    },
+    {
+      "letterId": "letter-8",
+      "title": "把名字写在一起",
+      "regionId": "hill-post",
+      "pack": [
+        "basket",
+        "map",
+        "cape"
+      ],
+      "packNames": [
+        "采集篮",
+        "地图",
+        "雨披"
+      ],
+      "edgeIds": [
+        "h0",
+        "h5",
+        "h9",
+        "h10"
+      ],
+      "steps": [
+        {
+          "edgeId": "h0",
+          "from": "camp",
+          "to": "post",
+          "name": "山坡邮局",
+          "cost": 2,
+          "energyAfter": 5
+        },
+        {
+          "edgeId": "h5",
+          "from": "post",
+          "to": "grove",
+          "name": "林缘草地",
+          "cost": 1,
+          "energyAfter": 4
+        },
+        {
+          "edgeId": "h9",
+          "from": "grove",
+          "to": "cache",
+          "name": "旧果园",
+          "cost": 2,
+          "energyAfter": 2
+        },
+        {
+          "edgeId": "h10",
+          "from": "cache",
+          "to": "home",
+          "name": "归家",
+          "cost": 2,
+          "energyAfter": 0
+        }
+      ],
+      "expected": {
+        "guestId": null,
+        "collection": 9,
+        "firstDelivery": true,
+        "newDecor": [],
+        "newThemes": [],
+        "materialsBefore": 44,
+        "materialsAfter": 55,
+        "journeys": 8,
+        "completedLetters": 8
+      }
+    },
+    {
+      "letterId": "letter-9",
+      "title": "写给归途",
+      "regionId": "dusk-woods",
+      "pack": [
+        "basket",
+        "map",
+        "cape"
+      ],
+      "packNames": [
+        "采集篮",
+        "地图",
+        "雨披"
+      ],
+      "edgeIds": [
+        "d0",
+        "d9",
+        "d10",
+        "d11",
+        "d12"
+      ],
+      "steps": [
+        {
+          "edgeId": "d0",
+          "from": "camp",
+          "to": "fork",
+          "name": "雨林入口",
+          "cost": 1,
+          "energyAfter": 8
+        },
+        {
+          "edgeId": "d9",
+          "from": "fork",
+          "to": "orchard",
+          "name": "山中果林",
+          "cost": 2,
+          "energyAfter": 6
+        },
+        {
+          "edgeId": "d10",
+          "from": "orchard",
+          "to": "cache",
+          "name": "石阶菌园",
+          "cost": 2,
+          "energyAfter": 4
+        },
+        {
+          "edgeId": "d11",
+          "from": "cache",
+          "to": "post",
+          "name": "山顶驿站",
+          "cost": 3,
+          "energyAfter": 1
+        },
+        {
+          "edgeId": "d12",
+          "from": "post",
+          "to": "home",
+          "name": "归家",
+          "cost": 1,
+          "energyAfter": 0
+        }
+      ],
+      "expected": {
+        "guestId": null,
+        "collection": 10,
+        "firstDelivery": true,
+        "newDecor": [],
+        "newThemes": [],
+        "materialsBefore": 55,
+        "materialsAfter": 67,
+        "journeys": 9,
+        "completedLetters": 9
+      }
+    }
+  ],
+  "purchases": [
+    {
+      "decorId": "firepit",
+      "name": "石围火堆",
+      "cost": 8,
+      "materialsBefore": 67,
+      "materialsAfter": 59
+    },
+    {
+      "decorId": "backpack",
+      "name": "旧背包",
+      "cost": 3,
+      "materialsBefore": 59,
+      "materialsAfter": 56
+    },
+    {
+      "decorId": "barrel",
+      "name": "小木桶",
+      "cost": 5,
+      "materialsBefore": 56,
+      "materialsAfter": 51
+    },
+    {
+      "decorId": "bowls",
+      "name": "双碗托盘",
+      "cost": 3,
+      "materialsBefore": 51,
+      "materialsAfter": 48
+    },
+    {
+      "decorId": "stump",
+      "name": "树桩",
+      "cost": 2,
+      "materialsBefore": 48,
+      "materialsAfter": 46
+    },
+    {
+      "decorId": "pinktree",
+      "name": "粉色小树",
+      "cost": 6,
+      "materialsBefore": 46,
+      "materialsAfter": 40
+    }
+  ],
+  "expectedFinal": {
+    "lettersDone": 9,
+    "lettersTotal": 9,
+    "friendsMet": 6,
+    "friendsTotal": 6,
+    "decorOwned": 12,
+    "decorTotal": 12,
+    "themesUnlocked": 3,
+    "themesTotal": 3,
+    "journeys": 9,
+    "ending": true,
+    "materialsBeforePurchases": 67,
+    "materials": 40,
+    "friendVisits": {
+      "carpenter": 1,
+      "beekeeper": 1,
+      "ranger": 1,
+      "herbalist": 1,
+      "teacher": 1,
+      "astronomer": 1
+    },
+    "unlockedDecor": [
+      "bench",
+      "lantern",
+      "log",
+      "whiteflowers",
+      "table",
+      "tent",
+      "firepit",
+      "backpack",
+      "barrel",
+      "bowls",
+      "stump",
+      "pinktree"
+    ],
+    "unlockedThemes": [
+      "evergreen",
+      "blossom",
+      "riverside"
+    ],
+    "memories": [
+      {
+        "friendId": "carpenter",
+        "count": 3
+      },
+      {
+        "friendId": "herbalist",
+        "count": 3
+      },
+      {
+        "friendId": "beekeeper",
+        "count": 3
+      },
+      {
+        "friendId": "teacher",
+        "count": 3
+      },
+      {
+        "friendId": "ranger",
+        "count": 3
+      },
+      {
+        "friendId": "astronomer",
+        "count": 3
+      }
+    ]
+  }
+}

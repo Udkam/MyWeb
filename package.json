@@ -1,11 +1,7 @@
 {
-  "name": "liubai-focus-desk",
-  "private": true,
+  "name": "mosslight-post",
   "version": "1.0.0",
+  "private": true,
   "type": "module",
-  "scripts": {
-    "test": "node --test tests/*.test.mjs",
-    "build": "node build.mjs",
-    "check": "node --check src/app.js && node --check src/model.js"
-  }
+  "scripts": { "check": "node --check src/app.js && node --check src/model.js && node --check src/scene.js", "test": "node --test tests/*.test.mjs", "build": "node build.mjs" }
 }

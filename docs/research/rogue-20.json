@@ -1,0 +1,340 @@
+{
+  "date": "2026-10-13",
+  "scope": "短局肉鸽、牌组、回合冒险作者页调研",
+  "method": "通过 web open 实际打开作者主页/官网并读取正文；搜索只用于找入口。未下载资产、未试玩、未确认移动端运行或存档。HTML5 为页面标注或嵌入入口存在，不代表端到端可玩验证。",
+  "count": 20,
+  "browser_page_count": 15,
+  "download_reference_count": 5,
+  "entries": [
+    {
+      "id": "R01",
+      "name": "Dicey Dungeons",
+      "url": "https://terrycavanagh.itch.io/dicey-dungeons",
+      "evidence": "作者介绍把骰子点数分配与牌组构建结合，列出六个职业；机器人以类似二十一点的方式获得骰子，发明家战后拆装备。页面标平均约半小时。",
+      "mechanism": "骰子随机输入＋职业规则差异＋战后装备成长。",
+      "borrow": "用不同角色改变少量核心规则，让再次出发有变化。",
+      "avoid": "本项目不照搬整局约半小时和多职业同时教学；首局只展示一种能力。",
+      "verification_depth": "已实际打开并阅读作者/官网页面正文与平台信息；仅网页内容验证，未进入游戏或试玩。",
+      "date": "2026-10-13",
+      "web_availability": "下载页；当前页面没有标注 HTML5。",
+      "web_play_evidence": "download-only：下载页；当前页面没有标注 HTML5。",
+      "source_locations": "作者简介与 More information；行12–39"
+    },
+    {
+      "id": "R02",
+      "name": "Slice & Dice",
+      "url": "https://tann.itch.io/slice-dice",
+      "evidence": "作者页提供桌面和 Android demo，标记骰子、策略和约半小时；该页链接的官方介绍明确写回合制可撤销、离线、低电耗、无广告或微交易。",
+      "mechanism": "骰子策略，回合制，允许撤销。",
+      "borrow": "不可逆操作前允许撤销，减少点错造成的惩罚；支持离线续玩。",
+      "avoid": "不把作者所称约半小时视为碎片时间证明；本项目应拆成更短遭遇。",
+      "verification_depth": "已实际打开并阅读作者/官网页面正文与平台信息；仅网页内容验证，未进入游戏或试玩。",
+      "date": "2026-10-13",
+      "web_availability": "下载 demo；官方补充页 https://tann.fun/games/dice/，未验证网页游戏运行。",
+      "web_play_evidence": "download-only：下载 demo；官方补充页 https://tann.fun/games/dice/，未验证网页游戏运行。",
+      "source_locations": "itch 作者页行22–38、54–66；官方介绍行2–8"
+    },
+    {
+      "id": "R03",
+      "name": "Pixel Dungeon",
+      "url": "https://watabou.itch.io/pixel-dungeon",
+      "evidence": "作者介绍提供 25 层随机地牢、四职业、80 余种物品，支持简单鼠标操作、成就和排行，同时明确提示难度较高、常会死亡。",
+      "mechanism": "随机地牢探索、物品收集与角色职业。",
+      "borrow": "少量可收藏物品、清楚的探索目标和可保留的成就。",
+      "avoid": "避免频繁死亡、25 层长跑和大量未解释道具成为轻松游戏的默认体验。",
+      "verification_depth": "已实际打开并阅读作者/官网页面正文与平台信息；仅网页内容验证，未进入游戏或试玩。",
+      "date": "2026-10-13",
+      "web_availability": "桌面下载页；作者说明由原 Android 游戏移植。",
+      "web_play_evidence": "download-only：桌面下载页；作者说明由原 Android 游戏移植。",
+      "source_locations": "Features 与作者难度说明；行10–36"
+    },
+    {
+      "id": "R04",
+      "name": "Die in the Dungeon CLASSIC",
+      "url": "https://alarts.itch.io/die-in-the-dungeon",
+      "evidence": "作者说明这是用骰子取代卡牌的回合制构筑肉鸽；页面有 Run game，列 HTML5、鼠标、单键操作和约半小时。",
+      "mechanism": "骰子组合与逐层推进。",
+      "borrow": "以少数骰子的搭配产生变化，操作统一为点选。",
+      "avoid": "不把单键标签等同于低认知负担；控制初期骰子种类与关卡总长。",
+      "verification_depth": "已实际打开并阅读作者/官网页面正文与平台信息；仅网页内容验证，未进入游戏或试玩。",
+      "date": "2026-10-13",
+      "web_availability": "页面提供 Run game 且平台标 HTML5；未启动游戏。",
+      "web_play_evidence": "Web：页面提供 Run game 且平台标 HTML5；未启动游戏。",
+      "source_locations": "简介与 More information；行10–48"
+    },
+    {
+      "id": "R05",
+      "name": "Dungeon Deck",
+      "url": "https://incinious.itch.io/dungeon-deck",
+      "evidence": "作者将程序生成地牢表现为一副牌，玩家收集武器并构建自己的牌组。页面标 HTML5、触屏和约半小时；作者在回复中解释弃牌需拖到弃牌堆。",
+      "mechanism": "把地图、敌人与装备压缩为卡牌组合。",
+      "borrow": "用一屏卡牌承载一次遭遇，卡面直接表达作用。",
+      "avoid": "避免只能凭图标猜出的弃牌操作与必须 hover 才见信息；触屏上应有明确按钮。",
+      "verification_depth": "已实际打开并阅读作者/官网页面正文与平台信息；仅网页内容验证，未进入游戏或试玩。",
+      "date": "2026-10-13",
+      "web_availability": "页面提供 Run game，平台标 HTML5/Touchscreen；未启动游戏。",
+      "web_play_evidence": "Web：页面提供 Run game，平台标 HTML5/Touchscreen；未启动游戏。",
+      "source_locations": "作者简介行14–22；信息行30–39；作者回复行98–100"
+    },
+    {
+      "id": "R06",
+      "name": "Forward（Game Jam 版）",
+      "url": "https://twotinydice.itch.io/forward",
+      "evidence": "作者玩法说明要求将英雄拖到前方接触的三张牌之一；怪物、盾、药水、金币、被动物品和宝箱分别有直接效果。页面标几分钟、HTML5 与触屏。",
+      "mechanism": "每回合向前选路，三张候选形成风险与收益取舍。",
+      "borrow": "每次只给 2–3 个清晰行动选项，适合短局与大触控区域。",
+      "avoid": "物品不可移除且可能有负面效果；本项目采用确认和可退路的设计。",
+      "verification_depth": "已实际打开并阅读作者/官网页面正文与平台信息；仅网页内容验证，未进入游戏或试玩。",
+      "date": "2026-10-13",
+      "web_availability": "作者网页内有游戏 iframe，平台标 HTML5/Touchscreen；未启动游戏。",
+      "web_play_evidence": "Web：作者网页内有游戏 iframe，平台标 HTML5/Touchscreen；未启动游戏。",
+      "source_locations": "How to play 行19–32；信息行42–50"
+    },
+    {
+      "id": "R07",
+      "name": "Backpack Hero",
+      "url": "https://thejaspel.itch.io/backpack-hero",
+      "evidence": "作者定义为背包管理肉鸽：收集稀有物品、整理背包并战斗；操作说明用鼠标拖动物品、右键或方向键旋转。页面标 HTML5，但平均局长约一小时。",
+      "mechanism": "背包空间与装备组合形成构筑决策。",
+      "borrow": "物品形状与相邻关系可以让成长看得见，适合保留少量可收藏装备。",
+      "avoid": "避免一小时整局、细密格子和右键专属操作；手机必须可点按旋转。",
+      "verification_depth": "已实际打开并阅读作者/官网页面正文与平台信息；仅网页内容验证，未进入游戏或试玩。",
+      "date": "2026-10-13",
+      "web_availability": "页面提供 Run game，平台标 HTML5；未启动游戏。",
+      "web_play_evidence": "Web：页面提供 Run game，平台标 HTML5；未启动游戏。",
+      "source_locations": "作者描述与 Controls 行17–30；信息行44–53"
+    },
+    {
+      "id": "R08",
+      "name": "Backpack Battles Demo",
+      "url": "https://playwithfurcifer.itch.io/backpack-battles",
+      "evidence": "作者说明先购买并整理稀有物品组成构筑，再自动与其他玩家战斗；页面是 demo，平台列 HTML5。",
+      "mechanism": "备战整理＋自动结算战斗。",
+      "borrow": "把操作集中在战前几个选择，战斗可快速展示结果。",
+      "avoid": "本项目不依赖在线对手和竞争排名，避免比较压力；自动结算仍要解释胜负原因。",
+      "verification_depth": "已实际打开并阅读作者/官网页面正文与平台信息；仅网页内容验证，未进入游戏或试玩。",
+      "date": "2026-10-13",
+      "web_availability": "页面内有游戏 iframe，平台标 HTML5；未启动游戏。",
+      "web_play_evidence": "Web：页面内有游戏 iframe，平台标 HTML5；未启动游戏。",
+      "source_locations": "作者描述行12–14；平台与标签行24–32"
+    },
+    {
+      "id": "R09",
+      "name": "Dungeons & Degenerate Gamblers",
+      "url": "https://purplemosscollectors.itch.io/dndg",
+      "evidence": "作者以带特殊效果卡牌的二十一点构成肉鸽牌组游戏；明确是网页版 demo，列 HTML5、鼠标、单键和约半小时。",
+      "mechanism": "熟悉基础规则＋少量会改变规则的特殊牌。",
+      "borrow": "先教一条熟悉规则，再逐步解锁例外，降低首局理解成本。",
+      "avoid": "不复制赌博主题和追损压力；特殊牌效果数必须限制。",
+      "verification_depth": "已实际打开并阅读作者/官网页面正文与平台信息；仅网页内容验证，未进入游戏或试玩。",
+      "date": "2026-10-13",
+      "web_availability": "页面提供 Run game，标 HTML5；未启动游戏。",
+      "web_play_evidence": "Web：页面提供 Run game，标 HTML5；未启动游戏。",
+      "source_locations": "简介行11–16；信息行20–29"
+    },
+    {
+      "id": "R10",
+      "name": "Pawnbarian Classic",
+      "url": "https://j4nw.itch.io/pawnbarian-classic",
+      "evidence": "作者规则写每回合抽四张象棋走法牌、最多行动两次；红色准星标记回合结束时会被攻击的格子，清空棋盘即可过关。",
+      "mechanism": "手牌限制移动，棋盘位置决定风险，敌方攻击预告。",
+      "borrow": "行动前展示结果与威胁区，每回合只需少量决策。",
+      "avoid": "不让敌方行为全部靠试错；减少拖拽方向判定和重叠危险标记。",
+      "verification_depth": "已实际打开并阅读作者/官网页面正文与平台信息；仅网页内容验证，未进入游戏或试玩。",
+      "date": "2026-10-13",
+      "web_availability": "页面提供 Run game，标 HTML5；未启动游戏。正式版介绍页不再提供原 web demo，本记录仅计这个游戏一次。",
+      "web_play_evidence": "Web：页面提供 Run game，标 HTML5；未启动游戏。正式版介绍页不再提供原 web demo，本记录仅计这个游戏一次。",
+      "source_locations": "规则行19–26；平台行30–36"
+    },
+    {
+      "id": "R11",
+      "name": "Dungeon Cards（Numeron）",
+      "url": "https://numeron.itch.io/dungeon-cards",
+      "evidence": "作者说明牌组是沿途拾到的武器，战术站位影响有限血量；这是 2023 年七日肉鸽作品，信息标约半小时和鼠标输入。",
+      "mechanism": "武器牌构筑＋格子站位。",
+      "borrow": "把新武器直接变成可用行动，成长反馈直观。",
+      "avoid": "避免一步错误造成过大损失和行动资源不明；应预览伤害与合法动作。",
+      "verification_depth": "已实际打开并阅读作者/官网页面正文与平台信息；仅网页内容验证，未进入游戏或试玩。",
+      "date": "2026-10-13",
+      "web_availability": "作者下载主页；安装说明要求 Java 8+，未验证网页运行。",
+      "web_play_evidence": "download-only：作者下载主页；安装说明要求 Java 8+，未验证网页运行。",
+      "source_locations": "简介行12–14；信息行23–26；安装行37–39"
+    },
+    {
+      "id": "R12",
+      "name": "Shogun Showdown — Alpha",
+      "url": "https://roboatino.itch.io/shogunshowdown",
+      "evidence": "作者明确是回合制战斗、肉鸽与牌组构建结合的 Alpha；页面有 Run game，列 HTML5、键鼠及平均约半小时。",
+      "mechanism": "回合制战斗与牌组选择。",
+      "borrow": "把战斗停在玩家决定前，允许中途离开而不损失反应窗口。",
+      "avoid": "不从介绍页推断完整存档或移动端表现；本项目需单独实测这些能力。",
+      "verification_depth": "已实际打开并阅读作者/官网页面正文与平台信息；仅网页内容验证，未进入游戏或试玩。",
+      "date": "2026-10-13",
+      "web_availability": "作者 Alpha 网页有 Run game/HTML5；未启动游戏，不与完整版本重复计数。",
+      "web_play_evidence": "Web：作者 Alpha 网页有 Run game/HTML5；未启动游戏，不与完整版本重复计数。",
+      "source_locations": "作者简介行14–15；信息行24–32"
+    },
+    {
+      "id": "R13",
+      "name": "Card Hog",
+      "url": "https://snoutup.itch.io/card-hog",
+      "evidence": "作者说明在格子地牢里操控猪角色，包含怪物、陷阱、武器和魔法；不同角色带不同卡牌配置与技能，列出本地多人。",
+      "mechanism": "格子卡牌地牢与角色差异。",
+      "borrow": "用亲切角色与少量初始配置承载长期解锁。",
+      "avoid": "避免首版引入多人和过多卡组；不能把该下载页误记为当前可网页玩。",
+      "verification_depth": "已实际打开并阅读作者/官网页面正文与平台信息；仅网页内容验证，未进入游戏或试玩。",
+      "date": "2026-10-13",
+      "web_availability": "作者 Windows 下载页，未启动或下载游戏。",
+      "web_play_evidence": "download-only：作者 Windows 下载页，未启动或下载游戏。",
+      "source_locations": "作者介绍与 Features 行13–25；平台行38–49"
+    },
+    {
+      "id": "R14",
+      "name": "Card Rogue",
+      "url": "https://juupeli.itch.io/card-rogue",
+      "evidence": "作者介绍为通过出牌控制角色的二维俯视肉鸽；页面有 Run game、HTML5 和回合制标签，标注原型与 GMTK 2020 作品。",
+      "mechanism": "行动被手牌表达，俯视地图随出牌推进。",
+      "borrow": "把移动与动作放到少量明确的卡片按钮上。",
+      "avoid": "不要只增加牌种而没有清楚的短期目标；存档和长期成长不能从原型标签推断。",
+      "verification_depth": "已实际打开并阅读作者/官网页面正文与平台信息；仅网页内容验证，未进入游戏或试玩。",
+      "date": "2026-10-13",
+      "web_availability": "作者原型页面提供 Run game，标 HTML5；未启动游戏。",
+      "web_play_evidence": "Web：作者原型页面提供 Run game，标 HTML5；未启动游戏。",
+      "source_locations": "作者简介行10–14；信息行18–28"
+    },
+    {
+      "id": "R15",
+      "name": "Twilight's Edge",
+      "url": "https://lazyanttu.itch.io/twilights-edge",
+      "evidence": "作者将遭遇写成社交压力卡牌谜题，魅力、说理和威慑分别解决障碍；介绍有五幕叙事，页面标 HTML5，并说明后续项目改名 Wireburn。",
+      "mechanism": "卡牌能力表达对话与遭遇选择。",
+      "borrow": "可把冒险变成友善交流或解决小事，降低战斗压力。",
+      "avoid": "五幕叙事不代表短局；新项目保持事件文字简短，不把改名项目重复计数。",
+      "verification_depth": "已实际打开并阅读作者/官网页面正文与平台信息；仅网页内容验证，未进入游戏或试玩。",
+      "date": "2026-10-13",
+      "web_availability": "作者页面有 Run game，标 HTML5；未启动游戏。",
+      "web_play_evidence": "Web：作者页面有 Run game，标 HTML5；未启动游戏。",
+      "source_locations": "作者介绍行10–16；平台/标签行19–24"
+    },
+    {
+      "id": "R16",
+      "name": "Octarine",
+      "url": "https://draconis.itch.io/octarine",
+      "evidence": "作者说明围绕法杖施法探索地牢，法术具有眩晕、缠绕或击退等附加效果；站在符文上可回充空法杖或获得生命，支持暂停，页面标 HTML5 和几分钟。",
+      "mechanism": "少量法杖的主效果与附加战术效果，符文作为恢复点。",
+      "borrow": "提供途中安全恢复点，少数能力也能形成组合。",
+      "avoid": "避免把关键附加效果藏起来让玩家反复试错；图标旁给简短说明。",
+      "verification_depth": "已实际打开并阅读作者/官网页面正文与平台信息；仅网页内容验证，未进入游戏或试玩。",
+      "date": "2026-10-13",
+      "web_availability": "作者页面内有游戏 iframe，标 HTML5；未启动游戏。",
+      "web_play_evidence": "Web：作者页面内有游戏 iframe，标 HTML5；未启动游戏。",
+      "source_locations": "简介、Controls、Tips 行12–27；平台/局长行34–42"
+    },
+    {
+      "id": "R17",
+      "name": "WebDungeon",
+      "url": "https://macbury.itch.io/webdungeon",
+      "evidence": "作者说明触摸目标格移动、相邻点击怪物攻击、同格点击物品拾取；页面列 HTML5、触屏和几分钟，存取档仍列在 TODO。",
+      "mechanism": "点击格子触发相应探索动作。",
+      "borrow": "手机上统一点按目标，让空间行动容易理解。",
+      "avoid": "不能把能运行的原型当成可长期保存产品；本项目存档应在首个版本实现。",
+      "verification_depth": "已实际打开并阅读作者/官网页面正文与平台信息；仅网页内容验证，未进入游戏或试玩。",
+      "date": "2026-10-13",
+      "web_availability": "作者页面内有游戏 iframe，标 HTML5；未启动游戏。",
+      "web_play_evidence": "Web：作者页面内有游戏 iframe，标 HTML5；未启动游戏。",
+      "source_locations": "How to play 行11–14；TODO 行23–32；信息行35–44"
+    },
+    {
+      "id": "R18",
+      "name": "Knight's Errand",
+      "url": "https://markshumarov.itch.io/knights-errand",
+      "evidence": "作者正文描述商店—战斗—商店循环、六边形回合战斗、其他玩家的异步镜像军队；一轮有五条命，正文两次说明完整一轮约 30 分钟，并声明有手机触屏版。",
+      "mechanism": "战前招募升级＋回合战斗＋多次失误容忍。",
+      "borrow": "用多次容错与战间补给代替一次失败就清空进度。",
+      "avoid": "完整一轮约 30 分钟不符合极短局；不将信息栏“几分钟”覆盖正文说明，也不依赖竞技压力。",
+      "verification_depth": "已实际打开并阅读作者/官网页面正文与平台信息；仅网页内容验证，未进入游戏或试玩。",
+      "date": "2026-10-13",
+      "web_availability": "作者页面内有游戏 iframe，标 HTML5/Touchscreen；未启动游戏。",
+      "web_play_evidence": "Web：作者页面内有游戏 iframe，标 HTML5/Touchscreen；未启动游戏。",
+      "source_locations": "About/Features/Controls 行40–60；信息栏行78–86"
+    },
+    {
+      "id": "R19",
+      "name": "Lucky Scoundrel",
+      "url": "https://bpbeeman03.itch.io/lucky-scoundrel",
+      "evidence": "本次可读正文描述 52 张牌地牢、武器升级与修理，血量耗尽后可凭运气获得第二次机会；每五座地牢提升角色，关间回城购物。页面标 HTML5、触屏和几分钟。",
+      "mechanism": "卡牌房间＋关间商店＋局内角色提升＋第二次机会。",
+      "borrow": "短段探索后回营补给，失败有缓冲，成长节点清晰。",
+      "avoid": "避免永久死亡清空长期收集，也避免版本更新要求清档；页面顶部当前可读版本存在清档提示。",
+      "verification_depth": "已实际打开并阅读作者/官网页面正文与平台信息；仅网页内容验证，未进入游戏或试玩。",
+      "date": "2026-10-13",
+      "web_availability": "作者页面提供 Run game/HTML5；未启动游戏。工具返回的是可读页面版本，未核对运行版本。",
+      "web_play_evidence": "Web：作者页面提供 Run game/HTML5；未启动游戏。工具返回的是可读页面版本，未核对运行版本。",
+      "source_locations": "作者规则行19–38；武器/修理行53–87；平台/局长行109–118"
+    },
+    {
+      "id": "R20",
+      "name": "Stealth ASCII",
+      "url": "https://jagedew.itch.io/ascii-stealth-roguelike-game",
+      "evidence": "作者说明回合制潜行迷宫以白点显示守卫侦测范围；被发现会消耗潜行值，在黑暗中可恢复，还能收集战利品贿赂守卫。控制表明确支持触屏点击移动，页面标几分钟。",
+      "mechanism": "可见威胁区＋可恢复资源＋绕行/贿赂等替代解法。",
+      "borrow": "行动前可看见风险，允许安全区恢复与非战斗路线。",
+      "avoid": "不要只靠红色或 ASCII 字符传递危险；新作使用图形和文字双重提示。",
+      "verification_depth": "已实际打开并阅读作者/官网页面正文与平台信息；仅网页内容验证，未进入游戏或试玩。",
+      "date": "2026-10-13",
+      "web_availability": "作者页面内有游戏 iframe，标 HTML5/Touchscreen；未启动游戏。",
+      "web_play_evidence": "Web：作者页面内有游戏 iframe，标 HTML5/Touchscreen；未启动游戏。",
+      "source_locations": "作者玩法行10–15；控制行18–25；信息行47–56"
+    }
+  ],
+  "conclusions": [
+    {
+      "title": "把一次操作做成可停下的一小步",
+      "text": "Forward 的三选一路线、Pawnbarian 的两次行动，以及 Slice & Dice 官网明确的撤销机制，说明可以把决策限制在少数选项。建议本项目一段探索目标 3–5 分钟、随时自动保存、回合不倒计时；3–5 分钟是设计建议，尚未通过试玩测得。",
+      "sources": [
+        "R02",
+        "R06",
+        "R10"
+      ]
+    },
+    {
+      "title": "长期养成保留，短局失败只影响当次收益",
+      "text": "Knight's Errand 用五次生命提供容错，Lucky Scoundrel 有第二次机会和关间商店。建议将装备图鉴、营地装饰和解锁能力永久保留，探索失败以回营和少量收益折损结束；不照搬永久死亡。",
+      "sources": [
+        "R18",
+        "R19"
+      ]
+    },
+    {
+      "title": "触屏操作先保证清楚，再减少按钮",
+      "text": "WebDungeon 的点击目标很直接；Forward 与 Dungeon Deck 虽标触屏，仍含拖拽操作。建议提供大按钮点选—确认、明确弃牌/返回动作，不依赖 hover、右键或复杂长按手势；平台标签不能替代手机实测。",
+      "sources": [
+        "R05",
+        "R06",
+        "R07",
+        "R17"
+      ]
+    },
+    {
+      "title": "随机性应带来组合变化，并提前显示风险",
+      "text": "Dicey Dungeons 与 Die in the Dungeon 用骰子组合制造变化；Pawnbarian 与 Stealth ASCII 将威胁范围画出。建议随机生成奖励和路线，但行动前显示可能损失与收益，早期不安排无提示陷阱。",
+      "sources": [
+        "R01",
+        "R04",
+        "R10",
+        "R20"
+      ]
+    },
+    {
+      "title": "把安全恢复点和存档做进核心循环",
+      "text": "Octarine 有符文恢复点；WebDungeon 把存档留在 TODO；Lucky Scoundrel 可读页面出现清档提示。建议每次探索后回到营地，自动存档并提供导出/导入，版本升级迁移存档。调查并未验证这些竞品的存档可靠性，以上为本项目设计推论。",
+      "sources": [
+        "R16",
+        "R17",
+        "R19"
+      ]
+    }
+  ],
+  "excluded": "工具返回不可访问或空白的 Dungeon Crawl、错误 slug、Scoundrel's Descent 等不计数；Pawnbarian/Forward/Shogun 的各版本只计同一游戏一次；另读的 One Button Dungeon/Scoundrel 页面未收入20项。"
+}
+

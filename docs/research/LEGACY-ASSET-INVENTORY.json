@@ -1,0 +1,155 @@
+{
+  "checked_on": "2026-10-13",
+  "scope": "Read-only inspection; no files deleted",
+  "total_files": 14,
+  "total_bytes": 659292,
+  "checked_sources": [
+    "scene.js",
+    "app.js",
+    "index.html",
+    "styles.css",
+    "assets/asset-map.json"
+  ],
+  "old_assets": [
+    {
+      "path": "E:\\Proj\\Active\\personal-web\\.playwright-mcp\\game-work\\src\\assets\\click.ogg",
+      "relative": "src/assets/click.ogg",
+      "bytes": 4876,
+      "sha256": "ccfb7fa0cccdd9faec0eb16033c732b1e308d139d80f799161495d58f7adcdb9",
+      "runtime_direct_references": [],
+      "asset_map_used": false,
+      "proposed_action": "remove obsolete prototype asset",
+      "deleted": false
+    },
+    {
+      "path": "E:\\Proj\\Active\\personal-web\\.playwright-mcp\\game-work\\src\\assets\\dungeon.png",
+      "relative": "src/assets/dungeon.png",
+      "bytes": 5294,
+      "sha256": "d24e60a41e4ac7a745c0304dfde121143688557f40215f23221c29cfe683825f",
+      "runtime_direct_references": [],
+      "asset_map_used": false,
+      "proposed_action": "remove obsolete prototype asset",
+      "deleted": false
+    },
+    {
+      "path": "E:\\Proj\\Active\\personal-web\\.playwright-mcp\\game-work\\src\\assets\\farm.png",
+      "relative": "src/assets/farm.png",
+      "bytes": 5866,
+      "sha256": "0c4b3b4058cacf6a9bf021666838156d46da9ce27500d4c13e30cd5a92b722f4",
+      "runtime_direct_references": [],
+      "asset_map_used": false,
+      "proposed_action": "remove obsolete prototype asset",
+      "deleted": false
+    },
+    {
+      "path": "E:\\Proj\\Active\\personal-web\\.playwright-mcp\\game-work\\src\\assets\\hit.ogg",
+      "relative": "src/assets/hit.ogg",
+      "bytes": 9370,
+      "sha256": "d00c2b3c9fff07e376145c8c8c45c90e5084ec192f6ce0387db233f7b86f1486",
+      "runtime_direct_references": [],
+      "asset_map_used": false,
+      "proposed_action": "remove obsolete prototype asset",
+      "deleted": false
+    },
+    {
+      "path": "E:\\Proj\\Active\\personal-web\\.playwright-mcp\\game-work\\src\\assets\\page.ogg",
+      "relative": "src/assets/page.ogg",
+      "bytes": 8273,
+      "sha256": "953390534377222bee89ac8cd9e60a58fdc037c71a4d7c18c43cd647c7f34ba8",
+      "runtime_direct_references": [],
+      "asset_map_used": false,
+      "proposed_action": "remove obsolete prototype asset",
+      "deleted": false
+    },
+    {
+      "path": "E:\\Proj\\Active\\personal-web\\.playwright-mcp\\game-work\\src\\assets\\reward.ogg",
+      "relative": "src/assets/reward.ogg",
+      "bytes": 8968,
+      "sha256": "063564703b6094d70718a3e787a55cc9141611e4ecd6b6637f8828f79b4a8c3a",
+      "runtime_direct_references": [],
+      "asset_map_used": false,
+      "proposed_action": "remove obsolete prototype asset",
+      "deleted": false
+    },
+    {
+      "path": "E:\\Proj\\Active\\personal-web\\.playwright-mcp\\game-work\\src\\assets\\town.png",
+      "relative": "src/assets/town.png",
+      "bytes": 5042,
+      "sha256": "3a54d99ecde790d4fdea207a3644cf130fc56fa838f1beb1507c185a95b8e902",
+      "runtime_direct_references": [],
+      "asset_map_used": false,
+      "proposed_action": "remove obsolete prototype asset",
+      "deleted": false
+    },
+    {
+      "path": "E:\\Proj\\Active\\personal-web\\.playwright-mcp\\game-work\\src\\assets\\village.mp3",
+      "relative": "src/assets/village.mp3",
+      "bytes": 608569,
+      "sha256": "7dfdddb91c6d0817badd83e5b5c8df405f7707c268e9aafb556422ec56348fb7",
+      "runtime_direct_references": [],
+      "asset_map_used": false,
+      "proposed_action": "remove obsolete prototype asset",
+      "deleted": false
+    },
+    {
+      "path": "E:\\Proj\\Active\\personal-web\\.playwright-mcp\\game-work\\src\\assets\\licenses\\dungeon.txt",
+      "relative": "src/assets/licenses/dungeon.txt",
+      "bytes": 570,
+      "sha256": "9f574a2f1f636a3db8a0665ba90212f34e2b5e61ecb533d77c05237766374111",
+      "runtime_direct_references": [],
+      "asset_map_used": false,
+      "proposed_action": "remove obsolete prototype asset",
+      "deleted": false
+    },
+    {
+      "path": "E:\\Proj\\Active\\personal-web\\.playwright-mcp\\game-work\\src\\assets\\licenses\\farm.txt",
+      "relative": "src/assets/licenses/farm.txt",
+      "bytes": 566,
+      "sha256": "9c4b5fc75e585a3495f6aa55b62172504780a51b7b4394066e1dc1a45403c548",
+      "runtime_direct_references": [],
+      "asset_map_used": false,
+      "proposed_action": "remove obsolete prototype asset",
+      "deleted": false
+    },
+    {
+      "path": "E:\\Proj\\Active\\personal-web\\.playwright-mcp\\game-work\\src\\assets\\licenses\\interface-sounds.txt",
+      "relative": "src/assets/licenses/interface-sounds.txt",
+      "bytes": 574,
+      "sha256": "f7966c773bbed0eca6a9c75081c44a178b38eae112724dbb5fdfbd4192d118a9",
+      "runtime_direct_references": [],
+      "asset_map_used": false,
+      "proposed_action": "remove obsolete prototype asset",
+      "deleted": false
+    },
+    {
+      "path": "E:\\Proj\\Active\\personal-web\\.playwright-mcp\\game-work\\src\\assets\\licenses\\music.txt",
+      "relative": "src/assets/licenses/music.txt",
+      "bytes": 279,
+      "sha256": "17ecd57b86f03a1499ecdd7bdbea8734e66365f7f56b35f71e5bd53260f7690c",
+      "runtime_direct_references": [],
+      "asset_map_used": false,
+      "proposed_action": "remove obsolete prototype asset",
+      "deleted": false
+    },
+    {
+      "path": "E:\\Proj\\Active\\personal-web\\.playwright-mcp\\game-work\\src\\assets\\licenses\\rpg-audio.txt",
+      "relative": "src/assets/licenses/rpg-audio.txt",
+      "bytes": 478,
+      "sha256": "5735dfd72cb64cbbceda4ebc00c380c41ca680edb82ff153aa7c9ab97614c539",
+      "runtime_direct_references": [],
+      "asset_map_used": false,
+      "proposed_action": "remove obsolete prototype asset",
+      "deleted": false
+    },
+    {
+      "path": "E:\\Proj\\Active\\personal-web\\.playwright-mcp\\game-work\\src\\assets\\licenses\\town.txt",
+      "relative": "src/assets/licenses/town.txt",
+      "bytes": 567,
+      "sha256": "c483c167cc3bdfe17c15f957ff847d409f64d81b410b28783636cf3b2b7814c5",
+      "runtime_direct_references": [],
+      "asset_map_used": false,
+      "proposed_action": "remove obsolete prototype asset",
+      "deleted": false
+    }
+  ]
+}
