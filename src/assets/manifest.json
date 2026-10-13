@@ -1,0 +1,463 @@
+{
+  "title": "Cinder Below curated Ninja Adventure assets",
+  "source_url": "https://pixel-boy.itch.io/ninja-adventure-asset-pack",
+  "authors": [
+    "Pixel-boy",
+    "AAA"
+  ],
+  "license": "CC0-1.0",
+  "archive_sha256": "95a06f4fdcfd1882f061a45ff313b7c905dbe2de1e8512b281d7937df62a7b15",
+  "source_archive_bytes": 94022790,
+  "files": [
+    {
+      "file": "player-idle.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Character/SorcererBlack/SeparateAnim/Idle.png",
+      "bytes": 3628,
+      "sha256": "0510e285f336e5597ad75cb1495f46ed8d46931d1c5b5ca99466839c1caa679f",
+      "modified": false,
+      "dimensions": [
+        64,
+        16
+      ]
+    },
+    {
+      "file": "player-walk.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Character/SorcererBlack/SeparateAnim/Walk.png",
+      "bytes": 4415,
+      "sha256": "398b39aa89835feccd2414a3ef8e8502f47bab703ce5dc637e4d94e207a26f2f",
+      "modified": false,
+      "dimensions": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "player-attack.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Character/SorcererBlack/SeparateAnim/Attack.png",
+      "bytes": 3611,
+      "sha256": "46a1d71a159bd2904fb310db6340440c23c7b6a98f1351c656d76c042dccdba7",
+      "modified": false,
+      "dimensions": [
+        64,
+        16
+      ]
+    },
+    {
+      "file": "player-dead.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Character/SorcererBlack/SeparateAnim/Dead.png",
+      "bytes": 3098,
+      "sha256": "6e3131a1c67261e4e7393131c327237ffb440a4e74fa6662b49c43b426688a38",
+      "modified": false,
+      "dimensions": [
+        16,
+        16
+      ]
+    },
+    {
+      "file": "slime.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Monster/Slime/Slime.png",
+      "bytes": 3593,
+      "sha256": "ed2f8eba4550cf54476ab3eb9d36eaf4feb2462e5dc01c7223567c40a261b971",
+      "modified": false,
+      "dimensions": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "shooter.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Monster/Skull/SpriteSheet.png",
+      "bytes": 3635,
+      "sha256": "6d2e9470a95303610de245e172c39d039aca53c74dbea56f4075fe8d8e92857f",
+      "modified": false,
+      "dimensions": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "charger.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Monster/BlueBat/SpriteSheet.png",
+      "bytes": 1387,
+      "sha256": "e08c320590ca7b2052d15b76159740f99f2d929e3444e81eeeebacf6ea5ade4c",
+      "modified": false,
+      "dimensions": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "caster.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Monster/Eye/Eye.png",
+      "bytes": 3506,
+      "sha256": "21c7de8b33acd7817f2994530baed80e5ef7db632f2bfb7790295a4c3ef1b603",
+      "modified": false,
+      "dimensions": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "sentinel-idle.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Boss/GiantFrog/Idle40x40.png",
+      "bytes": 1127,
+      "sha256": "dc2d67d1333e73259691a0bca9aff06377757a157be9c19317aac3a83b34ee15",
+      "modified": false,
+      "dimensions": [
+        200,
+        40
+      ]
+    },
+    {
+      "file": "sentinel-charge.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Boss/GiantFrog/Charge.png",
+      "bytes": 1623,
+      "sha256": "cfd5fdf2b91b9093980c3304a381584f5184ffe0382ff7ec35806b9c6a5418d2",
+      "modified": false,
+      "dimensions": [
+        280,
+        40
+      ]
+    },
+    {
+      "file": "sentinel-attack.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Boss/GiantFrog/Attack.png",
+      "bytes": 1094,
+      "sha256": "5ac0a5a76f1429a57cfee5981de0da0b2a68dc6056d37282f2487476f19ee576",
+      "modified": false,
+      "dimensions": [
+        120,
+        40
+      ]
+    },
+    {
+      "file": "sentinel-jump.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Boss/GiantFrog/Jump.png",
+      "bytes": 2018,
+      "sha256": "cc264f1da8d6974decc7595f7254d5aed6b146499e3859c6b9d8cbfe36989c41",
+      "modified": false,
+      "dimensions": [
+        240,
+        40
+      ]
+    },
+    {
+      "file": "sentinel-hit.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Boss/GiantFrog/Hit.png",
+      "bytes": 1698,
+      "sha256": "ed0b5ce7820cb6f049eac008660cae9e6ad28c72e8c533a326144a467150cdde",
+      "modified": false,
+      "dimensions": [
+        120,
+        40
+      ]
+    },
+    {
+      "file": "warden-idle.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Boss/TenguBlue/Idle.png",
+      "bytes": 3565,
+      "sha256": "6f800fd8786a59d7774bb6c628e44aa28eb72666c514bcf31fe7f771f47998ab",
+      "modified": false,
+      "dimensions": [
+        408,
+        68
+      ]
+    },
+    {
+      "file": "warden-attack.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Boss/TenguBlue/Attack.png",
+      "bytes": 15496,
+      "sha256": "a5269bc36caf1c9cac19479bd116ec5316c1570dd6f871f8e5adaa32c2750a45",
+      "modified": false,
+      "dimensions": [
+        1230,
+        82
+      ]
+    },
+    {
+      "file": "warden-walk.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Boss/TenguBlue/Walk.png",
+      "bytes": 6402,
+      "sha256": "609316c85177d78d4dd35117c9187a2f7b6bd9a0b881badab260eee530362ecc",
+      "modified": false,
+      "dimensions": [
+        820,
+        82
+      ]
+    },
+    {
+      "file": "warden-hit.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Boss/TenguBlue/Hit.png",
+      "bytes": 7158,
+      "sha256": "b5d79dc557b3d5b134ced95370d5fcb389e9a06dabe4917766aa60dfb272d17d",
+      "modified": false,
+      "dimensions": [
+        544,
+        68
+      ]
+    },
+    {
+      "file": "floor.png",
+      "original": "Ninja Adventure - Asset Pack/Backgrounds/Tilesets/Interior/TilesetInteriorFloor.png",
+      "bytes": 13012,
+      "sha256": "e281598e2d90f43b31fd557b94c2d2abb00d307758a053b7df301575bf535e3a",
+      "modified": false,
+      "dimensions": [
+        352,
+        272
+      ]
+    },
+    {
+      "file": "walls.png",
+      "original": "Ninja Adventure - Asset Pack/Backgrounds/Tilesets/Interior/TilesetWallSimple.png",
+      "bytes": 5149,
+      "sha256": "ad5eb80ab4d5e65dbcda9dc012f9981323b277717349cdab012fc65ce06e43b2",
+      "modified": false,
+      "dimensions": [
+        160,
+        176
+      ]
+    },
+    {
+      "file": "dungeon-props.png",
+      "original": "Ninja Adventure - Asset Pack/Backgrounds/Tilesets/TilesetDungeon.png",
+      "bytes": 1437,
+      "sha256": "03a4a4aa9002520a50cc3ab9c6ea63905826b2eca5d428c952e635dc3b24a798",
+      "modified": false,
+      "dimensions": [
+        192,
+        64
+      ]
+    },
+    {
+      "file": "decor.png",
+      "original": "Ninja Adventure - Asset Pack/Backgrounds/Tilesets/TilesetElement.png",
+      "bytes": 13884,
+      "sha256": "63d64985697d77033372256b9304ea85db7061f0fc19aafd0714492a9b57140e",
+      "modified": false,
+      "dimensions": [
+        256,
+        240
+      ]
+    },
+    {
+      "file": "fireball.png",
+      "original": "Ninja Adventure - Asset Pack/FX/Projectile/Fireball.png",
+      "bytes": 505,
+      "sha256": "b2e82a4bf1dcfcf5c015a95d38b5a7482f7a74d0fa847aa546aaf2386d136d09",
+      "modified": false,
+      "dimensions": [
+        64,
+        16
+      ]
+    },
+    {
+      "file": "energy.png",
+      "original": "Ninja Adventure - Asset Pack/FX/Projectile/EnergyBall.png",
+      "bytes": 338,
+      "sha256": "fe1f32b076e49e68cc84439f3d87e077df1cc596c51443b80bb08834cc9b4d99",
+      "modified": false,
+      "dimensions": [
+        64,
+        16
+      ]
+    },
+    {
+      "file": "energy-big.png",
+      "original": "Ninja Adventure - Asset Pack/FX/Projectile/BigEnergyBall.png",
+      "bytes": 650,
+      "sha256": "0205f7646c803864387e2101c43ca234b36042c5e7bb331a4a091e3fd6bcb85c",
+      "modified": false,
+      "dimensions": [
+        96,
+        24
+      ]
+    },
+    {
+      "file": "impact.png",
+      "original": "Ninja Adventure - Asset Pack/FX/Elemental/Explosion/SpriteSheet.png",
+      "bytes": 2939,
+      "sha256": "98f3dfc6cdcdfaf122d7cf70b7cbc8e14c96f4e76f1e8f430099575d6b942219",
+      "modified": false,
+      "dimensions": [
+        360,
+        40
+      ]
+    },
+    {
+      "file": "smoke.png",
+      "original": "Ninja Adventure - Asset Pack/FX/Smoke/Smoke/SpriteSheet.png",
+      "bytes": 1446,
+      "sha256": "33b2fc9c855a3dfc620f3bc5e494ab08e559b29737d72ea0b80283b779e5023d",
+      "modified": false,
+      "dimensions": [
+        192,
+        32
+      ]
+    },
+    {
+      "file": "slash.png",
+      "original": "Ninja Adventure - Asset Pack/FX/Attack/CircularSlash/SpriteSheet.png",
+      "bytes": 709,
+      "sha256": "d1c93de25dc1c84a1e21d23fe93c777bd220246bd9108056010ecb22279a2c12",
+      "modified": false,
+      "dimensions": [
+        128,
+        32
+      ]
+    },
+    {
+      "file": "flame.png",
+      "original": "Ninja Adventure - Asset Pack/FX/Elemental/Flam/SpriteSheet.png",
+      "bytes": 3010,
+      "sha256": "a46b49fdd9149cdee578acc9ebde50147f7c84faf8463ff265f3f54677e79e4d",
+      "modified": false,
+      "dimensions": [
+        200,
+        30
+      ]
+    },
+    {
+      "file": "staff.png",
+      "original": "Ninja Adventure - Asset Pack/Items/Weapons/MagicWand/SpriteInHand.png",
+      "bytes": 169,
+      "sha256": "d16a48a14d489e9e432dcf30b64025cca543e60e2866c71fb21a8a027d936d7a",
+      "modified": false,
+      "dimensions": [
+        5,
+        10
+      ]
+    },
+    {
+      "file": "relic-book.png",
+      "original": "Ninja Adventure - Asset Pack/Items/Weapons/Book/Sprite.png",
+      "bytes": 162,
+      "sha256": "002f4bb82b508af0ef3a492f4305fb52b5ef8aba293f8dfadf2ed3dbe3c42e8a",
+      "modified": false,
+      "dimensions": [
+        9,
+        9
+      ]
+    },
+    {
+      "file": "coin.png",
+      "original": "Ninja Adventure - Asset Pack/Items/Treasure/GoldCoin.png",
+      "bytes": 2898,
+      "sha256": "7bf1ce4fe59865d5c18231aeba75f3002e689f5ee33d303d3cdbdf8287322367",
+      "modified": false,
+      "dimensions": [
+        7,
+        7
+      ]
+    },
+    {
+      "file": "music-fight.ogg",
+      "original": "Ninja Adventure - Asset Pack/Audio/Musics/17 - Fight.ogg",
+      "bytes": 780630,
+      "sha256": "137f9a19a043c23c02179d722b14e9014bc3d73546db722a91640bd6181f1089",
+      "modified": false,
+      "audio": {
+        "sample_rate": 44100,
+        "channels": 2,
+        "duration_seconds": 32.0,
+        "loop_seam_auditioned": false
+      }
+    },
+    {
+      "file": "music-dungeon.ogg",
+      "original": "Ninja Adventure - Asset Pack/Audio/Musics/21 - Dungeon.ogg",
+      "bytes": 1460020,
+      "sha256": "c5f1d954bb5be95f893e3e848d0baabf3fbf7c22db7ad480e58ce910a14e68dc",
+      "modified": false,
+      "audio": {
+        "sample_rate": 44100,
+        "channels": 2,
+        "duration_seconds": 60.0,
+        "loop_seam_auditioned": false
+      }
+    },
+    {
+      "file": "shot.wav",
+      "original": "Ninja Adventure - Asset Pack/Audio/Sounds/Whoosh & Slash/Launch.wav",
+      "bytes": 67460,
+      "sha256": "d6f390506b4702e59e603ef8adfd90d95b7c4d0590c80c56e3b8d646768ef99c",
+      "modified": false,
+      "audio": {
+        "sample_rate": 44100,
+        "channels": 2,
+        "duration_seconds": 0.3812
+      }
+    },
+    {
+      "file": "dash.wav",
+      "original": "Ninja Adventure - Asset Pack/Audio/Sounds/Whoosh & Slash/Whoosh.wav",
+      "bytes": 58520,
+      "sha256": "2e9d4e4095ad0cddcee6ec69a1f55fe75b2793286910b3c574ef1d205d0e0154",
+      "modified": false,
+      "audio": {
+        "sample_rate": 44100,
+        "channels": 2,
+        "duration_seconds": 0.3306
+      }
+    },
+    {
+      "file": "hit.wav",
+      "original": "Ninja Adventure - Asset Pack/Audio/Sounds/Hit & Impact/Hit1.wav",
+      "bytes": 60200,
+      "sha256": "56b206a2648109fa25761b7034c211903ef10f1a9b4ce2f6526f7a77a831328d",
+      "modified": false,
+      "audio": {
+        "sample_rate": 44100,
+        "channels": 2,
+        "duration_seconds": 0.3401
+      }
+    },
+    {
+      "file": "death.wav",
+      "original": "Ninja Adventure - Asset Pack/Audio/Sounds/Elemental/Explosion2.wav",
+      "bytes": 112016,
+      "sha256": "6ee30b0cd88e83e302cbea4adb7d53322a414aef64cd0e03194d4465e31a9d60",
+      "modified": false,
+      "audio": {
+        "sample_rate": 44100,
+        "channels": 2,
+        "duration_seconds": 0.6338
+      }
+    },
+    {
+      "file": "relic.wav",
+      "original": "Ninja Adventure - Asset Pack/Audio/Sounds/Bonus/PowerUp1.wav",
+      "bytes": 83304,
+      "sha256": "f684a041c42646a6285692218010d9ed590421eba63e5d05d9c4f71026a5379f",
+      "modified": false,
+      "audio": {
+        "sample_rate": 44100,
+        "channels": 2,
+        "duration_seconds": 0.4715
+      }
+    },
+    {
+      "file": "LICENSE-Ninja-Adventure.txt",
+      "original": "Ninja Adventure - Asset Pack/LICENSE.txt",
+      "bytes": 6722,
+      "sha256": "9bc2cd77030dd73fd2497c5729556a11524fa04099d8351bc527fd4d4c31b916",
+      "modified": false
+    },
+    {
+      "file": "README-Ninja-Adventure.md",
+      "original": "Ninja Adventure - Asset Pack/README.md",
+      "bytes": 599,
+      "sha256": "6865198a6d7b052636269e9db0de966304737d5f8bacf683f2ac06ad60a68bd7",
+      "modified": false
+    }
+  ],
+  "total_bytes": 2742833,
+  "frame_conventions": {
+    "player": "16x16; columns down/up/left/right; walk rows 0..3 in temporal sequence. Idle and attack are one pose per direction.",
+    "monsters": "16x16; columns down/up/left/right; rows 0..3 temporal sequence.",
+    "sentinel": "40x40 strips; idle5 charge7 attack3 jump6 hit3; single facing.",
+    "warden": "idle68x68 six frames; hit68x68 eight frames; walk82x82 ten frames; attack82x82 fifteen frames; single facing.",
+    "effects": "fireball/energy 16x16 four frames; energy-big24x24 four; impact40x40 nine; smoke32x32 six; slash32x32 four; flame25x30 eight (visually checked)."
+  },
+  "audio_scope": "Files decoded through container headers/PCM metadata only; musical fit and loop seams have not been auditioned."
+}

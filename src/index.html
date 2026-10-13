@@ -1,109 +1,59 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, viewport-fit=cover"
-    />
-    <meta name="theme-color" content="#edf0d9" />
-    <meta
-      name="description"
-      content="送几封信，认识林间的朋友，慢慢把小屋布置成家。一个随时停下、每步保存的轻探索小游戏。"
-    />
-    <title>苔光来信 · Mosslight Post</title>
-    <link
-      rel="icon"
-      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%232c493a'/%3E%3Cpath d='M13 22h38v26H13z' fill='%23edf0d9'/%3E%3Cpath d='m13 22 19 15 19-15' fill='none' stroke='%232c493a' stroke-width='3'/%3E%3C/svg%3E"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#101018" />
+    <meta name="description" content="Cinder Below — a quick room-based action roguelite. Dodge, build a wild relic combination, and descend through eight chambers. Play instantly in your browser." />
+    <title>Cinder Below</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <div class="app-shell">
-      <header class="masthead">
-        <a class="wordmark" href="./" aria-label="苔光来信首页"
-          ><span class="brand-icon" aria-hidden="true">✉</span
-          ><span>苔光来信<small>MOSSLIGHT POST</small></span></a
-        >
-        <div class="top-actions">
-          <button
-            id="music-toggle"
-            class="icon-button"
-            aria-label="开启音乐"
-            title="开启音乐"
-          >
-            ♫<span id="music-label">音乐关</span></button
-          ><button id="settings-open" class="icon-button" aria-label="打开设置">
-            ☰<span>设置</span>
-          </button>
+    <main id="game" aria-label="Cinder Below game">
+      <canvas id="world" aria-label="Dungeon arena. Move with WASD, aim with the mouse or arrow keys, Space to dash, E for nova." tabindex="0"></canvas>
+      <div id="shade" aria-hidden="true"></div>
+      <header id="topbar">
+        <a class="wordmark" href="./" aria-label="Cinder Below home">C<span class="sigil">✦</span>B</a>
+        <div id="run-hud" hidden>
+          <div class="vitals"><div id="hearts" aria-label="Health"></div><span id="ember-count">0</span><span class="ember-symbol" aria-hidden="true">◆</span></div>
+          <div id="room-strip" aria-label="Run progress"></div>
+        </div>
+        <div class="tools">
+          <button class="icon-button" id="audio-toggle" aria-label="Enable audio" title="Audio">♪<span class="slash" aria-hidden="true"></span></button>
+          <button class="icon-button" id="fullscreen" aria-label="Enter fullscreen" title="Fullscreen (F)">⛶</button>
+          <button class="icon-button" id="pause-button" aria-label="Pause and settings" title="Pause (Esc)">Ⅱ</button>
         </div>
       </header>
-      <div id="save-warning" class="save-warning" hidden></div>
-      <main id="game" aria-label="苔光来信游戏">
-        <section class="scene-column" aria-label="林间小屋与路线">
-          <div class="scene-heading">
-            <div>
-              <span class="eyebrow" id="scene-eyebrow">溪边的一隅</span>
-              <h1 id="scene-title">今天，也慢慢来。</h1>
-            </div>
-            <span id="scene-badge" class="scene-badge">常青小院</span>
-          </div>
-          <div class="scene-frame">
-            <canvas
-              id="world"
-              width="864"
-              height="864"
-              aria-label="林间小屋场景"
-            ></canvas>
-            <div id="scene-targets" class="scene-targets"></div>
-            <div id="scene-note" class="scene-note"></div>
-          </div>
-          <div class="scene-footer">
-            <span id="scene-caption">信会送到，路也会等你。</span
-            ><button id="postcard" class="text-button">保存小院图片 ↗</button>
-          </div>
-        </section>
-        <section class="journal" aria-label="旅途手记">
-          <nav class="tabs" aria-label="游戏页面">
-            <button data-tab="home" aria-current="page">小屋</button
-            ><button data-tab="letters">
-              来信<span id="new-letter-dot" class="dot"></span></button
-            ><button data-tab="friends">伙伴</button
-            ><button data-tab="decor">布置</button>
-          </nav>
-          <div id="panel" class="panel" tabindex="-1">
-            <p class="loading">正在打开林间小屋……</p>
-          </div>
-        </section>
-      </main>
-      <footer class="site-footer">
-        <span id="save-status">每一步，自动保存在此浏览器</span
-        ><span
-          ><a href="https://foreseer.site/myweb" target="_blank" rel="noopener"
-            >4c / MyWeb ↗</a
-          ><button id="credits-open" class="text-button">素材鸣谢</button></span
-        >
-      </footer>
-    </div>
-    <div id="toast" class="toast" role="status" aria-live="polite"></div>
-    <dialog id="modal">
-      <div class="modal-head">
-        <h2 id="modal-title"></h2>
-        <button id="modal-close" class="icon-button" aria-label="关闭弹窗">
-          ✕
-        </button>
+      <section id="title-screen" class="screen title-screen" aria-labelledby="game-title">
+        <div class="title-content">
+          <div class="eyebrow"><span></span> A SHORT DESCENT INTO CHAOS</div>
+          <h1 id="game-title">CINDER<br /><span>BELOW</span></h1>
+          <p class="title-copy">Eight chambers. One impossible build.<br /> Make it out. Come back different.</p>
+          <div class="loadout-label">STARTING WEAPON <span id="unlocks-caption"></span></div>
+          <div id="weapon-options" class="weapon-options" aria-label="Starting weapon"></div>
+          <button id="play" class="primary-button" disabled><span>Preparing the vault…</span><span aria-hidden="true">↗</span></button>
+          <button id="resume-run" class="secondary-button" hidden>Continue descent <span>↗</span></button>
+          <p id="load-message" role="status">Loading the dungeon.</p>
+          <div class="title-stats" id="title-stats"></div>
+        </div>
+        <div class="title-foot"><span>WASD MOVE <b>·</b> MOUSE AIM / FIRE <b>·</b> SPACE DASH</span><button id="how-to-play" class="text-button">How to play</button><button id="credits-button" class="text-button">Credits</button></div>
+      </section>
+      <div id="combat-ui" hidden>
+        <div id="room-banner" class="room-banner" aria-live="polite"></div>
+        <div id="boss-hud" hidden><span id="boss-name"></span><div class="boss-track"><div id="boss-fill"></div></div></div>
+        <div id="objective" class="objective"></div>
+        <div id="build-strip" class="build-strip" aria-label="Your relics"></div>
+        <div id="abilities" class="abilities"><button id="dash" class="ability" aria-label="Dash"><span>↠</span><strong>DASH</strong><kbd>SPACE</kbd><i></i></button><button id="nova" class="ability" aria-label="Cast nova"><span>✳</span><strong>NOVA</strong><kbd>E</kbd><i></i></button></div>
+        <div id="touch-controls" aria-label="Touch controls"><div class="stick" id="move-stick" aria-label="Movement joystick"><span>MOVE</span><i></i></div><div class="stick" id="aim-stick" aria-label="Aim and fire joystick"><span>AIM / FIRE</span><i></i></div></div>
       </div>
-      <div id="modal-content"></div>
-    </dialog>
-    <input
-      type="file"
-      id="import-file"
-      accept="application/json,.json"
-      hidden
-    />
-    <noscript
-      >请允许 JavaScript 来开启游戏。所有进度保存在你自己的浏览器。</noscript
-    >
+      <section id="reward-screen" class="screen reward-screen" hidden aria-labelledby="reward-title"><div class="reward-heading"><p class="eyebrow">CHAMBER CLEARED</p><h2 id="reward-title">Feed the flame.</h2><p>Choose one relic. Let it change the way you fight.</p></div><div id="relic-choices" class="relic-choices"></div><p class="choice-hint">SELECT WITH 1 / 2 / 3</p></section>
+      <section id="end-screen" class="screen end-screen" hidden aria-labelledby="end-title"><div class="end-content"><p id="end-label" class="eyebrow"></p><h2 id="end-title"></h2><p id="end-copy"></p><div id="end-stats" class="end-stats"></div><div id="end-unlocks"></div><button id="retry" class="primary-button"><span>One more descent</span><span>↗</span></button><button id="back-title" class="text-button">Return to the surface</button></div></section>
+      <div id="toast" role="status" aria-live="polite" hidden></div>
+      <dialog id="menu" aria-labelledby="menu-title"><div class="dialog-head"><p class="eyebrow">TAKE A BREATH</p><button class="icon-button" id="close-menu" aria-label="Close menu">×</button></div><h2 id="menu-title">Paused.</h2><div id="menu-body"></div><div class="menu-actions"><button id="continue" class="primary-button">Back to the rift</button><button id="abandon" class="text-button">Return to title</button></div></dialog>
+      <input type="file" id="import-file" accept="application/json,.json" hidden />
+      <div class="sr-only" id="announcer" aria-live="polite"></div>
+    </main>
     <script type="module" src="./app.js"></script>
   </body>
 </html>

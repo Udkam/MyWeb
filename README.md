@@ -1,59 +1,67 @@
-# 苔光来信 · Mosslight Post
+# Cinder Below
 
-送几封信，认识林间的朋友，慢慢把小屋布置成家。
+A full-viewport browser action roguelite: eight chambers, two bosses, twelve stacking relics and three distinct starting weapons. Start immediately, dodge readable attacks, choose a build and take Hunt or Refuge gates between rooms.
 
-这是一个有限故事的轻探索与小屋养成游戏：四格行囊改变途中可选的路线，朋友送来陈设，采集的枝叶可以换些自己喜欢的物件。没有战斗、签到、喂养、现实倒计时或离线收益。
+**Public site:** https://foreseer-focus-desk.fresh-ape-5596.chatgpt.site
 
-## 游玩
+**Canonical editable source:** `E:\Proj\Active\MyWeb\cinder-below`
 
-- 9 封有首尾的信、3 张路线图、6 位动物朋友。
-- 5 种工具、4 格行囊；每段的精力与收获提前展示，只有能够完成送信并归家的选择才可前进。
-- 途中可以退回上一处。到家才结算，第一次收到的礼物会自动放进空位。
-- 12 种陈设、8 处可自由布置的位置、3 个故事解锁的院景。已拥有的陈设可多次摆放，不再收费。
-- 第九封之后故事完成；仍可布置、保存小院图片、翻信和重访朋友。
-- 手机触控、桌面鼠标与键盘操作；F 全屏、Esc 退出；遵循减少动态效果设置。
+The existing public ChatGPT Sites project and stable URL are retained. The old Focus Desk / Mosslight Post URL slug is not the game's title. This game replaces Mosslight Post; its complete earlier source remains in Git at `fb20b88e4e7c564eb9912d390c69678d52bdd5af`.
 
-## 保存与声音
+## Play
 
-每一步保存在当前浏览器的 `mosslight-post-v1` 中，没有账号或云同步。关闭页面不扣资源。设置提供 JSON 导出、导入；换设备、清理浏览器数据或换域名前请先备份。
+| Input | Action |
+| --- | --- |
+| WASD | Move |
+| Mouse + hold left button | Aim and fire |
+| Arrow keys | Keyboard-only aim and fire |
+| Space / right mouse / Shift | Dash |
+| E | Charged nova: damage and clear nearby hostile shots |
+| 1 / 2 / 3 | Select a relic |
+| Escape / P | Pause |
+| F | Toggle browser fullscreen |
+| M | Toggle audio |
 
-损坏存档不会被静默覆盖，可以下载原文或导入备份。使用 Web Locks 串行处理同源标签页写入，并同步其他标签页的进度。存储不可用或旧浏览器没有 Web Locks 时明确显示内存模式，仍能游玩与导出；此时不会让其他标签页覆盖尚未保存的本页进度。
+Phones have two independent sticks and separate Dash / Nova buttons. The game fills the browser viewport even where the Fullscreen API is unavailable. Portrait and landscape are supported; small screens can use landscape for more horizontal aiming space.
 
-音乐默认关闭，主动点按后播放；切到后台暂停。音乐、音效、像素图块与动物来自作者原始素材，没有生成图或自合成音乐，详见 [ASSET-CREDITS.md](ASSET-CREDITS.md)。
+Room one introduces the controls in a single wave. Other normal rooms have two waves with spawn warnings. Bosses occupy rooms four and eight, change their attacks at half health and summon a finite pair of supporting enemies. Clearing a room offers three relics. Split, ricochet, pierce, seeking, chain, burn, cold, explosions, orbiting blades, dash trails, nova and a health-for-damage pact combine during the run.
 
-## 本地开发
+Hunt sends two more enemies per wave and awards more embers. Refuge has fewer enemies and heals one heart on entry. Total cleared rooms unlock Scatter at four and Needle at ten. There are no daily rewards, wait timers or account requirements. Embers are a run/lifetime score, not a purchasable currency or an unfinished shop.
 
-源码目录：`E:\Proj\Active\MyWeb\mosslight-post`。
+## Saves
 
-运行环境为 Node.js 22 或更新版本，静态站无需 npm 运行依赖：
+Progress is **local to this browser**, under `cinder-below-v1`. Settings offers JSON export/import for backups and moving between devices. Continuing resumes the last safe room entrance, with already-banked rewards protected against double counting. The earlier `mosslight-post-v1` save is untouched.
 
-```powershell
-node --check src/app.js
-npm test
+Writes use the Web Locks API and revision checks. Another tab's update pauses this tab and asks the player to load the latest save or export the local one. Corrupt data is preserved; replacement requires confirmation. When storage or safe locking is unavailable, play continues in memory with a visible status and export. Cloud/account sync is not implemented.
+
+## Local development
+
+Node 22+ and Python 3 are sufficient for the source build; there are no npm runtime dependencies.
+
+```text
+npm run check
+npm run test
 npm run build
-python -m http.server 4318 --bind 127.0.0.1 --directory dist
+python -m http.server 4328 --bind 127.0.0.1
 ```
 
-打开 `http://127.0.0.1:4318/`。浏览器测试需要 Python 的 Playwright 与 Chromium：
+Open `http://127.0.0.1:4328/src/` for development or `/dist/` for the built version. Browser checks use an existing Python Playwright + Chromium installation:
 
-```powershell
-python tests/browser-check.py http://127.0.0.1:4318/
+```text
+python tests/browser-ui-check.py
+python tests/browser-storage-check.py
+python tests/browser-combat-check.py
 ```
 
-`build.mjs` 只清理本项目的 `dist` 后复制 `src`。运行包只包含游戏与精选素材，不包含研究下载包、测试存档或截图。
+The tests use `?test=1` and the public deterministic `advanceTime(ms)` hook. They use real UI input; combat completion tests do not modify health, enemies or the world. `render_game_to_text()` exposes a read-only JSON description for verification. A test hook is not an automatic gameplay feature.
 
-## 设计与验证
+## Hosting and evidence
 
-先实读 89 个不同游戏的官方或作者页面，其中 80 个有明确 Web 入口；对其中 8 款作过短试玩。素材调研包含 20 个官方页面、12 个作者/来源组。它们是页面观察与有限试玩，不能等同于通关或长期留存研究。
+ChatGPT Sites project: `appgprj_6accfe11a0ec8191ab683ddd3e52de07`. `.openai/hosting.json` points to `dist`. The official Sites source workflow opens/synchronizes the existing repository, runs remaining checks, commits and pushes the exact source, and packages the static output. A saved archive-backed version is deployed with public access. Local build success alone does not establish deployment; `.qa/release.json` records the actual source/version/deployment evidence.
 
-[设计决策](docs/DESIGN.md) 记录淘汰方案、原型反证和最终范围。[研究索引](docs/research/index.json) 保留逐站来源。`tests/playthrough-plan.json` 是模型搜索得到的九信路线，浏览器测试通过可见控件完成整段故事，不把完成状态写进存档冒充游玩。
+- [Design and module boundaries](DESIGN.md)
+- [Implementation details](IMPLEMENTATION.md)
+- [532-page research ledger and limitations](docs/research/README.md)
+- [Downloaded art and audio licenses / hashes](ASSET-CREDITS.md)
 
-## 发布
-
-平台：ChatGPT Sites。沿用 `.openai/hosting.json` 中已存在的 Site 身份，不另建重复站点。运行产物为 `dist`。
-
-站点保留原部署的稳定地址：[苔光来信](https://foreseer-focus-desk.fresh-ape-5596.chatgpt.site)。本地发布验收记录在 `.qa/release.json`，包含实际版本、公开访问与验证结果；该证据文件不进入运行包。
-
-Windows 使用 Sites 官方 `site-workflow.mjs` 时，在该进程内优先使用 `E:\Git\bin` 与 `E:\Git\usr\bin`，并设置 `TAR_OPTIONS=--force-local`。凭据仅通过工具返回及工作流隐藏 stdin 传递，不写入文件、命令参数或 Git。
-
-入口站继续位于 `E:\Proj\Active\personal-web`，使用既有 Vercel Git 部署；新游戏公开可访问后再加入其 MyWeb 列表。
+Research and diagnostic screenshots stay outside `src` and the deployed artifact. `.qa` is ignored and retains acceptance evidence locally. Game art and all audio are credited original CC0 Ninja Adventure assets; no art or music from The Binding of Isaac is used.

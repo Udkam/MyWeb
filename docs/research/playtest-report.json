@@ -1,0 +1,112 @@
+{
+  "recorded_local_date": "2026-10-14",
+  "timezone": "Asia/Shanghai",
+  "method": "Isolated Python Playwright Chromium; real keyboard/mouse; screenshots inspected; no state injection or hidden-state inspection",
+  "page_errors": 0,
+  "browser_closed": true,
+  "additional_counted_pages": 0,
+  "checks": [
+    {
+      "url": "https://sean-noonan.itch.io/bad-juju",
+      "title": "Bad Juju",
+      "verified": [
+        "Author Run game and Enter reached actual room",
+        "Keyboard movement changed player position",
+        "Observed PRESS R TO RETRY loss state",
+        "R restored initial arrangement and removed retry prompt"
+      ],
+      "attempted_not_verified": [
+        "Mouse firing hit or enemy kill",
+        "Release-to-reload effect",
+        "Juju and slow-time mechanics"
+      ],
+      "not_reached": [
+        "Room clear",
+        "Upgrade choice"
+      ],
+      "evidence": [
+        {
+          "file": "../../.qa/research-playtests/bad-juju-author.png",
+          "sha256": "4fab733d1080c828dbefb775f5389a46fc04bfcb96a7725048aec207ca8a6852"
+        },
+        {
+          "file": "../../.qa/research-playtests/bad-juju-combat-release.png",
+          "sha256": "9f48ac1528c3a4217c6361176f882077495f5a68a98994958810da899c71a18b"
+        },
+        {
+          "file": "../../.qa/research-playtests/bad-juju-loaded.png",
+          "sha256": "abe1251bbbf263f70a84e4e2a3bcb9666577b3101be01f0ecd6a8e8f3d860084"
+        },
+        {
+          "file": "../../.qa/research-playtests/bad-juju-release-reload.png",
+          "sha256": "a3498fbf15eae13410ebc5250d1c8dfdb1b09158eef5885693c5e04ac0e9f1b0"
+        },
+        {
+          "file": "../../.qa/research-playtests/bad-juju-restarted-firing.png",
+          "sha256": "243eb76882da6248e7454de7b2b4f8ed8b2a6876463b5c2de8830eeece684d48"
+        },
+        {
+          "file": "../../.qa/research-playtests/bad-juju-room.png",
+          "sha256": "24cf09daf6430409a805e6f0cc1ba0e1e40c1470420e3bdaa33ced23844551ff"
+        },
+        {
+          "file": "../../.qa/research-playtests/bad-juju-start.png",
+          "sha256": "857ef1dd0090717b96dcac229c866605f779827f2e9aa6dcd84f9bd4c32c26f9"
+        }
+      ]
+    },
+    {
+      "url": "https://kindanice.itch.io/fair-squares",
+      "title": "Fair Squares",
+      "verified": [
+        "Actual tutorial and controls loaded",
+        "Keyboard movement and aimed shooting",
+        "Target destruction effects",
+        "Ammunition changed 10 to 2 to 0",
+        "fight! portal and purple transition"
+      ],
+      "inconclusive": [
+        "Next screenshot returned to tutorial arrangement; intervening cause unobserved"
+      ],
+      "not_reached": [
+        "Confirmed complete combat wave",
+        "Upgrade choice"
+      ],
+      "evidence": [
+        {
+          "file": "../../.qa/research-playtests/fair-squares-after-shots.png",
+          "sha256": "7a91e35adfbc75a8e875efc5465cd6c20898ef74e594fa90e5989f71fca10200"
+        },
+        {
+          "file": "../../.qa/research-playtests/fair-squares-author.png",
+          "sha256": "1981da6c1a8e41bc0e8f6f0f3a3a6f7f81a7e9d6efbeb22a1fda82ab2e8e9e6f"
+        },
+        {
+          "file": "../../.qa/research-playtests/fair-squares-combat.png",
+          "sha256": "2fe61eb0676d83a9621ca01c6a16be38dc0e930df23d8fb8e4feca2fa95dd79c"
+        },
+        {
+          "file": "../../.qa/research-playtests/fair-squares-enter-fight.png",
+          "sha256": "0c309b1ae5e4461e580bec4b9bc56d9a21c4e430c1fdd28db2d107141707afc9"
+        },
+        {
+          "file": "../../.qa/research-playtests/fair-squares-live-wave.png",
+          "sha256": "78afccc92fd0260e498d1d5471c0f92f7b85bc08eed93c8844952fbfa749adfa"
+        },
+        {
+          "file": "../../.qa/research-playtests/fair-squares-menu.png",
+          "sha256": "011d1f5f6e9f55764cdb2754e9de8c46a2dc8329afe1edb6e234a414a68617b6"
+        },
+        {
+          "file": "../../.qa/research-playtests/fair-squares-pickups.png",
+          "sha256": "110aa6054e4d6945124f6702238a7b0dc8414c57d2171d225b67f14d2f26258b"
+        },
+        {
+          "file": "../../.qa/research-playtests/fair-squares-wave.png",
+          "sha256": "ccc4e91b9597d5083d52f1fc23ae3cacc372d3f37899043fab5fefd1cdcd1221"
+        }
+      ]
+    }
+  ],
+  "scope": "Bounded direct interactions, not completed playthroughs or full mechanic verification"
+}

@@ -1,0 +1,251 @@
+{
+  "audited_at": "2026-10-13T16:26:58.490653+00:00",
+  "scope": "Read-only identity review of the four live research files; descriptive metadata and cached author descriptions, not gameplay verification",
+  "counts_at_snapshot": {
+    "root/verified.jsonl": 132,
+    "bullet/records.jsonl": 140,
+    "dungeon/verified.jsonl": 130,
+    "arena/arena-reviewed.jsonl": 130
+  },
+  "total_records": 532,
+  "unique_urls": 532,
+  "exact_duplicate_urls": [],
+  "confirmed_same_game_duplicates": [],
+  "manually_adjudicated_candidates": [
+    {
+      "urls": [
+        "https://averagepiglet-atroxit.itch.io/lost-souls",
+        "https://ayrond.itch.io/lost-souls"
+      ],
+      "decision": "keep_separate",
+      "reason": "Different authors. First is endless generated dungeon soul collection; Lost Souls (and Paperwork) is hell paperwork rescue with six managed stats. Matching short title alone is not same-game evidence."
+    },
+    {
+      "urls": [
+        "https://angrybanana.itch.io/bulletboi",
+        "https://drakemordini.itch.io/bullet-boy"
+      ],
+      "decision": "keep_separate",
+      "reason": "BulletBoi has three dungeons and tap-dodge/hold-charge. Bullet Boy has health-cost bullet absorption, gravitational pull and ten-wave NecroKing endpoint. Different authors and distinct rules."
+    },
+    {
+      "urls": [
+        "https://kindanice.itch.io/fair-squares",
+        "https://viniflores.itch.io/fair-and-square"
+      ],
+      "decision": "keep_separate",
+      "reason": "Fair Squares upgrades the enemy whenever the player upgrades. Fair and Square specifies ten escalating waves and a last-wave boss. Different authors; name resemblance is insufficient."
+    },
+    {
+      "urls": [
+        "https://free-game-assets.itch.io/slimecide",
+        "https://no-whone.itch.io/slime-crime"
+      ],
+      "decision": "keep_separate",
+      "reason": "Slimecide has a colonist fighting slime waves. Slime Crime is a slime with mutually exclusive move/shoot/harvest actions. Distinct authors, protagonists and loops."
+    },
+    {
+      "urls": [
+        "https://ledoc.itch.io/creature-survivors",
+        "https://ledoc.itch.io/pixel-arena-survivors"
+      ],
+      "decision": "keep_separate_pending_new_alias_evidence",
+      "reason": "Same author but separate named projects: Creature Survivors author page says Unity over 1.5 months, five characters, seventeen weapons and eight evolutions; Pixel Arena Survivors says Godot over three weeks, ten-minute arena then boss. Neither reviewed page declares remake or port."
+    },
+    {
+      "urls": [
+        "https://ember-paw-games.itch.io/die-recompile-zero",
+        "https://ember-paw-games.itch.io/gaunt-valkyr"
+      ],
+      "decision": "keep_separate",
+      "reason": "Same studio does not establish duplicate: Die Recompile persists destruction through replacement clones; Gaunt Valkyr describes three characters and weapon-mod behavior. Reviewed text does not identify the pages as versions of one game."
+    },
+    {
+      "urls": [
+        "https://luisgreyy.itch.io/bossrushjam2025",
+        "https://s4g.itch.io/threadborne"
+      ],
+      "decision": "keep_separate",
+      "reason": "Threadbound rotates movement and makes shooting slow the player; floor zones change attacks. Threadborne is fifteen-minute survival with magic cards added by level-ups and chests. Different authors, titles and rule structure."
+    },
+    {
+      "urls": [
+        "https://penusbmic.itch.io/bullet-bunny",
+        "https://drakemordini.itch.io/bullet-boy"
+      ],
+      "decision": "keep_separate",
+      "reason": "Bullet Bunny has a five-hundred-second endpoint with four guns and six gems; Bullet Boy absorbs bullets by spending health and has a ten-wave NecroKing endpoint. Only generic Bullet name resembles."
+    }
+  ],
+  "title_similarity_candidates": [
+    {
+      "urls": [
+        "https://averagepiglet-atroxit.itch.io/lost-souls",
+        "https://ayrond.itch.io/lost-souls"
+      ],
+      "titles": [
+        "Lost Souls",
+        "Lost Souls (and Paperwork)"
+      ],
+      "similarity": 1.0,
+      "decision": "candidate_only_do_not_auto_merge"
+    },
+    {
+      "urls": [
+        "https://arkhamsoft.itch.io/octomech-survivors",
+        "https://liu-yongwei.itch.io/doom-survivors"
+      ],
+      "titles": [
+        "OctoMech Survivors",
+        "Doom Survivors - Demo"
+      ],
+      "similarity": 0.8,
+      "decision": "candidate_only_do_not_auto_merge"
+    },
+    {
+      "urls": [
+        "https://l-ananas.itch.io/zombiesurvivor",
+        "https://ameniwa.itch.io/orbit-survivor"
+      ],
+      "titles": [
+        "Zombie Survivor",
+        "Orbit Survivor"
+      ],
+      "similarity": 0.815,
+      "decision": "candidate_only_do_not_auto_merge"
+    },
+    {
+      "urls": [
+        "https://batyachelly.itch.io/yoyo-survivor",
+        "https://liu-yongwei.itch.io/doom-survivors"
+      ],
+      "titles": [
+        "YoYo Survivor",
+        "Doom Survivors - Demo"
+      ],
+      "similarity": 0.8,
+      "decision": "candidate_only_do_not_auto_merge"
+    },
+    {
+      "urls": [
+        "https://ameniwa.itch.io/orbit-survivor",
+        "https://director-jin.itch.io/16bitsurvivors"
+      ],
+      "titles": [
+        "Orbit Survivor",
+        "16Bit Survivors"
+      ],
+      "similarity": 0.815,
+      "decision": "candidate_only_do_not_auto_merge"
+    },
+    {
+      "urls": [
+        "https://free-game-assets.itch.io/slimecide",
+        "https://no-whone.itch.io/slime-crime"
+      ],
+      "titles": [
+        "Slimecide (Demo)",
+        "Slime Crime"
+      ],
+      "similarity": 0.842,
+      "decision": "candidate_only_do_not_auto_merge"
+    },
+    {
+      "urls": [
+        "https://kindanice.itch.io/fair-squares",
+        "https://viniflores.itch.io/fair-and-square"
+      ],
+      "titles": [
+        "Fair Squares",
+        "Fair and Square"
+      ],
+      "similarity": 0.833,
+      "decision": "candidate_only_do_not_auto_merge"
+    },
+    {
+      "urls": [
+        "https://liu-yongwei.itch.io/doom-survivors",
+        "https://nekudo.itch.io/dino-survivors"
+      ],
+      "titles": [
+        "Doom Survivors - Demo",
+        "Dino Survivors"
+      ],
+      "similarity": 0.846,
+      "decision": "candidate_only_do_not_auto_merge"
+    },
+    {
+      "urls": [
+        "https://luisgreyy.itch.io/bossrushjam2025",
+        "https://s4g.itch.io/threadborne"
+      ],
+      "titles": [
+        "Threadbound",
+        "Threadborne"
+      ],
+      "similarity": 0.818,
+      "decision": "candidate_only_do_not_auto_merge"
+    },
+    {
+      "urls": [
+        "https://penusbmic.itch.io/bullet-bunny",
+        "https://drakemordini.itch.io/bullet-boy"
+      ],
+      "titles": [
+        "Bullet Bunny",
+        "Bullet Boy"
+      ],
+      "similarity": 0.8,
+      "decision": "candidate_only_do_not_auto_merge"
+    },
+    {
+      "urls": [
+        "https://angrybanana.itch.io/bulletboi",
+        "https://drakemordini.itch.io/bullet-boy"
+      ],
+      "titles": [
+        "BulletBoi",
+        "Bullet Boy"
+      ],
+      "similarity": 0.889,
+      "decision": "candidate_only_do_not_auto_merge"
+    }
+  ],
+  "version_family_watchlist": [
+    {
+      "counted_url": "https://squishyblob.itch.io/card-retrieve",
+      "other_url": "https://geeklatte.itch.io/card-retrieve",
+      "reason": "Counted author page explicitly calls itself the old Weekly Jam prototype and links an updated demo under the second author. Count the family once if both appear.",
+      "other_currently_counted": false
+    },
+    {
+      "counted_url": "https://totallyaaron.itch.io/scalable-dungeons-rescaled",
+      "other_url": "https://aaronzengnz.itch.io/scalable-dungeons",
+      "reason": "Counted author page explicitly calls this a revamp and links the game-jam original. Count the family once if both appear.",
+      "other_currently_counted": false
+    },
+    {
+      "counted_url": "https://muifwego.itch.io/dont-bite-me-bro-deluxe",
+      "other_title": "Don't Bite Me Bro!",
+      "reason": "Author states Deluxe includes the same free core game plus DLC. Do not count an eventual base-game page twice.",
+      "other_currently_counted": false
+    },
+    {
+      "counted_url": "https://retrific.itch.io/help",
+      "other_title": "Colt Canyon",
+      "reason": "Help! author explicitly says it became Colt Canyon. Treat as one design family for a conservative unique-game threshold if a separate Colt Canyon record appears.",
+      "other_currently_counted": false
+    },
+    {
+      "counted_url": "https://bob-the-seagull-king.itch.io/hells-gate-a-wasteland-kings-mod",
+      "other_title": "Wasteland Kings / Nuclear Throne",
+      "reason": "Explicit derivative mod, not an alias. It contains its own six-character/mutation system; disclose derivation. Conservative gate may exclude mods but should not silently relabel it as base-game research.",
+      "other_currently_counted": false
+    }
+  ],
+  "same_description_candidates": [],
+  "shared_steam_app_candidates": [],
+  "links_between_counted_author_pages": [],
+  "missing_raw_evidence": [],
+  "limitations": "Author identity and mechanics can disprove superficial title matches, but no universal game-ID exists on itch.io. Files still being updated must be re-read. A linked sequel is not automatically the same game; a linked updated demo generally is."
+}

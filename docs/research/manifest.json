@@ -1,0 +1,683 @@
+{
+  "schema_version": 1,
+  "assembled_local_date": "2026-10-14",
+  "timezone": "Asia/Shanghai",
+  "total_records": 532,
+  "unique_canonical_urls": 532,
+  "record_order": "root, bullet, dungeon, arena; source line order retained",
+  "ledger": {
+    "file": "ledger.jsonl",
+    "count": 532,
+    "sha256": "f23bb4fa817cf2ae9cc101ae74bbb21babb555d43bb460d658e809d329d0050a",
+    "ids": "CBR-0001..CBR-0532"
+  },
+  "groups": [
+    {
+      "group": "root",
+      "file": "action-research/root/verified.jsonl",
+      "count": 132,
+      "ledger_number_start": 1,
+      "ledger_number_end": 132,
+      "source_status": "verified",
+      "sha256": "b5fcb6a413a3b5c8e8238478299b287c6ebaa32d9b26b0f179950c477f022d17",
+      "bytes": 146713
+    },
+    {
+      "group": "bullet",
+      "file": "action-research/bullet/records.jsonl",
+      "count": 140,
+      "ledger_number_start": 133,
+      "ledger_number_end": 272,
+      "source_status": "accepted",
+      "sha256": "afd9962e3ab3308204b69bca0ab7fe56d990ef6519235b1e904f2e48fb947fb5",
+      "bytes": 176402
+    },
+    {
+      "group": "dungeon",
+      "file": "action-research/dungeon/verified.jsonl",
+      "count": 130,
+      "ledger_number_start": 273,
+      "ledger_number_end": 402,
+      "source_status": "read_verified",
+      "sha256": "f9a052d612b6a9fb0e71435a13004c317d64bd20b41a3faa45b289df02cd04c3",
+      "bytes": 121613
+    },
+    {
+      "group": "arena",
+      "file": "action-research/arena/arena-reviewed.jsonl",
+      "count": 130,
+      "ledger_number_start": 403,
+      "ledger_number_end": 532,
+      "source_status": "verified-read",
+      "sha256": "7b74364f57fc6e1c860b77b93e7bb2b8cc70cda522810571bcba38af120ee050",
+      "bytes": 124963
+    }
+  ],
+  "input_files": [
+    {
+      "path": "action-research/arena/arena-reviewed.jsonl",
+      "bytes": 124963,
+      "sha256": "7b74364f57fc6e1c860b77b93e7bb2b8cc70cda522810571bcba38af120ee050"
+    },
+    {
+      "path": "action-research/arena/brief-050.md",
+      "bytes": 2790,
+      "sha256": "c62d3c22c48845be1dfc83e25de43c83580a1d0e53d8ff1cefc2d455be0ef4ae"
+    },
+    {
+      "path": "action-research/arena/brief-100.md",
+      "bytes": 2810,
+      "sha256": "450603a4c7b08e28ddf0a3b4ed68e773d733dceb01e9da82d8520a367cbdef58"
+    },
+    {
+      "path": "action-research/arena/duplicate-candidates.json",
+      "bytes": 9571,
+      "sha256": "7387e5efdda70e86d2597d81f9be8a53888769f3bc931e577fa9deeabec6b1e8"
+    },
+    {
+      "path": "action-research/arena/playtest-report.json",
+      "bytes": 4169,
+      "sha256": "c949023807a16fab538bf9764fe50e8aa66544ad7f1b5710260beeabd2b42474"
+    },
+    {
+      "path": "action-research/arena/playtest-report.md",
+      "bytes": 3678,
+      "sha256": "87e779e66ed6581c0d454a1417b0542129fcabf16c8be94bc0374e3f22da56f9"
+    },
+    {
+      "path": "action-research/arena/reviewed.tsv",
+      "bytes": 36234,
+      "sha256": "b0a49805a333ca487371ce4833ae4bc41be1b57004e6e455111cff8ea69dd6f5"
+    },
+    {
+      "path": "action-research/bullet/brief-001-050.md",
+      "bytes": 3139,
+      "sha256": "553911e805a73c3a0d3d7e60d41cdc85bf8ae430c5d4a14c492e41b644203fa9"
+    },
+    {
+      "path": "action-research/bullet/brief-051-100.md",
+      "bytes": 3143,
+      "sha256": "b6823d7c6e0f46f698761e4a8f2eb7dbd5b27679e8a6e99a5a0e6399f379ddb6"
+    },
+    {
+      "path": "action-research/bullet/brief-101-140.md",
+      "bytes": 3391,
+      "sha256": "3c0345779adcf43bbc532216e6ed6b48afcef6bed975609a9ac94218e66cbb10"
+    },
+    {
+      "path": "action-research/bullet/notes-001-015.json",
+      "bytes": 4096,
+      "sha256": "5440cc081a4ec33e0112bf37a91be2766ee0b5a769c6a6e25b4fe69d219287de"
+    },
+    {
+      "path": "action-research/bullet/notes-016-030.json",
+      "bytes": 4665,
+      "sha256": "4208ac098d630d8a8ce5d2556a3eff0ce02f467be06cd123cbbf28cefc65aa22"
+    },
+    {
+      "path": "action-research/bullet/notes-031-045.json",
+      "bytes": 4160,
+      "sha256": "cc11f59d12ab45059b275b5bf36359017c69ebeac437601840be064334954d7d"
+    },
+    {
+      "path": "action-research/bullet/notes-046-060.json",
+      "bytes": 4007,
+      "sha256": "4ec8220d9e1deecb04465ea84dcb69de579a868cbacd730fa31c945a016692d0"
+    },
+    {
+      "path": "action-research/bullet/notes-061-075.json",
+      "bytes": 4054,
+      "sha256": "947d64c9fb8221f5de2adb7f8f787472b359351d4013b332e9a2d82710b99f5f"
+    },
+    {
+      "path": "action-research/bullet/notes-076-090.json",
+      "bytes": 4175,
+      "sha256": "86cc9cea0b5eef28ed0e43479cba1cfdc3d59a845ca90141fecc733d87819ec9"
+    },
+    {
+      "path": "action-research/bullet/notes-091-105.json",
+      "bytes": 3245,
+      "sha256": "744fd66ed3055dc4ef95c22368b280f264b70a6cbdfd921b5080cbe48b6afa46"
+    },
+    {
+      "path": "action-research/bullet/notes-106-120.json",
+      "bytes": 4003,
+      "sha256": "09c54d23770db5a3ef4dad26187d7c4a453f3ca9d3ab8504bf6d6cb9b7f822b5"
+    },
+    {
+      "path": "action-research/bullet/notes-121-135.json",
+      "bytes": 3250,
+      "sha256": "7ebec583de0ac69af266db117a3a0cc110da729f88805cfc0e28b11536a967fe"
+    },
+    {
+      "path": "action-research/bullet/notes-136-150.json",
+      "bytes": 3705,
+      "sha256": "2e8c9d4fd5463e4d1c8029d6081a86e877a6d456b2c57f9770cf3025cfd535cc"
+    },
+    {
+      "path": "action-research/bullet/notes-151-169.json",
+      "bytes": 4584,
+      "sha256": "9b34f4d2e39073f91a76be758b664042ca67519eec5c6cba08c574979ab65c24"
+    },
+    {
+      "path": "action-research/bullet/notes-170-180.json",
+      "bytes": 2527,
+      "sha256": "d92e205dcb37cbb0f39aca22966b06700288bbb28918c28046b3112ceb9473b9"
+    },
+    {
+      "path": "action-research/bullet/records.jsonl",
+      "bytes": 176402,
+      "sha256": "afd9962e3ab3308204b69bca0ab7fe56d990ef6519235b1e904f2e48fb947fb5"
+    },
+    {
+      "path": "action-research/direct-observations.md",
+      "bytes": 3237,
+      "sha256": "7f77d026c755437af4f65fcb1ad8eb43816e0ade7287580e860d68a4a36aa47f"
+    },
+    {
+      "path": "action-research/dungeon/analysis-01.md",
+      "bytes": 2354,
+      "sha256": "1072c5d59679e47056eaa6b8c3a5f9ac4ecab2230330339cb1411d65b1cf14db"
+    },
+    {
+      "path": "action-research/dungeon/analysis-02.md",
+      "bytes": 2622,
+      "sha256": "cc5709b08741efabb516fa3858af0328e694b7356d257ab46e1e8b61771a3549"
+    },
+    {
+      "path": "action-research/dungeon/review-notes.jsonl",
+      "bytes": 38664,
+      "sha256": "0fd5632415a6cf550b3065d7a93bb8c908a4faff1bd7a044e6722566ed3f9a77"
+    },
+    {
+      "path": "action-research/dungeon/verified.jsonl",
+      "bytes": 121613,
+      "sha256": "f9a052d612b6a9fb0e71435a13004c317d64bd20b41a3faa45b289df02cd04c3"
+    },
+    {
+      "path": "action-research/root/analysis.md",
+      "bytes": 5976,
+      "sha256": "ef90d249222f3b31f6bb90c052bf7ab2eb19c86f4b4c9732b12bd126fc10404f"
+    },
+    {
+      "path": "action-research/root/notes.tsv",
+      "bytes": 16230,
+      "sha256": "b07ac6288fa2b9efd7e77bc684a52fdaa6a36b5bc990becd235a44437803ec49"
+    },
+    {
+      "path": "action-research/root/verified.jsonl",
+      "bytes": 146713,
+      "sha256": "b5fcb6a413a3b5c8e8238478299b287c6ebaa32d9b26b0f179950c477f022d17"
+    },
+    {
+      "path": "cinder-below/DESIGN.md",
+      "bytes": 8638,
+      "sha256": "2d4ccbedf498a7e1edf2a009a99c25ac71f554e8bde165e90e67008585e9a812"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "README.md",
+      "bytes": 6518,
+      "sha256": "c3df91f80368b7698cfbf54ea7a6f04f006cc91e5fcd3501954f09910fef9c07"
+    },
+    {
+      "path": "direct-observations.md",
+      "bytes": 3237,
+      "sha256": "7f77d026c755437af4f65fcb1ad8eb43816e0ade7287580e860d68a4a36aa47f"
+    },
+    {
+      "path": "ledger.jsonl",
+      "bytes": 648336,
+      "sha256": "f23bb4fa817cf2ae9cc101ae74bbb21babb555d43bb460d658e809d329d0050a"
+    },
+    {
+      "path": "notes/README.md",
+      "bytes": 1842,
+      "sha256": "234c2f6edf13813d7ee6eb81fdd53bdba2bae6218057447b8f736d823cf48502"
+    },
+    {
+      "path": "notes/arena-brief-050.md",
+      "bytes": 2790,
+      "sha256": "c62d3c22c48845be1dfc83e25de43c83580a1d0e53d8ff1cefc2d455be0ef4ae"
+    },
+    {
+      "path": "notes/arena-brief-100.md",
+      "bytes": 2810,
+      "sha256": "450603a4c7b08e28ddf0a3b4ed68e773d733dceb01e9da82d8520a367cbdef58"
+    },
+    {
+      "path": "notes/arena-selected.jsonl",
+      "bytes": 5241,
+      "sha256": "f2612ec97b9603ab02dc45168ca2ac71817cd2c9d4cee273d1a6fad8510ed5f8"
+    },
+    {
+      "path": "notes/bullet-brief-001-050.md",
+      "bytes": 3139,
+      "sha256": "553911e805a73c3a0d3d7e60d41cdc85bf8ae430c5d4a14c492e41b644203fa9"
+    },
+    {
+      "path": "notes/bullet-brief-051-100.md",
+      "bytes": 3143,
+      "sha256": "b6823d7c6e0f46f698761e4a8f2eb7dbd5b27679e8a6e99a5a0e6399f379ddb6"
+    },
+    {
+      "path": "notes/bullet-brief-101-140.md",
+      "bytes": 3391,
+      "sha256": "3c0345779adcf43bbc532216e6ed6b48afcef6bed975609a9ac94218e66cbb10"
+    },
+    {
+      "path": "notes/bullet-selected.jsonl",
+      "bytes": 6194,
+      "sha256": "a832e7b6ffb5bedfa62619582375d34727ba12458094a1a7a9d0d944151ef9ec"
+    },
+    {
+      "path": "notes/dungeon-analysis-01.md",
+      "bytes": 2354,
+      "sha256": "1072c5d59679e47056eaa6b8c3a5f9ac4ecab2230330339cb1411d65b1cf14db"
+    },
+    {
+      "path": "notes/dungeon-analysis-02.md",
+      "bytes": 2622,
+      "sha256": "cc5709b08741efabb516fa3858af0328e694b7356d257ab46e1e8b61771a3549"
+    },
+    {
+      "path": "notes/dungeon-selected.jsonl",
+      "bytes": 5281,
+      "sha256": "e47e0567db1930eb277615b052334820bf3f84e44f0729ebcd4bbe92e708783a"
+    },
+    {
+      "path": "notes/identity-audit.json",
+      "bytes": 9571,
+      "sha256": "7387e5efdda70e86d2597d81f9be8a53888769f3bc931e577fa9deeabec6b1e8"
+    },
+    {
+      "path": "notes/root-analysis.md",
+      "bytes": 5976,
+      "sha256": "ef90d249222f3b31f6bb90c052bf7ab2eb19c86f4b4c9732b12bd126fc10404f"
+    },
+    {
+      "path": "notes/root-selected.jsonl",
+      "bytes": 3516,
+      "sha256": "943fcfd4752a31987ce4cf0e26fa0a226494db877fbeaefdf97149285228829a"
+    },
+    {
+      "path": "playtest-report.json",
+      "bytes": 4357,
+      "sha256": "fb4c118ae7d6bb24c95754c42f07eaef1e131d0af12fde819011c47d8e32669d"
+    },
+    {
+      "path": "playtest-report.md",
+      "bytes": 4577,
+      "sha256": "0aa2994ef4e27f9eb62da2dc6cf4c14139c5b8c53370a88eb8bbf43dce4485cd"
+    },
+    {
+      "path": "summary.md",
+      "bytes": 8750,
+      "sha256": "e775af862d01f8894cb47f357ad25f538d3fb4d22167bd7f65d33e6c7d86779c"
+    }
+  ],
+  "exact_source_copies": [
+    {
+      "path": "notes/root-analysis.md",
+      "source_file": "action-research/root/analysis.md",
+      "copy": "byte_identical"
+    },
+    {
+      "path": "notes/bullet-brief-001-050.md",
+      "source_file": "action-research/bullet/brief-001-050.md",
+      "copy": "byte_identical"
+    },
+    {
+      "path": "notes/bullet-brief-051-100.md",
+      "source_file": "action-research/bullet/brief-051-100.md",
+      "copy": "byte_identical"
+    },
+    {
+      "path": "notes/bullet-brief-101-140.md",
+      "source_file": "action-research/bullet/brief-101-140.md",
+      "copy": "byte_identical"
+    },
+    {
+      "path": "notes/dungeon-analysis-01.md",
+      "source_file": "action-research/dungeon/analysis-01.md",
+      "copy": "byte_identical"
+    },
+    {
+      "path": "notes/dungeon-analysis-02.md",
+      "source_file": "action-research/dungeon/analysis-02.md",
+      "copy": "byte_identical"
+    },
+    {
+      "path": "notes/arena-brief-050.md",
+      "source_file": "action-research/arena/brief-050.md",
+      "copy": "byte_identical"
+    },
+    {
+      "path": "notes/arena-brief-100.md",
+      "source_file": "action-research/arena/brief-100.md",
+      "copy": "byte_identical"
+    },
+    {
+      "path": "notes/identity-audit.json",
+      "source_file": "action-research/arena/duplicate-candidates.json",
+      "copy": "byte_identical"
+    },
+    {
+      "path": "direct-observations.md",
+      "source_file": "action-research/direct-observations.md",
+      "copy": "byte_identical"
+    }
+  ],
+  "selected_notes": [
+    {
+      "group": "root",
+      "file": "notes/root-selected.jsonl",
+      "count": 12,
+      "ledger_ids": [
+        "CBR-0001",
+        "CBR-0012",
+        "CBR-0022",
+        "CBR-0119",
+        "CBR-0051",
+        "CBR-0085",
+        "CBR-0088",
+        "CBR-0089",
+        "CBR-0067",
+        "CBR-0100",
+        "CBR-0010",
+        "CBR-0054"
+      ]
+    },
+    {
+      "group": "bullet",
+      "file": "notes/bullet-selected.jsonl",
+      "count": 12,
+      "ledger_ids": [
+        "CBR-0134",
+        "CBR-0165",
+        "CBR-0161",
+        "CBR-0148",
+        "CBR-0193",
+        "CBR-0209",
+        "CBR-0208",
+        "CBR-0224",
+        "CBR-0272",
+        "CBR-0269",
+        "CBR-0259",
+        "CBR-0266"
+      ]
+    },
+    {
+      "group": "dungeon",
+      "file": "notes/dungeon-selected.jsonl",
+      "count": 12,
+      "ledger_ids": [
+        "CBR-0273",
+        "CBR-0292",
+        "CBR-0330",
+        "CBR-0317",
+        "CBR-0303",
+        "CBR-0289",
+        "CBR-0357",
+        "CBR-0333",
+        "CBR-0371",
+        "CBR-0361",
+        "CBR-0275",
+        "CBR-0305"
+      ]
+    },
+    {
+      "group": "arena",
+      "file": "notes/arena-selected.jsonl",
+      "count": 12,
+      "ledger_ids": [
+        "CBR-0436",
+        "CBR-0478",
+        "CBR-0473",
+        "CBR-0416",
+        "CBR-0427",
+        "CBR-0419",
+        "CBR-0500",
+        "CBR-0481",
+        "CBR-0460",
+        "CBR-0405",
+        "CBR-0515",
+        "CBR-0502"
+      ]
+    }
+  ],
+  "excluded_sources_not_counted": [
+    "action-research/root/excluded.jsonl",
+    "action-research/bullet/review-exclusions.json",
+    "action-research/dungeon/excluded.jsonl",
+    "action-research/dungeon/comparators.jsonl",
+    "action-research/arena/excluded.json",
+    "candidate/catalogue/unreviewed fetch files"
+  ],
+  "evidence_scope": {
+    "ledger": "Author-page readings, not 532 playtests; original read_method retained",
+    "supplemental_short_browser_checks": 4,
+    "additional_counted_pages": 0,
+    "playtest_reports": [
+      "direct-observations.md",
+      "playtest-report.md",
+      "playtest-report.json"
+    ],
+    "raw_html_or_full_page_text_copied": false,
+    "failed_launch_attempts": 1,
+    "screenshot_directory_from_research": "../../.qa/research-playtests/",
+    "screenshot_directory_from_package_root": ".qa/research-playtests/",
+    "screenshots_in_runtime": false,
+    "root_observation_evidence": "The root report records CUA observations only; it provides no separately saved screenshots. No image evidence is invented for these entries.",
+    "observation_classification": [
+      {
+        "url": "https://spals.itch.io/room-cleaner",
+        "report": "direct-observations.md",
+        "classification": "bounded_actual_interaction"
+      },
+      {
+        "url": "https://thoof.itch.io/100-bullet-dungeon",
+        "report": "direct-observations.md",
+        "classification": "bounded_actual_interaction"
+      },
+      {
+        "url": "https://sean-noonan.itch.io/bad-juju",
+        "report": "playtest-report.json",
+        "classification": "bounded_actual_interaction"
+      },
+      {
+        "url": "https://kindanice.itch.io/fair-squares",
+        "report": "playtest-report.json",
+        "classification": "bounded_actual_interaction"
+      },
+      {
+        "url": "https://milkbar-lads.itch.io/dead-estate-classic",
+        "report": "direct-observations.md",
+        "classification": "failed_launch_no_gameplay_evidence"
+      }
+    ]
+  },
+  "identity_audit": {
+    "file": "notes/identity-audit.json",
+    "audited_at": "2026-10-13T16:26:58.490653+00:00",
+    "exact_duplicate_urls": 0,
+    "confirmed_same_game_duplicates": 0,
+    "title_similarity_candidates": 11,
+    "manual_adjudication_records": 8,
+    "universal_game_identity_proven": false,
+    "deluxe_watchlist_clarification": "Only the Deluxe URL is counted; the base-game version is not a second ledger record. The refreshed audit excludes each counted_url from its own other-title match."
+  },
+  "transformations": {
+    "observed_mechanics": "Unchanged in value and type for all 532 source records",
+    "source_files_modified": false,
+    "description_excerpt": {
+      "max_whitespace_tokens": 25,
+      "max_english_words": 25,
+      "english_word_pattern": "[A-Za-z]+(?:['’-][A-Za-z]+)*",
+      "shortened_records": 21,
+      "original_excerpt_sha256_stored_when_shortened": true
+    },
+    "new_fields": [
+      "ledger_number",
+      "ledger_id",
+      "source_group",
+      "source_file",
+      "source_line",
+      "evidence_level"
+    ]
+  },
+  "validation": {
+    "source_counts_match": true,
+    "all_source_statuses_expected": true,
+    "contiguous_unique_ids": true,
+    "unique_canonical_urls": 532,
+    "observed_mechanics_equal_to_sources": 532,
+    "max_excerpt_english_words": 25,
+    "max_excerpt_whitespace_tokens": 25,
+    "selected_manual_notes": 48,
+    "utf8_replacement_characters": 0,
+    "original_record_fields_preserved_except_description_excerpt": true,
+    "source_note_positions_verified": true,
+    "package_screenshot_hashes_verified": 15,
+    "staging_source_screenshot_hashes_verified": 15,
+    "package_screenshot_links_verified": 15,
+    "direct_observations_copy_matches_source": true,
+    "canonical_migration_checked": false
+  },
+  "manifest_self_hash": "Not stored to avoid self-reference",
+  "adapted_source_copies": [
+    {
+      "path": "playtest-report.md",
+      "source_file": "action-research/arena/playtest-report.md",
+      "changes": "Only Evidence lines adapted to Markdown links for all 15 declared screenshots at package-local QA paths; observation text unchanged."
+    },
+    {
+      "path": "playtest-report.json",
+      "source_file": "action-research/arena/playtest-report.json",
+      "changes": "Only checks[].evidence[].file paths changed to ../../.qa/research-playtests/<filename>; other values preserved."
+    }
+  ],
+  "package_evidence": [
+    {
+      "path_from_research": "../../.qa/research-playtests/bad-juju-author.png",
+      "path_from_package_root": ".qa/research-playtests/bad-juju-author.png",
+      "sha256": "4fab733d1080c828dbefb775f5389a46fc04bfcb96a7725048aec207ca8a6852",
+      "bytes": 77429,
+      "game_url": "https://sean-noonan.itch.io/bad-juju",
+      "included_in_runtime": false
+    },
+    {
+      "path_from_research": "../../.qa/research-playtests/bad-juju-combat-release.png",
+      "path_from_package_root": ".qa/research-playtests/bad-juju-combat-release.png",
+      "sha256": "9f48ac1528c3a4217c6361176f882077495f5a68a98994958810da899c71a18b",
+      "bytes": 76556,
+      "game_url": "https://sean-noonan.itch.io/bad-juju",
+      "included_in_runtime": false
+    },
+    {
+      "path_from_research": "../../.qa/research-playtests/bad-juju-loaded.png",
+      "path_from_package_root": ".qa/research-playtests/bad-juju-loaded.png",
+      "sha256": "abe1251bbbf263f70a84e4e2a3bcb9666577b3101be01f0ecd6a8e8f3d860084",
+      "bytes": 83299,
+      "game_url": "https://sean-noonan.itch.io/bad-juju",
+      "included_in_runtime": false
+    },
+    {
+      "path_from_research": "../../.qa/research-playtests/bad-juju-release-reload.png",
+      "path_from_package_root": ".qa/research-playtests/bad-juju-release-reload.png",
+      "sha256": "a3498fbf15eae13410ebc5250d1c8dfdb1b09158eef5885693c5e04ac0e9f1b0",
+      "bytes": 76260,
+      "game_url": "https://sean-noonan.itch.io/bad-juju",
+      "included_in_runtime": false
+    },
+    {
+      "path_from_research": "../../.qa/research-playtests/bad-juju-restarted-firing.png",
+      "path_from_package_root": ".qa/research-playtests/bad-juju-restarted-firing.png",
+      "sha256": "243eb76882da6248e7454de7b2b4f8ed8b2a6876463b5c2de8830eeece684d48",
+      "bytes": 76076,
+      "game_url": "https://sean-noonan.itch.io/bad-juju",
+      "included_in_runtime": false
+    },
+    {
+      "path_from_research": "../../.qa/research-playtests/bad-juju-room.png",
+      "path_from_package_root": ".qa/research-playtests/bad-juju-room.png",
+      "sha256": "24cf09daf6430409a805e6f0cc1ba0e1e40c1470420e3bdaa33ced23844551ff",
+      "bytes": 76123,
+      "game_url": "https://sean-noonan.itch.io/bad-juju",
+      "included_in_runtime": false
+    },
+    {
+      "path_from_research": "../../.qa/research-playtests/bad-juju-start.png",
+      "path_from_package_root": ".qa/research-playtests/bad-juju-start.png",
+      "sha256": "857ef1dd0090717b96dcac229c866605f779827f2e9aa6dcd84f9bd4c32c26f9",
+      "bytes": 75758,
+      "game_url": "https://sean-noonan.itch.io/bad-juju",
+      "included_in_runtime": false
+    },
+    {
+      "path_from_research": "../../.qa/research-playtests/fair-squares-after-shots.png",
+      "path_from_package_root": ".qa/research-playtests/fair-squares-after-shots.png",
+      "sha256": "7a91e35adfbc75a8e875efc5465cd6c20898ef74e594fa90e5989f71fca10200",
+      "bytes": 39706,
+      "game_url": "https://kindanice.itch.io/fair-squares",
+      "included_in_runtime": false
+    },
+    {
+      "path_from_research": "../../.qa/research-playtests/fair-squares-author.png",
+      "path_from_package_root": ".qa/research-playtests/fair-squares-author.png",
+      "sha256": "1981da6c1a8e41bc0e8f6f0f3a3a6f7f81a7e9d6efbeb22a1fda82ab2e8e9e6f",
+      "bytes": 37650,
+      "game_url": "https://kindanice.itch.io/fair-squares",
+      "included_in_runtime": false
+    },
+    {
+      "path_from_research": "../../.qa/research-playtests/fair-squares-combat.png",
+      "path_from_package_root": ".qa/research-playtests/fair-squares-combat.png",
+      "sha256": "2fe61eb0676d83a9621ca01c6a16be38dc0e930df23d8fb8e4feca2fa95dd79c",
+      "bytes": 39426,
+      "game_url": "https://kindanice.itch.io/fair-squares",
+      "included_in_runtime": false
+    },
+    {
+      "path_from_research": "../../.qa/research-playtests/fair-squares-enter-fight.png",
+      "path_from_package_root": ".qa/research-playtests/fair-squares-enter-fight.png",
+      "sha256": "0c309b1ae5e4461e580bec4b9bc56d9a21c4e430c1fdd28db2d107141707afc9",
+      "bytes": 37248,
+      "game_url": "https://kindanice.itch.io/fair-squares",
+      "included_in_runtime": false
+    },
+    {
+      "path_from_research": "../../.qa/research-playtests/fair-squares-live-wave.png",
+      "path_from_package_root": ".qa/research-playtests/fair-squares-live-wave.png",
+      "sha256": "78afccc92fd0260e498d1d5471c0f92f7b85bc08eed93c8844952fbfa749adfa",
+      "bytes": 38486,
+      "game_url": "https://kindanice.itch.io/fair-squares",
+      "included_in_runtime": false
+    },
+    {
+      "path_from_research": "../../.qa/research-playtests/fair-squares-menu.png",
+      "path_from_package_root": ".qa/research-playtests/fair-squares-menu.png",
+      "sha256": "011d1f5f6e9f55764cdb2754e9de8c46a2dc8329afe1edb6e234a414a68617b6",
+      "bytes": 38374,
+      "game_url": "https://kindanice.itch.io/fair-squares",
+      "included_in_runtime": false
+    },
+    {
+      "path_from_research": "../../.qa/research-playtests/fair-squares-pickups.png",
+      "path_from_package_root": ".qa/research-playtests/fair-squares-pickups.png",
+      "sha256": "110aa6054e4d6945124f6702238a7b0dc8414c57d2171d225b67f14d2f26258b",
+      "bytes": 39015,
+      "game_url": "https://kindanice.itch.io/fair-squares",
+      "included_in_runtime": false
+    },
+    {
+      "path_from_research": "../../.qa/research-playtests/fair-squares-wave.png",
+      "path_from_package_root": ".qa/research-playtests/fair-squares-wave.png",
+      "sha256": "ccc4e91b9597d5083d52f1fc23ae3cacc372d3f37899043fab5fefd1cdcd1221",
+      "bytes": 39551,
+      "game_url": "https://kindanice.itch.io/fair-squares",
+      "included_in_runtime": false
+    }
+  ]
+}
