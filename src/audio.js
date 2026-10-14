@@ -1,7 +1,15 @@
 /** Plays only the credited downloaded recordings. No oscillators or synthesized effects. */
 export function createAudio(onUnavailable = () => {}) {
   let context, master, music = false, sfx = false, loaded = false, pending;
-  let bg, warned = false, activeVoices = 0, lastShot = 0;
+  let bg, bgGain, warned = false, activeVoices = 0, lastShot = 0;
+  let suspended = false, musicRevision = 0, desiredTrack = 'dungeon', currentTrack = null;
+  // Original recordings have different loudness. Playback gain preserves their bytes.
+  const tracks = {
+    dungeon: { file: 'music-dungeon.ogg', gain: .70 }, fight: { file: 'music-fight.ogg', gain: .85 },
+    mire: { file: 'music-aquatic.ogg', gain: 1 }, cinder: { file: 'music-dark-castle.ogg', gain: .39 },
+    storm: { file: 'music-tension.ogg', gain: .60 }, void: { file: 'music-final-area.ogg', gain: .44 },
+    rift: { file: 'music-dream.ogg', gain: .86 },
+  };
   const buffers = new Map();
   async function unlock() {
     try {
@@ -24,16 +32,47 @@ export function createAudio(onUnavailable = () => {}) {
     source.connect(volume); volume.connect(master); activeVoices++;
     source.onended = () => { activeVoices--; source.disconnect(); volume.disconnect(); }; source.start();
   }
+  async function startMusic() {
+    if (!music || suspended || !context || !master) return;
+    if (!bg) {
+      bg = new Audio(); bg.loop = true; bg.preload = 'none';
+      bgGain = context.createGain(); bgGain.gain.value = 0;
+      context.createMediaElementSource(bg).connect(bgGain); bgGain.connect(master);
+    }
+    const revision = ++musicRevision, next = desiredTrack;
+    if (currentTrack !== next) {
+      const playing = !bg.paused;
+      bgGain.gain.cancelScheduledValues(context.currentTime);
+      bgGain.gain.setValueAtTime(bgGain.gain.value, context.currentTime);
+      bgGain.gain.linearRampToValueAtTime(0, context.currentTime + .15);
+      if (playing) await new Promise(resolve => setTimeout(resolve, 160));
+      if (revision !== musicRevision || !music || suspended) return;
+      bg.pause(); bg.src = `./assets/${tracks[next].file}`; currentTrack = next;
+    }
+    try {
+      await bg.play();
+      if (revision !== musicRevision || !music || suspended) return;
+      bgGain.gain.cancelScheduledValues(context.currentTime);
+      bgGain.gain.setValueAtTime(0, context.currentTime);
+      bgGain.gain.linearRampToValueAtTime(.28 * tracks[next].gain, context.currentTime + .4);
+    } catch (error) { if (error?.name !== 'AbortError' && revision === musicRevision && !warned) { onUnavailable(); warned = true; } }
+  }
   async function setMusic(enabled) {
     music = enabled;
-    if (!bg) { bg = new Audio('./assets/music-fight.ogg'); bg.loop = true; bg.volume = .22; bg.preload = 'none'; }
-    if (music) { try { await bg.play(); } catch { if (!warned) { onUnavailable(); warned = true; } } } else bg.pause();
+    if (music) await startMusic();
+    else { musicRevision++; bg?.pause(); }
   }
   return {
     unlock, play,
+    setScene({ biome = 'hollow', boss = false, title = false } = {}) {
+      const next = title ? 'dungeon' : boss ? 'fight' : biome in tracks ? biome : 'dungeon';
+      if (next === desiredTrack) return;
+      desiredTrack = next;
+      void startMusic();
+    },
     async configure(settings) { sfx = !!settings.sfx; if (sfx || settings.music) await unlock(); await setMusic(!!settings.music); },
-    suspend() { bg?.pause(); context?.suspend().catch(() => {}); },
-    async resume() { if (sfx || music) await unlock(); if (music) await setMusic(true); },
-    status() { return { enabled: music || sfx, music, sfx, effectsReady: loaded, context: context?.state || 'idle', musicPlaying: !!bg && !bg.paused, source: 'Ninja Adventure original recordings' }; },
+    suspend() { suspended = true; musicRevision++; bg?.pause(); context?.suspend().catch(() => {}); },
+    async resume() { suspended = false; if (sfx || music) await unlock(); if (music) await setMusic(true); },
+    status() { return { enabled: music || sfx, music, sfx, effectsReady: loaded, context: context?.state || 'idle', musicPlaying: !!bg && !bg.paused && context?.state === 'running', track: currentTrack, desiredTrack, source: 'Ninja Adventure original recordings' }; },
   };
 }

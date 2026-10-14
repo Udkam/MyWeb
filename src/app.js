@@ -1,8 +1,10 @@
-import { createRun, step, chooseRelic, setWorldSize, snapshot, restoreRun, describe, RELICS, WEAPONS } from './engine.js';
+import { createRun, step, chooseRelic, setWorldSize, snapshot, restoreRun, describe, interact, nearestInteractable, availableEmbers, RELICS, WEAPONS } from './engine.js';
 import { loadArt, render, assetStatus } from './renderer.js';
 import { createInput } from './input.js';
 import { createAudio } from './audio.js';
 import { loadSave, createDefaultSave, saveSave, parseImport, exportSave } from './storage.js';
+import { getLanguage, setLanguage, t, translateMessage, localizeWeapon, localizeRelic, applyTranslations } from './i18n.js';
+import { fieldGuide } from './field-guide.js';
 
 const $ = (id) => document.getElementById(id);
 const canvas = $('world'), ctx = canvas.getContext('2d', { alpha: false }), menu = $('menu');
@@ -15,6 +17,8 @@ let data = initial.data || createDefaultSave(), saveStatus = initial.status, sav
 let mode = 'title', paused = false, ready = false, selectedWeapon = 'cinder', state, preview;
 let manualTime = testMode, accumulator = 0, lastFrame = 0, lastHud = '', lastBuild = '', bannerUntil = 0, toastTimer;
 let queue = Promise.resolve(), conflicted = false, titleBeforeMenu = null, pendingImport = null;
+let menuSection = 'settings', endUnlocks = [], bannerText = null, currentToast = '';
+let artFailed = false;
 const dims = { width: 0, height: 0, dpr: 1 };
 const audio = createAudio(() => toast('Audio could not start. You can keep playing and retry with the music button.'));
 const input = createInput(canvas, () => state || preview, command);
@@ -23,8 +27,8 @@ const currentWorld = () => state || preview;
 function escapeHTML(value) { return String(value).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 function unlocked(w) { return data.stats.rooms >= w.unlockRooms; }
 function fmtTime(seconds) { const whole = Math.max(0, Math.floor(seconds || 0)); return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, '0')}`; }
-function toast(message, duration = 5000) { $('toast').textContent = message; $('toast').hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { $('toast').hidden = true; }, duration); }
-function announce(message) { $('announcer').textContent = message; }
+function toast(message, duration = 5000) { currentToast = typeof message === 'function' ? message : () => translateMessage(message); $('toast').textContent = currentToast(); $('toast').hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { $('toast').hidden = true; }, duration); }
+function announce(message) { $('announcer').textContent = translateMessage(message); }
 function logicalSize() {
   const ratio = dims.width / Math.max(1, dims.height);
   return ratio < 1 ? { width: Math.max(380, 1000 * ratio), height: 1000 } : { width: 1100, height: Math.max(560, 1100 / ratio) };
@@ -41,8 +45,9 @@ function setMode(next) {
   mode = next; document.body.dataset.mode = next;
   $('title-screen').hidden = next !== 'title'; $('combat-ui').hidden = next !== 'playing';
   $('run-hud').hidden = next === 'title'; $('reward-screen').hidden = next !== 'reward'; $('end-screen').hidden = next !== 'end';
-  input.setActive(next === 'playing' && !paused); accumulator = 0; lastHud = ''; updateHUD(); draw();
+  input.setActive(next === 'playing' && !paused); accumulator = 0; lastHud = ''; syncSoundscape(); updateHUD(); draw();
 }
+function syncSoundscape() { audio.setScene({ title: mode === 'title', biome: state?.biome, boss: !!state?.bossId }); }
 function draw() {
   if (!ready || !currentWorld()) return;
   ctx.setTransform(dims.dpr, 0, 0, dims.dpr, 0, 0);
@@ -50,22 +55,23 @@ function draw() {
 }
 function syncTitle() {
   if (!WEAPONS.some((w) => w.id === selectedWeapon && unlocked(w))) selectedWeapon = 'cinder';
-  $('weapon-options').replaceChildren(...WEAPONS.map((w) => {
+  $('weapon-options').replaceChildren(...WEAPONS.map((original) => {
+    const w = localizeWeapon(original);
     const button = document.createElement('button'); button.className = 'weapon-choice'; button.type = 'button';
     button.setAttribute('aria-pressed', String(selectedWeapon === w.id)); button.setAttribute('aria-disabled', String(!unlocked(w)));
-    button.title = `${w.description}${unlocked(w) ? '' : ` Clear ${w.unlockRooms} total rooms to unlock.`}`;
-    button.innerHTML = `<span class="weapon-icon" aria-hidden="true">${weaponIcons[w.id]}</span><span>${escapeHTML(w.name)}${unlocked(w) ? '' : `<small>${data.stats.rooms}/${w.unlockRooms} ROOMS</small>`}</span>`;
-    button.addEventListener('click', () => { if (!unlocked(w)) { toast(`${w.name}: clear ${w.unlockRooms} rooms across any number of runs to unlock.`); return; } selectedWeapon = w.id; syncTitle(); });
+    button.title = `${w.description}${unlocked(w) ? '' : ` ${t('Clear {rooms} total rooms to unlock.', { rooms: w.unlockRooms })}`}`;
+    button.innerHTML = `<span class="weapon-icon" aria-hidden="true">${weaponIcons[w.id]}</span><span>${escapeHTML(w.name)}${unlocked(w) ? '' : `<small>${t('{cleared}/{rooms} ROOMS', { cleared: data.stats.rooms, rooms: w.unlockRooms })}</small>`}</span>`;
+    button.addEventListener('click', () => { if (!unlocked(w)) { toast(() => t('{name}: clear {rooms} rooms across any number of runs to unlock.', { name: localizeWeapon(original).name, rooms: w.unlockRooms })); return; } selectedWeapon = w.id; syncTitle(); });
     return button;
   }));
   $('unlocks-caption').textContent = `${WEAPONS.filter(unlocked).length} / ${WEAPONS.length}`;
-  $('title-stats').innerHTML = `<span><strong>${data.stats.bestRoom || '—'}</strong>DEEPEST ROOM</span><span><strong>${data.stats.rooms}</strong>ROOMS CLEARED</span><span><strong>${data.stats.wins}</strong>ESCAPES</span>`;
+  $('title-stats').innerHTML = `<span><strong>${data.stats.bestRoom || '—'}</strong>${t('DEEPEST ROOM')}</span><span><strong>${data.stats.rooms}</strong>${t('ROOMS CLEARED')}</span><span><strong>${data.stats.wins}</strong>${t('ESCAPES')}</span>`;
   $('resume-run').hidden = !data.checkpoint || !ready;
-  if (data.checkpoint) $('resume-run').innerHTML = `Continue · room ${data.checkpoint.room} <span>↗</span>`;
+  if (data.checkpoint) $('resume-run').innerHTML = `${t('Continue · room {room}', { room: data.checkpoint.room })} <span>↗</span>`;
   const localReady = ['ready', 'empty', 'saved'].includes(saveStatus);
-  $('load-message').textContent = !ready ? 'Loading the dungeon.' : localReady ? 'Progress stays in this browser. A descent resumes at its last room entrance.' : `${saveMessage || 'Progress is currently in memory only.'} Open settings to export a backup.`;
+  $('load-message').textContent = artFailed ? t('Some artwork could not load. Reload this page to retry.') : !ready ? t('Loading the dungeon.') : localReady ? t('Progress stays in this browser. A descent resumes at its last room entrance.') : `${translateMessage(saveMessage || 'Progress is currently in memory only.')} ${t('Open settings to export a backup.')}`;
   $('audio-toggle').dataset.active = String(data.settings.music || data.settings.sfx);
-  $('audio-toggle').setAttribute('aria-label', data.settings.music || data.settings.sfx ? 'Mute audio' : 'Enable audio');
+  $('audio-toggle').setAttribute('aria-label', t(data.settings.music || data.settings.sfx ? 'Mute audio' : 'Enable audio'));
 }
 
 function persist() {
@@ -99,7 +105,7 @@ function checkpoint() { if (!state || ['dead', 'won'].includes(state.phase)) ret
 function newSeed() { const bytes = new Uint32Array(1); crypto.getRandomValues(bytes); return bytes[0] || 1; }
 function begin(resume = false) {
   if (!ready || conflicted) { if (conflicted) pauseForConflict(); return; }
-  menu.close(); paused = false; input.clear();
+  menu.close(); pendingImport = null; paused = false; input.clear();
   if (resume) {
     state = restoreRun(data.checkpoint);
     if (!state) { toast('This checkpoint could not be read. Your lifetime progress is safe. Start a new descent.'); data.checkpoint = null; syncTitle(); return; }
@@ -109,21 +115,47 @@ function begin(resume = false) {
     data.stats.runs++; data.banked = { rooms: 0, kills: 0, embers: 0 };
   }
   lastBuild = ''; setMode('playing'); canvas.focus({ preventScroll: true });
-  roomBanner(); checkpoint(); void audio.configure(data.settings); announce(`Room ${state.room}. Move, aim and shoot. Space to dash.`);
+  roomBanner(); checkpoint(); void audio.resume(); void audio.configure(data.settings); announce(t('Room {room}. Move, aim and shoot. Space to dash.', { room: state.room }));
+}
+function setBanner(key, values = {}, duration = 2.5) {
+  bannerText = { key, values }; bannerUntil = state.time + duration;
+  $('room-banner').textContent = translatedBanner();
+}
+function translatedBanner() {
+  const values = { ...bannerText.values };
+  if (values.layout) values.layout = t(values.layout);
+  if (values.bossId) values.name = fieldGuide().find(entry => entry.id === values.bossId)?.name || values.bossId;
+  if (values.actKey) values.name = t(values.actKey);
+  return t(bannerText.key, values);
 }
 function roomBanner() {
-  $('room-banner').textContent = state.room === 8 ? 'THE CINDER WARDEN' : state.room === 4 ? 'THE GATEKEEPER' : `${state.room < 5 ? 'THE HOLLOW' : 'THE CINDER VAULT'} · ${String(state.room).padStart(2, '0')}`;
-  bannerUntil = state.time + 2.5;
+  const boss = state.enemies.find(e => e.boss);
+  if (boss) { setBanner('BOSS · {name}', { bossId: boss.type }); }
+  else if (state.biome === 'rift') setBanner(({ echo: 'RIFT · ECHO', surge: 'RIFT · SURGE', glass: 'RIFT · GLASS' })[state.riftRule] || 'THE OTHER SIDE', {}, 4.2);
+  else if (state.totalRooms === 15 && state.room % 3 === 1) setBanner('ACT {act} · {name}', { act: state.act, actKey: state.actName });
+  else {
+    const names = { 'pillar-court': 'PILLAR COURT', 'side-cloisters': 'SIDE CLOISTERS', crossroads: 'CROSSROADS', 'broken-hall': 'BROKEN HALL', 'altar-ring': 'ALTAR RING', 'twin-halls': 'TWIN HALLS' };
+    setBanner('{layout} · {room}', { layout: names[state.layout], room: String(state.room).padStart(2, '0') });
+  }
+}
+function riftDescription(rule) {
+  if (rule === 'echo') return t('Echo: your shots and enemy shots bounce once more.');
+  if (rule === 'surge') return t('Surge: nova charges three times faster; enemy shots fly faster.');
+  if (rule === 'glass') return t('Glass: your shots deal 50% more damage; hostile shots cost two hearts.');
+  return '';
 }
 function showReward() {
   checkpoint(); setMode('reward'); audio.play('relic');
+  renderRewards();
+  $('relic-choices').querySelector('button')?.focus({ preventScroll: true }); announce('Room cleared. Choose one of three relics.');
+}
+function renderRewards() {
   $('relic-choices').replaceChildren(...state.choices.map((id, index) => {
-    const relic = RELICS.find((r) => r.id === id), level = (state.relics[id] || 0) + 1;
+    const relic = localizeRelic(RELICS.find((r) => r.id === id)), level = (state.relics[id] || 0) + 1;
     const button = document.createElement('button'); button.className = 'relic-card'; button.style.setProperty('--card-color', relic.color);
-    button.innerHTML = `<span class="relic-key">${index + 1}</span><span class="relic-icon" aria-hidden="true">${icons[id] || '✦'}</span><span class="relic-tag">${escapeHTML(relic.tag)}</span><strong class="relic-name">${escapeHTML(relic.name)}</strong><span class="relic-desc">${escapeHTML(relic.description)}</span><span class="relic-level">${level === 1 ? 'NEW RELIC' : `LEVEL ${level}`}</span>`;
+    button.innerHTML = `<span class="relic-key">${index + 1}</span><span class="relic-icon" aria-hidden="true">${icons[id] || '✦'}</span><span class="relic-tag">${escapeHTML(relic.tag)}</span><strong class="relic-name">${escapeHTML(relic.name)}</strong><span class="relic-desc">${escapeHTML(relic.description)}</span><span class="relic-level">${level === 1 ? t('NEW RELIC') : t('LEVEL {level}', { level })}</span>`;
     button.addEventListener('click', () => selectRelic(index)); return button;
   }));
-  $('relic-choices').querySelector('button')?.focus({ preventScroll: true }); announce('Room cleared. Choose one of three relics.');
 }
 function selectRelic(index) {
   if (mode !== 'reward' || paused) return;
@@ -136,43 +168,82 @@ function finish() {
   bankProgress(); if (state.phase === 'won') data.stats.wins++;
   data.checkpoint = null; data.banked = { rooms: 0, kills: 0, embers: 0 }; void persist();
   setMode('end'); audio.play(state.phase === 'won' ? 'relic' : 'death');
-  $('end-label').textContent = state.phase === 'won' ? 'THE VAULT IS BROKEN' : `FALLEN IN CHAMBER ${String(state.room).padStart(2, '0')}`;
-  $('end-title').textContent = state.phase === 'won' ? 'You brought the dawn.' : 'The flame returns.';
-  $('end-copy').textContent = state.phase === 'won' ? 'Eight chambers behind you. A different build awaits below.' : 'Your unlocks remain. The next descent is one click away.';
-  $('end-stats').innerHTML = `<span><strong>${state.stats.rooms}/8</strong>ROOMS</span><span><strong>${state.stats.kills}</strong>DEFEATED</span><span><strong>${fmtTime(state.stats.elapsed)}</strong>TIME</span><span><strong>${state.stats.embers}</strong>EMBERS</span>`;
-  $('end-unlocks').replaceChildren(...WEAPONS.filter((w) => unlocked(w) && !before.includes(w.id)).map((w) => { const p = document.createElement('p'); p.className = 'unlock-note'; p.textContent = `${w.name} unlocked — select it on the title screen.`; return p; }));
-  $('retry').focus({ preventScroll: true }); announce(`${state.phase === 'won' ? 'Victory' : 'Defeated'}. ${state.stats.rooms} rooms cleared.`);
+  endUnlocks = WEAPONS.filter((w) => unlocked(w) && !before.includes(w.id)).map((w) => w.id);
+  renderEnd();
+  $('retry').focus({ preventScroll: true }); announce(t(state.phase === 'won' ? 'Victory. {rooms} rooms cleared.' : 'Defeated. {rooms} rooms cleared.', { rooms: state.stats.rooms }));
+}
+function renderEnd() {
+  $('end-label').textContent = state.phase === 'won' ? t('THE VAULT IS BROKEN') : t('FALLEN IN CHAMBER {room}', { room: String(state.room).padStart(2, '0') });
+  $('end-title').textContent = t(state.phase === 'won' ? 'You brought the dawn.' : 'The flame returns.');
+  $('end-copy').textContent = t(state.phase === 'won' ? 'The descent is complete. A different world awaits your next seed.' : 'Your unlocks remain. The next descent is one click away.');
+  $('end-stats').innerHTML = `<span><strong>${state.stats.rooms}/${state.totalRooms}</strong>${t('ROOMS')}</span><span><strong>${state.stats.kills}</strong>${t('DEFEATED')}</span><span><strong>${fmtTime(state.stats.elapsed)}</strong>${t('TIME')}</span><span><strong>${state.stats.embers}</strong>${t('EMBERS')}</span>`;
+  $('end-unlocks').replaceChildren(...WEAPONS.filter((w) => endUnlocks.includes(w.id)).map((w) => { const p = document.createElement('p'); p.className = 'unlock-note'; p.textContent = t('{name} unlocked — select it on the title screen.', { name: localizeWeapon(w).name }); return p; }));
 }
 function updateHUD() {
   if (!state || mode === 'title') return;
-  const p = state.player, signature = [p.hp, p.maxHp, state.room, state.wave, state.stats.embers, state.phase].join(':');
+  const p = state.player, wallet = availableEmbers(state), signature = [p.hp, p.maxHp, state.room, state.wave, wallet, state.phase].join(':');
   if (lastHud !== signature) {
     lastHud = signature;
     $('hearts').innerHTML = Array.from({ length: p.maxHp }, (_, i) => `<i class="heart${i >= p.hp ? ' empty' : ''}" aria-hidden="true"></i>`).join('');
-    $('hearts').setAttribute('aria-label', `${p.hp} of ${p.maxHp} hearts`); $('ember-count').textContent = state.stats.embers;
-    $('room-strip').innerHTML = Array.from({ length: 8 }, (_, i) => `<i class="room-node${i + 1 < state.room ? ' past' : i + 1 === state.room ? ' current' : ''}${[3, 7].includes(i) ? ' boss' : ''}" aria-hidden="true"></i>`).join('');
-    $('room-strip').setAttribute('aria-label', `Room ${state.room} of 8, wave ${state.wave || 1} of ${state.waveTotal || 1}`);
-    $('objective').textContent = state.phase === 'exit' ? 'Walk into a gate · HUNT: more enemies + embers · REFUGE: easier + heal 1' : state.room === 1 && state.time < 6 ? (matchMedia('(pointer:coarse)').matches ? 'Left stick moves · Right stick aims and fires' : 'Hold mouse to fire · Space to dash · E unleashes nova') : '';
+    $('hearts').setAttribute('aria-label', t('{hp} of {maxHp} hearts', { hp: p.hp, maxHp: p.maxHp })); $('ember-count').textContent = wallet;
+    const node = (room, bossRoom) => `<i class="room-node${room < state.room ? ' past' : room === state.room ? ' current' : ''}${bossRoom ? ' boss' : ''}" aria-hidden="true"></i>`;
+    $('room-strip').innerHTML = state.totalRooms === 15 ? Array.from({ length: 5 }, (_, act) => `<span class="act-node">${[1, 2, 3].map(part => node(act * 3 + part, part === 3)).join('')}</span>`).join('') : Array.from({ length: state.totalRooms }, (_, i) => node(i + 1, [4, 8].includes(i + 1))).join('');
+    $('room-strip').setAttribute('aria-label', t('Room {room} of {rooms}, wave {wave} of {total}', { room: state.room, rooms: state.totalRooms, wave: state.wave || 1, total: state.waveTotal || 1 }));
+    $('objective').textContent = state.phase === 'exit' ? t(state.gates.some(g => g.route === 'rift') ? 'Choose HUNT, REFUGE or the optional RIFT' : 'Walk into a gate · HUNT: more enemies + embers · REFUGE: easier + heal 1') : state.room === 1 && state.time < 6 ? t(matchMedia('(pointer:coarse)').matches ? 'Left stick moves · Right stick aims and fires' : 'Hold mouse to fire · Space to dash · E unleashes nova') : '';
+    const rift = state.gates.find(g => g.route === 'rift');
+    if (rift && state.phase === 'exit') $('objective').textContent += ` · ${riftDescription(rift.riftRule)}`;
   }
   if (state.phase === 'combat' && state.time >= 6) $('objective').textContent = '';
+  if (state.phase === 'combat' && state.riftRule && state.time < bannerUntil) $('objective').textContent = riftDescription(state.riftRule);
   if (state.time >= bannerUntil) $('room-banner').textContent = '';
-  const boss = state.enemies.find((e) => ['sentinel', 'warden'].includes(e.type) && e.hp > 0);
+  const boss = state.enemies.find((e) => e.boss && e.hp > 0);
   $('boss-hud').hidden = !boss;
-  if (boss) { $('boss-name').textContent = boss.type === 'sentinel' ? 'THE GATEKEEPER' : `CINDER WARDEN${boss.stage > 1 ? ' · ENRAGED' : ''}`; $('boss-fill').style.width = `${Math.max(0, boss.hp / boss.maxHp * 100)}%`; }
+  if (boss) { const name = fieldGuide().find(entry => entry.id === boss.type)?.name || boss.type; $('boss-name').textContent = boss.stage > 1 ? t('{name} · PHASE {stage}', { name, stage: boss.stage }) : name; $('boss-fill').style.width = `${Math.max(0, boss.hp / boss.maxHp * 100)}%`; }
   $('dash').dataset.ready = String(p.dashCooldown <= 0); $('dash').querySelector('i').style.height = `${Math.min(100, p.dashCooldown / 1.35 * 100)}%`;
   $('nova').dataset.ready = String(p.novaCharge >= p.novaMax); $('nova').querySelector('i').style.height = `${Math.max(0, 100 - p.novaCharge / p.novaMax * 100)}%`;
-  $('dash').setAttribute('aria-label', p.dashCooldown > 0 ? `Dash recovering, ${p.dashCooldown.toFixed(1)} seconds` : 'Dash ready');
-  $('nova').setAttribute('aria-label', `Nova ${Math.floor(p.novaCharge / p.novaMax * 100)} percent charged`);
+  $('dash').setAttribute('aria-label', p.dashCooldown > 0 ? t('Dash recovering, {seconds} seconds', { seconds: p.dashCooldown.toFixed(1) }) : t('Dash ready'));
+  $('nova').setAttribute('aria-label', t('Nova {percent} percent charged', { percent: Math.floor(p.novaCharge / p.novaMax * 100) }));
+  updateAdventure();
   const build = JSON.stringify(state.relics);
   if (build !== lastBuild) {
     lastBuild = build;
     $('build-strip').replaceChildren(...Object.entries(state.relics).map(([id, count]) => {
-      const r = RELICS.find((item) => item.id === id), button = document.createElement('button');
+      const r = localizeRelic(RELICS.find((item) => item.id === id)), button = document.createElement('button');
       button.className = 'build-icon'; button.style.color = r.color; button.title = `${r.name} · ${count}: ${r.description}`; button.setAttribute('aria-label', button.title);
       button.innerHTML = `${icons[id]}<small>${count}</small>`;
       button.addEventListener('click', () => { openMenu('build'); }); return button;
     }));
   }
+}
+function interactLabel(target) {
+  if (!target) return '';
+  if (target.kind === 'traveler') return t('Rescue traveler');
+  if (target.kind === 'lamp') return t('Light lamp {number}', { number: target.order });
+  if (target.kind === 'offering') return t('Offer 10 embers');
+  if (target.kind === 'chest') return t('Open hidden chest');
+  if (target.kind === 'ghost') return t('Greet the lost spirit');
+  return t('Interact');
+}
+function updateAdventure() {
+  const target = mode === 'playing' && !paused ? nearestInteractable(state) : null;
+  $('interact-button').hidden = !target;
+  if (target) {
+    const label = interactLabel(target);
+    if ($('interact-label').textContent !== label) $('interact-label').textContent = label;
+    $('interact-button').setAttribute('aria-label', `${label} · Q`);
+  }
+  const escort = state.adventure?.escort;
+  const status = escort ? t('Traveler: clear room {room}', { room: escort.dueRoom }) : '';
+  if ($('quest-status').textContent !== status) $('quest-status').textContent = status;
+}
+function useNearby() {
+  if (mode !== 'playing' || paused) return;
+  const target = nearestInteractable(state); if (!target) return;
+  const result = interact(state, target.id);
+  if (result.ok) audio.play('relic');
+  if (result.message) toast(result.message, 3000);
+  else if (!result.ok && result.reason) toast(result.reason, 3000);
+  lastHud = ''; updateHUD(); draw();
 }
 function tick(dt) {
   if (mode !== 'playing' || paused) return;
@@ -182,9 +253,10 @@ function tick(dt) {
     else if (event.type === 'dash') audio.play('dash');
     else if (event.type === 'nova') audio.play('relic');
     else if (event.type === 'player-hit') audio.play('hit');
-    else if (event.type === 'room-enter') { checkpoint(); roomBanner(); }
-    else if (event.type === 'wave-enter' && state.wave > 1) { $('room-banner').textContent = `WAVE ${state.wave} / ${state.waveTotal}`; bannerUntil = state.time + 1.6; announce(`Wave ${state.wave} of ${state.waveTotal}.`); }
-    else if (event.type === 'boss-summon') { $('room-banner').textContent = 'THE RIFT ANSWERS'; bannerUntil = state.time + 1.6; }
+    else if (event.type === 'room-enter') { checkpoint(); roomBanner(); syncSoundscape(); }
+    else if (event.type === 'wave-enter' && state.wave > 1) { setBanner('WAVE {wave} / {total}', { wave: state.wave, total: state.waveTotal }, 1.6); announce(t('Wave {wave} of {total}.', { wave: state.wave, total: state.waveTotal })); }
+    else if (event.type === 'boss-summon') { setBanner('THE RIFT ANSWERS', {}, 1.6); }
+    else if (event.type === 'quest' && event.kind === 'traveler' && event.reason === 'completed') toast('The traveler is safe: 8 embers and one heart.', 3500);
   }
   if (state.phase !== previous) {
     if (state.phase === 'reward') showReward();
@@ -204,21 +276,35 @@ function frame(now) {
 }
 
 function controlsMarkup() {
-  return `<div class="controls-grid"><span><b>WASD</b>Move</span><span><b>MOUSE + HOLD CLICK</b>Aim and fire</span><span><b>ARROW KEYS</b>Keyboard aim and fire</span><span><b>SPACE / RIGHT CLICK</b>Dash through danger</span><span><b>E</b>Nova: damage + clear bullets</span><span><b>ESC / P · F · M</b>Pause · fullscreen · audio</span></div><p class="menu-prose">On touchscreens, move with the left stick and aim/fire with the right. Dash and Nova have separate buttons. Enter either glowing gate after choosing your relic.</p><p class="menu-prose">Hunt adds enemies and extra embers. Refuge has fewer enemies and restores one heart on entry. Every fourth room is a boss. Clear eight rooms to escape.</p>`;
+  const controls = [['WASD', 'Move'], ['MOUSE + HOLD CLICK', 'Aim and fire'], ['ARROW KEYS', 'Keyboard aim and fire'], ['SPACE / RIGHT CLICK', 'Dash through danger'], ['E', 'Nova: damage + clear bullets'], ['Q', 'Interact with nearby objects'], ['ESC / P · F · M', 'Pause · fullscreen · audio']];
+  return `<div class="controls-grid">${controls.map(([key, description]) => `<span><b>${t(key)}</b>${t(description)}</span>`).join('')}</div><p class="menu-prose">${t('On touchscreens, move with the left stick and aim/fire with the right. Dash and Nova have separate buttons. Enter a glowing gate after choosing your relic.')}</p><p class="menu-prose">${t('Five acts, fifteen rooms. Each act has two battles and a randomly selected boss. Hunt means more enemies and embers; Refuge heals one heart. After a boss, an optional Rift leads through an altered world.')}</p>`;
+}
+function journalMarkup() {
+  const entries = fieldGuide();
+  return `<p class="menu-prose">${t('Twenty enemy species and ten bosses across five acts. Each seed changes the encounters. Larvae do not count as a species.')}</p><p class="menu-prose">${t('Side paths are optional. Rescue a traveler and clear the next room; light lamps in order 1, 2, 3; or offer 10 embers for healing and a full nova.')}</p><p class="menu-prose">${t('Look for cracked masonry and watch what changes after three untouched rooms.')}</p>${[false, true].map(boss => `<h3>${t(boss ? 'Bosses' : 'Enemies')}</h3>${entries.filter(e => e.boss === boss).map(e => `<p><strong>${escapeHTML(e.name)}</strong><br>${escapeHTML(e.description)}</p>`).join('')}`).join('')}`;
 }
 function settingsMarkup() {
-  return `<div class="setting-row"><label for="setting-music">Music<small>Original Ninja Adventure soundtrack</small></label><input id="setting-music" type="checkbox" ${data.settings.music ? 'checked' : ''}></div><div class="setting-row"><label for="setting-sfx">Sound effects</label><input id="setting-sfx" type="checkbox" ${data.settings.sfx ? 'checked' : ''}></div><div class="setting-row"><label for="setting-motion">Reduce effects<small>No camera shake or cosmetic flashes${motionQuery.matches ? ' · system preference active' : ''}</small></label><input id="setting-motion" type="checkbox" ${data.settings.reduceMotion ? 'checked' : ''}></div><div class="save-actions"><button id="export-save">Export save</button><button id="import-save">Import save</button></div><p class="save-status">${escapeHTML(saveMessage || 'Saved in this browser. No account or cloud sync.')}</p><p class="menu-prose">A continued run restarts at its last room entrance. Export a backup to move your progress to another browser.</p>${conflicted ? '<div class="warning-box">Another tab changed this save. This tab has stopped saving.<button id="reload-save">Load the latest save</button></div>' : ''}<button id="menu-help" class="text-button">Controls &amp; rules</button>`;
+  return `<div class="setting-row"><label for="setting-music">${t('Music')}<small>${t('Original Ninja Adventure soundtrack')}</small></label><input id="setting-music" type="checkbox" ${data.settings.music ? 'checked' : ''}></div><div class="setting-row"><label for="setting-sfx">${t('Sound effects')}</label><input id="setting-sfx" type="checkbox" ${data.settings.sfx ? 'checked' : ''}></div><div class="setting-row"><label for="setting-motion">${t('Reduce effects')}<small>${t('No camera shake or cosmetic flashes')}${motionQuery.matches ? ` · ${t('system preference active')}` : ''}</small></label><input id="setting-motion" type="checkbox" ${data.settings.reduceMotion ? 'checked' : ''}></div><div class="save-actions"><button id="export-save">${t('Export save')}</button><button id="import-save">${t('Import save')}</button></div><p class="save-status">${escapeHTML(translateMessage(saveMessage || 'Saved in this browser. No account or cloud sync.'))}</p><p class="menu-prose">${t('A continued run restarts at its last room entrance. Export a backup to move your progress to another browser.')}</p>${conflicted ? `<div class="warning-box">${t('Another tab changed this save. This tab has stopped saving.')}<button id="reload-save">${t('Load the latest save')}</button></div>` : ''}<button id="menu-help" class="text-button">${t('Controls & rules')}</button>`;
 }
 function openMenu(section = 'settings') {
   if (menu.open) return;
   titleBeforeMenu = document.activeElement; paused = true; input.setActive(false); checkpoint(); audio.suspend();
-  $('menu-title').textContent = section === 'help' ? 'Find your rhythm.' : section === 'credits' ? 'Made of good things.' : section === 'build' ? 'Your relics.' : mode === 'title' ? 'Make it yours.' : 'Paused.';
+  menuSection = section; renderMenu();
+  menu.showModal(); $('close-menu').focus();
+}
+function renderMenu() {
+  const section = menuSection;
+  $('menu-title').textContent = t(section === 'help' ? 'Find your rhythm.' : section === 'credits' ? 'Made of good things.' : section === 'build' ? 'Your relics.' : mode === 'title' ? 'Make it yours.' : 'Paused.');
+  $('continue').textContent = t(mode === 'title' ? 'Back' : 'Back to the rift'); $('abandon').hidden = mode === 'title' || mode === 'end';
+  if (pendingImport) { renderImportConfirmation(); return; }
   if (section === 'help') $('menu-body').innerHTML = controlsMarkup();
-  else if (section === 'credits') $('menu-body').innerHTML = `<p>Cinder Below · an eight-room browser action roguelite by 4c.</p><ul class="credits-links"><li>Pixel art, soundtrack and sound effects: <a href="https://pixel-boy.itch.io/ninja-adventure-asset-pack" target="_blank" rel="noopener">Ninja Adventure — Pixel-boy &amp; AAA</a>, CC0.</li><li>Game code and design created for this site. No assets from The Binding of Isaac are used.</li></ul><p class="menu-prose">Audio uses original downloaded recordings. Asset source paths, hashes and licenses are preserved with the editable source.</p>`;
-  else if (section === 'build') $('menu-body').innerHTML = Object.entries(state.relics).map(([id, level]) => { const relic = RELICS.find((r) => r.id === id); return `<p><strong style="color:${relic.color}">${escapeHTML(relic.name)} · ${level}</strong><br>${escapeHTML(relic.description)}</p>`; }).join('') || '<p>Your first relic waits after the first chamber.</p>';
+  else if (section === 'journal') $('menu-body').innerHTML = journalMarkup();
+  else if (section === 'credits') $('menu-body').innerHTML = `<p>${t('Cinder Below · a five-act browser action roguelite by 4c.')}</p><ul class="credits-links"><li>${t('Pixel art, soundtrack and sound effects:')} <a href="https://pixel-boy.itch.io/ninja-adventure-asset-pack" target="_blank" rel="noopener">Ninja Adventure — Pixel-boy &amp; AAA</a>, CC0.</li><li>${t('Game code and design created for this site. No assets from The Binding of Isaac are used.')}</li></ul><p class="menu-prose">${t('Audio uses original downloaded recordings. Asset source paths, hashes and licenses are preserved with the editable source.')}</p>`;
+  else if (section === 'build') $('menu-body').innerHTML = Object.entries(state.relics).map(([id, level]) => { const relic = localizeRelic(RELICS.find((r) => r.id === id)); return `<p><strong style="color:${relic.color}">${escapeHTML(relic.name)} · ${level}</strong><br>${escapeHTML(relic.description)}</p>`; }).join('') || `<p>${t('Your first relic waits after the first chamber.')}</p>`;
   else $('menu-body').innerHTML = settingsMarkup();
-  $('continue').textContent = mode === 'title' ? 'Back' : 'Back to the rift'; $('abandon').hidden = mode === 'title' || mode === 'end';
-  menu.showModal(); $('close-menu').focus(); bindMenu();
+  if (section === 'settings' || section === 'help') $('menu-body').insertAdjacentHTML('beforeend', `<button id="menu-journal" class="text-button">${t('Field guide & discoveries')}</button>`);
+  if (section === 'journal') $('menu-title').textContent = t('Field guide & discoveries');
+  bindMenu();
 }
 function bindMenu() {
   for (const [id, field] of [['setting-music', 'music'], ['setting-sfx', 'sfx'], ['setting-motion', 'reduceMotion']]) $(id)?.addEventListener('change', async (e) => {
@@ -231,15 +317,16 @@ function bindMenu() {
     data = newest.data; storageRaw = newest.raw; saveStatus = newest.status; saveMessage = newest.message; conflicted = false; state = null; menu.close(); paused = false; setMode('title'); syncTitle();
   });
   $('menu-help')?.addEventListener('click', () => { menu.close(); openMenu('help'); });
+  $('menu-journal')?.addEventListener('click', () => { menuSection = 'journal'; renderMenu(); });
 }
 function closeMenu() {
-  menu.close(); paused = false; input.setActive(mode === 'playing'); accumulator = 0;
+  menu.close(); pendingImport = null; paused = false; input.setActive(mode === 'playing'); accumulator = 0;
   if (mode === 'playing' || mode === 'title') void audio.resume();
   if (titleBeforeMenu instanceof HTMLElement && titleBeforeMenu.isConnected) titleBeforeMenu.focus({ preventScroll: true });
   else if (mode === 'playing') canvas.focus({ preventScroll: true });
 }
-function toTitle() { if (state && !['won', 'dead'].includes(state.phase)) checkpoint(); menu.close(); paused = false; state = null; setMode('title'); syncTitle(); $('play').focus(); }
-function pauseForConflict() { if (!menu.open) openMenu(); else { $('menu-body').innerHTML = settingsMarkup(); bindMenu(); } toast('Another tab updated your save. Load its latest version or export this one.'); }
+function toTitle() { if (state && !['won', 'dead'].includes(state.phase)) checkpoint(); menu.close(); pendingImport = null; paused = false; state = null; setMode('title'); syncTitle(); $('play').focus(); }
+function pauseForConflict() { if (!menu.open) openMenu(); else { menuSection = 'settings'; renderMenu(); } toast('Another tab updated your save. Load its latest version or export this one.'); }
 function exportProgress() {
   if (state && !['dead', 'won'].includes(state.phase)) { bankProgress(); data.checkpoint = snapshot(state); }
   const blob = new Blob([exportSave(data)], { type: 'application/json' }); const url = URL.createObjectURL(blob), link = document.createElement('a');
@@ -251,7 +338,10 @@ async function importFile(e) {
   const parsed = parseImport(await file.text()); if (!parsed.data) { toast(parsed.error || 'Invalid save file.'); return; }
   pendingImport = parsed.data;
   const latest = loadSave(); storageRaw = latest.raw;
-  $('menu-body').innerHTML = `<div class="warning-box">Replace this browser's Cinder Below progress with the imported save? It contains ${pendingImport.stats.rooms} cleared rooms and ${pendingImport.stats.wins} escapes. Export the current save first if you want to keep it.<button id="confirm-import">Replace with imported save</button><button id="cancel-import">Cancel</button></div>`;
+  renderImportConfirmation();
+}
+function renderImportConfirmation() {
+  $('menu-body').innerHTML = `<div class="warning-box">${t("Replace this browser's Cinder Below progress with the imported save? It contains {rooms} cleared rooms and {wins} escapes. Export the current save first if you want to keep it.", { rooms: pendingImport.stats.rooms, wins: pendingImport.stats.wins })}<button id="confirm-import">${t('Replace with imported save')}</button><button id="cancel-import">${t('Cancel')}</button></div>`;
   $('confirm-import').addEventListener('click', async () => {
     if (!navigator.locks?.request) { toast('Safe local saving is unavailable in this browser. The current progress was kept; export it before closing.'); return; }
     let result;
@@ -260,7 +350,7 @@ async function importFile(e) {
     if (!result.ok) { toast(result.message || 'Could not import safely. The current save was kept.'); return; }
     data = result.data; storageRaw = result.raw; saveStatus = result.status; saveMessage = result.message; conflicted = false; state = null; paused = false; pendingImport = null; menu.close(); setMode('title'); syncTitle(); toast('Save imported. Your descent is ready.');
   });
-  $('cancel-import').addEventListener('click', () => { pendingImport = null; $('menu-body').innerHTML = settingsMarkup(); bindMenu(); });
+  $('cancel-import').addEventListener('click', () => { pendingImport = null; menuSection = 'settings'; renderMenu(); });
 }
 async function fullscreen() {
   try {
@@ -277,26 +367,67 @@ function command(name, arg) {
   else if (name === 'choice') selectRelic(arg);
   else if (name === 'enter' && mode === 'title') begin();
   else if (name === 'enter' && mode === 'end') begin();
+  else if (name === 'interact') useNearby();
 }
+
+function refreshLanguage() {
+  document.documentElement.lang = getLanguage();
+  applyTranslations(document);
+  for (const id of ['language-toggle', 'menu-language-toggle']) {
+    $(id).textContent = getLanguage() === 'zh-CN' ? 'EN' : '中文';
+    const label = getLanguage() === 'zh-CN' ? t('Switch to English') : 'Switch to Chinese';
+    $(id).setAttribute('aria-label', label);
+    $(id).title = label;
+  }
+  $('fullscreen').setAttribute('aria-label', t(document.fullscreenElement ? 'Exit fullscreen' : 'Enter fullscreen'));
+  $('play').innerHTML = `<span>${t(ready ? 'Enter the rift' : 'Preparing the vault…')}</span><span aria-hidden="true">↗</span>`;
+  syncTitle(); lastHud = ''; lastBuild = ''; updateHUD();
+  if (state && bannerText && state.time < bannerUntil) $('room-banner').textContent = translatedBanner();
+  if (mode === 'reward') renderRewards();
+  if (mode === 'end') renderEnd();
+  if (menu.open) renderMenu();
+  if (!$('toast').hidden && currentToast) $('toast').textContent = currentToast();
+  $('announcer').textContent = '';
+  draw();
+}
+function toggleLanguage() {
+  // Changing presentation must not checkpoint, re-bank a reward or restart a run.
+  const focusId = document.activeElement?.id;
+  setLanguage(getLanguage() === 'zh-CN' ? 'en' : 'zh-CN');
+  input.clear(); refreshLanguage();
+  if (focusId && $(focusId)) $(focusId).focus({ preventScroll: true });
+}
+$('language-toggle').addEventListener('click', toggleLanguage);
+$('menu-language-toggle').addEventListener('click', toggleLanguage);
+
 $('play').addEventListener('click', () => begin()); $('resume-run').addEventListener('click', () => begin(true)); $('retry').addEventListener('click', () => begin());
 $('back-title').addEventListener('click', toTitle); $('abandon').addEventListener('click', toTitle);
 $('pause-button').addEventListener('click', () => openMenu()); $('continue').addEventListener('click', closeMenu); $('close-menu').addEventListener('click', closeMenu);
 $('how-to-play').addEventListener('click', () => openMenu('help')); $('credits-button').addEventListener('click', () => openMenu('credits'));
 $('audio-toggle').addEventListener('click', toggleAudio); $('fullscreen').addEventListener('click', fullscreen); $('import-file').addEventListener('change', importFile);
+$('interact-button').addEventListener('click', useNearby);
 menu.addEventListener('cancel', (e) => { e.preventDefault(); closeMenu(); });
 window.addEventListener('resize', resize);
-document.addEventListener('fullscreenchange', () => { $('fullscreen').setAttribute('aria-label', document.fullscreenElement ? 'Exit fullscreen' : 'Enter fullscreen'); resize(); });
+document.addEventListener('fullscreenchange', () => { $('fullscreen').setAttribute('aria-label', t(document.fullscreenElement ? 'Exit fullscreen' : 'Enter fullscreen')); resize(); });
 document.addEventListener('visibilitychange', () => { if (document.hidden) { input.clear(); audio.suspend(); if (mode === 'playing' && !menu.open) openMenu(); } });
 window.addEventListener('blur', () => { if (mode === 'playing' && !menu.open) openMenu(); });
 window.addEventListener('storage', (e) => { if ((e.key === 'cinder-below-v1' || e.key === null) && e.newValue !== storageRaw) { conflicted = true; pauseForConflict(); } });
-window.render_game_to_text = () => JSON.stringify({ ...(state ? describe(state) : { phase: 'title' }), ui: { mode, paused, ready, menuOpen: menu.open, selectedWeapon, storageStatus: saveStatus, lifetime: data.stats, unlockedWeapons: WEAPONS.filter(unlocked).map((w) => w.id), input: input.status(), audio: audio.status(), art: assetStatus }, viewport: { ...dims, world: logicalSize() } });
+function accessibleWorld() {
+  if (!state) return { phase: 'title' };
+  const world = describe(state);
+  return { ...world, actName: t(world.actName), coordinates: t(world.coordinates), goal: t(world.goal),
+    gates: world.gates.map(gate => ({ ...gate, label: t(gate.label) })),
+    choices: world.choices.map(localizeRelic) };
+}
+window.render_game_to_text = () => JSON.stringify({ ...accessibleWorld(), ui: { mode, paused, ready, language: getLanguage(), menuOpen: menu.open, selectedWeapon, storageStatus: saveStatus, lifetime: data.stats, unlockedWeapons: WEAPONS.filter(unlocked).map((w) => w.id), input: input.status(), audio: audio.status(), art: assetStatus }, viewport: { ...dims, world: logicalSize() } });
 window.advanceTime = async (ms) => {
   manualTime = true; const duration = Math.max(0, Math.min(Number(ms) || 0, 60000)) / 1000;
   accumulator += duration;
   while (accumulator + 1e-10 >= 1 / 120) { tick(1 / 120); accumulator -= 1 / 120; }
   updateHUD(); draw(); await queue; return window.render_game_to_text();
 };
+refreshLanguage();
 resize(); preview = createRun({ seed: 1748, ...logicalSize() }); setMode('title'); syncTitle(); requestAnimationFrame(frame);
-loadArt().then(() => { ready = true; $('play').disabled = false; $('play').innerHTML = '<span>Enter the rift</span><span aria-hidden="true">↗</span>'; syncTitle(); draw(); }).catch((error) => {
-  console.error(error); $('load-message').textContent = 'Some artwork could not load. Reload this page to retry.';
+loadArt().then(() => { ready = true; $('play').disabled = false; $('play').innerHTML = `<span>${t('Enter the rift')}</span><span aria-hidden="true">↗</span>`; syncTitle(); draw(); }).catch((error) => {
+  console.error(error); artFailed = true; syncTitle();
 });

@@ -23,7 +23,8 @@ with sync_playwright() as pw:
     page = context.new_page(); page.on('pageerror', lambda e: errors.append(str(e)))
     page.on('response', lambda r: errors.append(f'HTTP {r.status}: {r.url}') if r.status >= 400 else None)
     ready(page); screenshot(page, 'desktop-title')
-    check('art ready', state(page)['ui']['art']['loaded'] == 31)
+    art = state(page)['ui']['art']
+    check('all declared art ready', art['loaded'] == art['total'] and art['total'] >= 55 and not art['failed'])
     check('initial weapon only', state(page)['ui']['unlockedWeapons'] == ['cinder'])
     page.locator('#play').click(); advance(page, 150)
     start = state(page)

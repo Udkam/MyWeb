@@ -1,56 +1,58 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#101018" />
-    <meta name="description" content="Cinder Below — a quick room-based action roguelite. Dodge, build a wild relic combination, and descend through eight chambers. Play instantly in your browser." />
+    <meta name="description" content="Cinder Below：即开即玩的像素动作肉鸽。五段随机冒险，20 种怪物、10 位首领、遗物构筑和异界奇遇。" data-i18n-content="Cinder Below — a pixel action roguelite. Five randomized acts, twenty enemy species, ten bosses, relic builds and otherworld discoveries. Play instantly." />
     <title>Cinder Below</title>
     <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <main id="game" aria-label="Cinder Below game">
-      <canvas id="world" aria-label="Dungeon arena. Move with WASD, aim with the mouse or arrow keys, Space to dash, E for nova." tabindex="0"></canvas>
+    <main id="game" aria-label="Cinder Below 游戏" data-i18n-aria-label="Cinder Below game">
+      <canvas id="world" aria-label="地牢战场。使用 WASD 移动，鼠标或方向键瞄准，空格冲刺，E 释放星爆。" data-i18n-aria-label="Dungeon arena. Move with WASD, aim with the mouse or arrow keys, Space to dash, E for nova." tabindex="0"></canvas>
       <div id="shade" aria-hidden="true"></div>
       <header id="topbar">
-        <a class="wordmark" href="./" aria-label="Cinder Below home">C<span class="sigil">✦</span>B</a>
+        <a class="wordmark" href="./" aria-label="Cinder Below 首页" data-i18n-aria-label="Cinder Below home">C<span class="sigil">✦</span>B</a>
         <div id="run-hud" hidden>
-          <div class="vitals"><div id="hearts" aria-label="Health"></div><span id="ember-count">0</span><span class="ember-symbol" aria-hidden="true">◆</span></div>
-          <div id="room-strip" aria-label="Run progress"></div>
+          <div class="vitals"><div id="hearts" aria-label="生命" data-i18n-aria-label="Health"></div><span id="ember-count">0</span><span class="ember-symbol" aria-hidden="true">◆</span></div>
+          <div id="room-strip" aria-label="闯关进度" data-i18n-aria-label="Run progress"></div>
         </div>
         <div class="tools">
-          <button class="icon-button" id="audio-toggle" aria-label="Enable audio" title="Audio">♪<span class="slash" aria-hidden="true"></span></button>
-          <button class="icon-button" id="fullscreen" aria-label="Enter fullscreen" title="Fullscreen (F)">⛶</button>
-          <button class="icon-button" id="pause-button" aria-label="Pause and settings" title="Pause (Esc)">Ⅱ</button>
+          <button class="icon-button language-button" id="language-toggle" type="button" aria-label="切换到英语" data-i18n-aria-label="Switch to English" title="切换到英语" data-i18n-title="Switch to English">EN</button>
+          <button class="icon-button" id="audio-toggle" aria-label="开启声音" data-i18n-aria-label="Enable audio" title="声音" data-i18n-title="Audio">♪<span class="slash" aria-hidden="true"></span></button>
+          <button class="icon-button" id="fullscreen" aria-label="进入全屏" data-i18n-aria-label="Enter fullscreen" title="全屏（F）" data-i18n-title="Fullscreen (F)">⛶</button>
+          <button class="icon-button" id="pause-button" aria-label="暂停与设置" data-i18n-aria-label="Pause and settings" title="暂停（Esc）" data-i18n-title="Pause (Esc)">Ⅱ</button>
         </div>
       </header>
       <section id="title-screen" class="screen title-screen" aria-labelledby="game-title">
         <div class="title-content">
-          <div class="eyebrow"><span></span> A SHORT DESCENT INTO CHAOS</div>
+          <div class="eyebrow"><span class="eyebrow-rule" aria-hidden="true"></span><span data-i18n="A SHORT DESCENT INTO CHAOS">潜入地牢，点燃混乱</span></div>
           <h1 id="game-title">CINDER<br /><span>BELOW</span></h1>
-          <p class="title-copy">Eight chambers. One impossible build.<br /> Make it out. Come back different.</p>
-          <div class="loadout-label">STARTING WEAPON <span id="unlocks-caption"></span></div>
-          <div id="weapon-options" class="weapon-options" aria-label="Starting weapon"></div>
-          <button id="play" class="primary-button" disabled><span>Preparing the vault…</span><span aria-hidden="true">↗</span></button>
-          <button id="resume-run" class="secondary-button" hidden>Continue descent <span>↗</span></button>
-          <p id="load-message" role="status">Loading the dungeon.</p>
+          <p class="title-copy"><span data-i18n="Five acts. A different descent.">五段深渊，每轮不同。</span><br /><span data-i18n="Make it out. Come back different.">闯出去，再带着新打法归来。</span></p>
+          <div class="loadout-label"><span data-i18n="STARTING WEAPON">初始武器</span><span id="unlocks-caption"></span></div>
+          <div id="weapon-options" class="weapon-options" aria-label="初始武器" data-i18n-aria-label="Starting weapon"></div>
+          <button id="play" class="primary-button" disabled><span data-i18n="Preparing the vault…">正在准备地牢…</span><span aria-hidden="true">↗</span></button>
+          <button id="resume-run" class="secondary-button" hidden><span data-i18n="Continue descent">继续下潜</span><span aria-hidden="true">↗</span></button>
+          <p id="load-message" role="status" data-i18n="Loading the dungeon.">正在加载地牢。</p>
           <div class="title-stats" id="title-stats"></div>
         </div>
-        <div class="title-foot"><span>WASD MOVE <b>·</b> MOUSE AIM / FIRE <b>·</b> SPACE DASH</span><button id="how-to-play" class="text-button">How to play</button><button id="credits-button" class="text-button">Credits</button></div>
+        <div class="title-foot"><span><span data-i18n="WASD MOVE">WASD 移动</span><b>·</b><span data-i18n="MOUSE AIM / FIRE">鼠标瞄准／射击</span><b>·</b><span data-i18n="SPACE DASH">空格冲刺</span></span><button id="how-to-play" class="text-button" data-i18n="How to play">玩法说明</button><button id="credits-button" class="text-button" data-i18n="Credits">制作名单</button></div>
       </section>
       <div id="combat-ui" hidden>
         <div id="room-banner" class="room-banner" aria-live="polite"></div>
         <div id="boss-hud" hidden><span id="boss-name"></span><div class="boss-track"><div id="boss-fill"></div></div></div>
         <div id="objective" class="objective"></div>
-        <div id="build-strip" class="build-strip" aria-label="Your relics"></div>
-        <div id="abilities" class="abilities"><button id="dash" class="ability" aria-label="Dash"><span>↠</span><strong>DASH</strong><kbd>SPACE</kbd><i></i></button><button id="nova" class="ability" aria-label="Cast nova"><span>✳</span><strong>NOVA</strong><kbd>E</kbd><i></i></button></div>
-        <div id="touch-controls" aria-label="Touch controls"><div class="stick" id="move-stick" aria-label="Movement joystick"><span>MOVE</span><i></i></div><div class="stick" id="aim-stick" aria-label="Aim and fire joystick"><span>AIM / FIRE</span><i></i></div></div>
+        <div id="adventure-ui"><p id="quest-status" aria-live="polite"></p><button id="interact-button" type="button" hidden><kbd aria-hidden="true">Q</kbd><span id="interact-label"></span></button></div>
+        <div id="build-strip" class="build-strip" aria-label="你的遗物" data-i18n-aria-label="Your relics"></div>
+        <div id="abilities" class="abilities"><button id="dash" class="ability" aria-label="冲刺" data-i18n-aria-label="Dash"><span aria-hidden="true">↠</span><strong data-i18n="DASH">冲刺</strong><kbd data-i18n="SPACE">空格</kbd><i></i></button><button id="nova" class="ability" aria-label="释放星爆" data-i18n-aria-label="Cast nova"><span aria-hidden="true">✳</span><strong data-i18n="NOVA">星爆</strong><kbd>E</kbd><i></i></button></div>
+        <div id="touch-controls" aria-label="触控操作" data-i18n-aria-label="Touch controls"><div class="stick" id="move-stick" aria-label="移动摇杆" data-i18n-aria-label="Movement joystick"><span data-i18n="MOVE">移动</span><i></i></div><div class="stick" id="aim-stick" aria-label="瞄准与射击摇杆" data-i18n-aria-label="Aim and fire joystick"><span data-i18n="AIM / FIRE">瞄准／射击</span><i></i></div></div>
       </div>
-      <section id="reward-screen" class="screen reward-screen" hidden aria-labelledby="reward-title"><div class="reward-heading"><p class="eyebrow">CHAMBER CLEARED</p><h2 id="reward-title">Feed the flame.</h2><p>Choose one relic. Let it change the way you fight.</p></div><div id="relic-choices" class="relic-choices"></div><p class="choice-hint">SELECT WITH 1 / 2 / 3</p></section>
-      <section id="end-screen" class="screen end-screen" hidden aria-labelledby="end-title"><div class="end-content"><p id="end-label" class="eyebrow"></p><h2 id="end-title"></h2><p id="end-copy"></p><div id="end-stats" class="end-stats"></div><div id="end-unlocks"></div><button id="retry" class="primary-button"><span>One more descent</span><span>↗</span></button><button id="back-title" class="text-button">Return to the surface</button></div></section>
+      <section id="reward-screen" class="screen reward-screen" hidden aria-labelledby="reward-title"><div class="reward-heading"><p class="eyebrow" data-i18n="CHAMBER CLEARED">房间已清空</p><h2 id="reward-title" data-i18n="Feed the flame.">添一把火。</h2><p data-i18n="Choose one relic. Let it change the way you fight.">选择一件遗物，改变你的战斗方式。</p></div><div id="relic-choices" class="relic-choices"></div><p class="choice-hint" data-i18n="SELECT WITH 1 / 2 / 3">按 1 / 2 / 3 选择</p></section>
+      <section id="end-screen" class="screen end-screen" hidden aria-labelledby="end-title"><div class="end-content"><p id="end-label" class="eyebrow"></p><h2 id="end-title"></h2><p id="end-copy"></p><div id="end-stats" class="end-stats"></div><div id="end-unlocks"></div><button id="retry" class="primary-button"><span data-i18n="One more descent">再闯一次</span><span aria-hidden="true">↗</span></button><button id="back-title" class="text-button" data-i18n="Return to the surface">返回地表</button></div></section>
       <div id="toast" role="status" aria-live="polite" hidden></div>
-      <dialog id="menu" aria-labelledby="menu-title"><div class="dialog-head"><p class="eyebrow">TAKE A BREATH</p><button class="icon-button" id="close-menu" aria-label="Close menu">×</button></div><h2 id="menu-title">Paused.</h2><div id="menu-body"></div><div class="menu-actions"><button id="continue" class="primary-button">Back to the rift</button><button id="abandon" class="text-button">Return to title</button></div></dialog>
+      <dialog id="menu" aria-labelledby="menu-title"><div class="dialog-head"><p class="eyebrow" data-i18n="TAKE A BREATH">歇一口气</p><div class="dialog-tools"><button class="icon-button language-button" id="menu-language-toggle" type="button" aria-label="切换到英语" data-i18n-aria-label="Switch to English" title="切换到英语" data-i18n-title="Switch to English">EN</button><button class="icon-button" id="close-menu" aria-label="关闭菜单" data-i18n-aria-label="Close menu">×</button></div></div><h2 id="menu-title" data-i18n="Paused.">已暂停</h2><div id="menu-body"></div><div class="menu-actions"><button id="continue" class="primary-button" data-i18n="Back to the rift">继续战斗</button><button id="abandon" class="text-button" data-i18n="Return to title">返回标题</button></div></dialog>
       <input type="file" id="import-file" accept="application/json,.json" hidden />
       <div class="sr-only" id="announcer" aria-live="polite"></div>
     </main>

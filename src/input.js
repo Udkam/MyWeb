@@ -40,6 +40,7 @@ export function createInput(canvas, getState, onCommand) {
     if (/^Digit[123]$/.test(key)) { onCommand('choice', Number(key.slice(-1)) - 1); return; }
     if (key === 'Enter') { onCommand('enter'); return; }
     if (!active) return;
+    if (key === 'KeyQ') { onCommand('interact'); return; }
     keys.add(key);
     if (key === 'Space' || key === 'ShiftLeft' || key === 'ShiftRight') dash = true;
     if (key === 'KeyE') nova = true;

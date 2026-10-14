@@ -1,0 +1,405 @@
+export const LANGUAGE_KEY = 'cinder-below-language';
+const isLanguage = (value) => value === 'zh-CN' || value === 'en';
+
+function readLanguage() {
+  try {
+    const value = globalThis.localStorage?.getItem(LANGUAGE_KEY);
+    return isLanguage(value) ? value : 'zh-CN';
+  } catch {
+    return 'zh-CN';
+  }
+}
+
+let language = readLanguage();
+
+export function getLanguage() {
+  return language;
+}
+
+export function setLanguage(value) {
+  if (!isLanguage(value)) return language;
+  language = value;
+  try { globalThis.localStorage?.setItem(LANGUAGE_KEY, value); } catch { /* This page can still change language. */ }
+  return language;
+}
+
+const zh = Object.freeze({
+  'RIFT · ECHO': '裂隙 · 回声',
+  'RIFT · SURGE': '裂隙 · 过载',
+  'RIFT · GLASS': '裂隙 · 玻璃',
+  'Echo: your shots and enemy shots bounce once more.': '回声：敌我子弹都多反弹一次。',
+  'Surge: nova charges three times faster; enemy shots fly faster.': '过载：星爆充能三倍，敌弹速度加快。',
+  'Glass: your shots deal 50% more damage; hostile shots cost two hearts.': '玻璃：射击伤害提高 50%，中敌弹失去两颗心。',
+  'Explore optional discoveries or choose an exit.': '探索可选奇遇，或选择出口。',
+  'All 15 rooms are cleared.': '十五个房间全部清空，五段冒险已完成。',
+  'All 8 rooms are cleared.': '八个房间全部清空。',
+  'Cinder Below — a pixel action roguelite. Five randomized acts, twenty enemy species, ten bosses, relic builds and otherworld discoveries. Play instantly.': 'Cinder Below：即开即玩的像素动作肉鸽。五段随机冒险，20 种怪物、10 位首领、遗物构筑和异界奇遇。',
+  'Five acts. A different descent.': '五段深渊，每轮不同。',
+  'BOSS · {name}': '首领 · {name}',
+  'ACT {act} · {name}': '第 {act} 段 · {name}',
+  '{name} · PHASE {stage}': '{name} · 第 {stage} 阶段',
+  'THE OTHER SIDE': '异界裂隙',
+  'The Hollow': '幽谷',
+  'The Mire': '腐生沼泽',
+  'The Cinder Vault': '灰烬熔窟',
+  'The Stormwake': '风暴回廊',
+  'The Pale Beyond': '苍白彼岸',
+  'The descent is complete. A different world awaits your next seed.': '这次下潜已完成。下一轮，另一种世界正在等你。',
+  'Room {room} of {rooms}, wave {wave} of {total}': '第 {room}/{rooms} 室，第 {wave}/{total} 波',
+  'Choose HUNT, REFUGE or the optional RIFT': '选择猎途、庇所，或进入异界裂隙',
+  'On touchscreens, move with the left stick and aim/fire with the right. Dash and Nova have separate buttons. Enter a glowing gate after choosing your relic.': '触屏左摇杆移动，右摇杆瞄准并射击，另有冲刺和星爆按钮。选好遗物后走进发光出口。',
+  'Five acts, fifteen rooms. Each act has two battles and a randomly selected boss. Hunt means more enemies and embers; Refuge heals one heart. After a boss, an optional Rift leads through an altered world.': '五段共十五房，每段两场战斗后遇到一位随机首领。猎途敌人与余烬更多，庇所回复一点生命。首领战后可选异界裂隙：下一房弹速加快、敌人增多，通关额外获得 6 余烬和 30 星爆能量。',
+  'Twenty enemy species and ten bosses across five acts. Each seed changes the encounters. Larvae do not count as a species.': '五段冒险包含 20 种普通怪物和 10 位首领，每轮随机抽取遭遇。分裂幼体不计入物种数。',
+  'Cinder Below · a five-act browser action roguelite by 4c.': 'Cinder Below · 4c 制作的五段式浏览器动作肉鸽。',
+  'Defeat every enemy. Read their windups, dodge projectiles and falling impacts. Nearby discoveries use Q.': '击败全部敌人。观察自身蓄力，闪避子弹与坠落攻击；靠近奇遇后按 Q 交互。',
+  'Explore optional discoveries or walk into Hunt or Refuge.': '探索可选奇遇，或进入猎途、庇所出口。',
+  'Field guide & discoveries': '怪物与奇遇',
+  'Enemies': '普通怪物',
+  'Bosses': '首领',
+  'Twenty enemy species, two bosses. Larvae are offspring, not a separate species.': '20 种普通怪物、2 位首领。分裂幼体不计入物种数。',
+  'Side paths are optional. Rescue a traveler and clear the next room; light lamps in order 1, 2, 3; or offer 10 embers for healing and a full nova.': '支线均可跳过。救出旅人后清空下一房；按 1、2、3 点亮石灯；或供奉 10 余烬恢复生命并充满星爆。',
+  'Look for cracked masonry and watch what changes after three untouched rooms.': '留意破裂的墙面，以及连续三房无伤后出现的变化。',
+  'Explore during combat or after choosing your relic.': '战斗中或选择遗物后可以探索。',
+  'There is nothing to use here.': '这里暂时没有可交互的物件。',
+  'Move closer to interact.': '再靠近一些。',
+  'The traveler will follow you. Clear the next room for a reward.': '旅人与你同行。清空下一房即可获得谢礼。',
+  'The lamps went dark. Light them in the order 1, 2, 3.': '石灯熄灭了。请按 1、2、3 的顺序点亮。',
+  'A lamp is lit. Continue the sequence.': '石灯亮起。继续按顺序点亮下一盏。',
+  'The offering requires 10 available embers.': '供奉需要 10 点可用余烬。',
+  'Your hearts and nova are already full. Nothing was spent.': '生命与星爆均已充满，没有扣除余烬。',
+  'The lamps answer: 6 embers and 25 nova charge.': '石灯回应了：获得 6 余烬与 25 点星爆能量。',
+  'Offering accepted. Recover up to two hearts and fully charge nova.': '供奉完成：恢复最多两点生命，星爆充满。',
+  'A hidden cache: 12 embers.': '发现隐藏宝箱：获得 12 余烬。',
+  'The lost ghost thanks you: 8 embers and one heart.': '迷途幽灵的谢礼：8 余烬与一点生命。',
+  'The discovery is complete.': '奇遇已完成。',
+  'The traveler is safe: 8 embers and one heart.': '旅人安全了：获得 8 余烬与一点生命。',
+  'Cinder Below — a quick room-based action roguelite. Dodge, build a wild relic combination, and descend through eight chambers. Play instantly in your browser.': 'Cinder Below：即开即玩的浏览器动作冒险。穿行八个房间，闪避攻击，组合遗物，寻找逃生之路。',
+  'Cinder Below game': 'Cinder Below 游戏',
+  'Cinder Below home': 'Cinder Below 首页',
+  'Dungeon arena. Move with WASD, aim with the mouse or arrow keys, Space to dash, E for nova.': '地牢战场。WASD 移动，鼠标或方向键瞄准，空格冲刺，E 释放星爆。',
+  'Health': '生命',
+  'Run progress': '本局进度',
+  'Enable audio': '开启声音',
+  'Mute audio': '关闭声音',
+  'Audio': '声音',
+  'Enter fullscreen': '进入全屏',
+  'Exit fullscreen': '退出全屏',
+  'Fullscreen (F)': '全屏（F）',
+  'Pause and settings': '暂停与设置',
+  'Pause (Esc)': '暂停（Esc）',
+  'Switch to English': '切换到英语',
+  'Switch to Chinese': '切换到中文',
+  'Language': '语言',
+  'A SHORT DESCENT INTO CHAOS': '踏入混沌深处',
+  'Eight chambers. One impossible build.': '八个房间，让遗物碰撞出奇招。',
+  'Make it out. Come back different.': '闯出重围，再试另一种可能。',
+  'Eight chambers. One impossible build. Make it out. Come back different.': '八个房间，让遗物碰撞出奇招。闯出重围，再试另一种可能。',
+  'STARTING WEAPON': '初始武器',
+  'Starting weapon': '初始武器',
+  'Preparing the vault…': '正在准备地牢…',
+  'Continue descent': '继续冒险',
+  'Loading the dungeon.': '正在加载地牢。',
+  'Enter the rift': '进入裂隙',
+  'WASD MOVE': 'WASD 移动',
+  'MOUSE AIM / FIRE': '鼠标瞄准／射击',
+  'SPACE DASH': '空格冲刺',
+  'WASD MOVE · MOUSE AIM / FIRE · SPACE DASH': 'WASD 移动 · 鼠标瞄准／射击 · 空格冲刺',
+  'How to play': '玩法说明',
+  'Credits': '制作与鸣谢',
+  'Your relics': '你的遗物',
+  'Dash': '冲刺',
+  'DASH': '冲刺',
+  'SPACE': '空格',
+  'Cast nova': '释放星爆',
+  'NOVA': '星爆',
+  'Touch controls': '触屏操作',
+  'Movement joystick': '移动摇杆',
+  'MOVE': '移动',
+  'Aim and fire joystick': '瞄准与射击摇杆',
+  'AIM / FIRE': '瞄准／射击',
+  'CHAMBER CLEARED': '房间已清空',
+  'Feed the flame.': '让火焰更盛。',
+  'Choose one relic. Let it change the way you fight.': '选择一件遗物，让战斗多一种可能。',
+  'SELECT WITH 1 / 2 / 3': '按 1 / 2 / 3 选择',
+  'One more descent': '再来一局',
+  'Return to the surface': '返回地表',
+  'TAKE A BREATH': '稍作喘息',
+  'Close menu': '关闭菜单',
+  'Paused.': '已暂停。',
+  'Back to the rift': '返回战斗',
+  'Return to title': '返回标题页',
+  'Clear {rooms} total rooms to unlock.': '累计清空 {rooms} 个房间后解锁。',
+  '{name}: clear {rooms} rooms across any number of runs to unlock.': '{name}：跨局累计清空 {rooms} 个房间后解锁。',
+  '{cleared}/{rooms} ROOMS': '{cleared}/{rooms} 个房间',
+  '{current}/{required} ROOMS': '{current}/{required} 个房间',
+  'DEEPEST ROOM': '最深房间',
+  'ROOMS CLEARED': '累计清空',
+  'ESCAPES': '成功逃离',
+  'Continue · room {room}': '继续 · 第 {room} 室',
+  'Progress stays in this browser. A descent resumes at its last room entrance.': '进度保存在此浏览器中，继续时从上次房间入口开始。',
+  'Progress is currently in memory only.': '当前进度仅保留在本页内存中。',
+  'Open settings to export a backup.': '可在设置中导出备份。',
+  '{message} Open settings to export a backup.': '{message} 可在设置中导出备份。',
+  'Progress is in memory only. Open settings to export it.': '当前进度仅保留在本页内存中，请在设置中导出。',
+  'Room {room}. Move, aim and shoot. Space to dash.': '第 {room} 室。移动、瞄准并射击，按空格冲刺。',
+  'THE CINDER WARDEN': '灰烬守卫',
+  'CINDER WARDEN': '灰烬守卫',
+  'CINDER WARDEN · ENRAGED': '灰烬守卫 · 狂暴',
+  'THE GATEKEEPER': '守门者',
+  'THE HOLLOW': '空洞',
+  'THE HOLLOW · {room}': '空洞 · {room}',
+  'THE CINDER VAULT': '烬火地窖',
+  'THE CINDER VAULT · {room}': '烬火地窖 · {room}',
+  'THE RIFT ANSWERS': '裂隙回应了召唤',
+  'PILLAR COURT': '石柱庭院',
+  'SIDE CLOISTERS': '双侧回廊',
+  'CROSSROADS': '交叉路口',
+  'BROKEN HALL': '残破大厅',
+  'ALTAR RING': '环形祭坛',
+  'TWIN HALLS': '双厅',
+  '{layout} · {room}': '{layout} · 第 {room} 室',
+  'NEW RELIC': '新遗物',
+  'LEVEL {level}': '{level} 级',
+  'Room cleared. Choose one of three relics.': '房间已清空，从三件遗物中选择一件。',
+  'Relic acquired. Walk into an exit: Hunt or Refuge.': '已获得遗物，进入猎途或庇所出口。',
+  'THE VAULT IS BROKEN': '地牢已被攻破',
+  'FALLEN IN CHAMBER {room}': '倒在第 {room} 室',
+  'You brought the dawn.': '你带来了黎明。',
+  'The flame returns.': '火焰将再燃。',
+  'Eight chambers behind you. A different build awaits below.': '八个房间已在身后，下一种遗物组合仍在深处等你。',
+  'Your unlocks remain. The next descent is one click away.': '已解锁的武器会保留，随时可以再来一局。',
+  'ROOMS': '房间',
+  'DEFEATED': '击败',
+  'TIME': '用时',
+  'EMBERS': '余烬',
+  '{name} unlocked — select it on the title screen.': '已解锁 {name}，可在标题页选择。',
+  'Victory': '胜利',
+  'Defeated': '战败',
+  'Victory. {rooms} rooms cleared.': '胜利，已清空 {rooms} 个房间。',
+  'Defeated. {rooms} rooms cleared.': '战败，已清空 {rooms} 个房间。',
+  '{result}. {rooms} rooms cleared.': '{result}，已清空 {rooms} 个房间。',
+  '{hp} of {maxHp} hearts': '生命 {hp}/{maxHp}',
+  'Room {room} of 8, wave {wave} of {total}': '第 {room}/8 室，第 {wave}/{total} 波',
+  'WAVE {wave} / {total}': '第 {wave}/{total} 波',
+  'Wave {wave} of {total}.': '第 {wave} 波，共 {total} 波。',
+  'Walk into a gate · HUNT: more enemies + embers · REFUGE: easier + heal 1': '进入出口 · 猎途：更多敌人与余烬 · 庇所：敌人较少，恢复一颗心',
+  'Left stick moves · Right stick aims and fires': '左摇杆移动 · 右摇杆瞄准并射击',
+  'Hold mouse to fire · Space to dash · E unleashes nova': '按住鼠标射击 · 空格冲刺 · E 释放星爆',
+  'Dash recovering, {seconds} seconds': '冲刺冷却中，还需 {seconds} 秒',
+  'Dash ready': '冲刺就绪',
+  'Nova {percent} percent charged': '星爆充能 {percent}%',
+  '{name} · {level}: {description}': '{name} · {level} 级：{description}',
+  '{name} · {count}: {description}': '{name} · {count} 级：{description}',
+  'Move': '移动',
+  'MOUSE + HOLD CLICK': '鼠标＋按住左键',
+  'Aim and fire': '瞄准并射击',
+  'ARROW KEYS': '方向键',
+  'Keyboard aim and fire': '键盘瞄准并射击',
+  'Interact': '交互',
+  'INTERACT': '交互',
+  'Interact with nearby objects': '与附近物件交互',
+  'Rescue traveler': '救出旅人',
+  'Light lamp {number}': '点亮第 {number} 盏灯',
+  'Offer 10 embers': '供奉 10 余烬',
+  'Open hidden chest': '打开隐藏宝箱',
+  'Greet the lost spirit': '问候迷途幽灵',
+  'Traveler: clear room {room}': '旅人同行：清空第 {room} 室',
+  'Adventure notes': '探索提示',
+  'SPACE / RIGHT CLICK': '空格／右键',
+  'Dash through danger': '冲刺穿过险境',
+  'Nova: damage + clear bullets': '星爆：造成伤害并清除弹幕',
+  'Pause · fullscreen · audio': '暂停 · 全屏 · 声音',
+  'On touchscreens, move with the left stick and aim/fire with the right. Dash and Nova have separate buttons. Enter either glowing gate after choosing your relic.': '触屏时用左摇杆移动，右摇杆瞄准并射击。冲刺和星爆有独立按钮。选好遗物后，走入任意一扇发光的门。',
+  'Hunt adds enemies and extra embers. Refuge has fewer enemies and restores one heart on entry. Every fourth room is a boss. Clear eight rooms to escape.': '猎途有更多敌人与余烬；庇所敌人较少，进入时恢复一颗心。每四个房间会遇到首领，清空八个房间即可逃离。',
+  'Music': '音乐',
+  'Original Ninja Adventure soundtrack': 'Ninja Adventure 原版配乐',
+  'Sound effects': '音效',
+  'Reduce effects': '减少特效',
+  'No camera shake or cosmetic flashes': '关闭镜头震动和装饰性闪光',
+  'system preference active': '已启用系统偏好',
+  ' · system preference active': ' · 已启用系统偏好',
+  'Export save': '导出存档',
+  'Import save': '导入存档',
+  'Saved in this browser. No account or cloud sync.': '存档保存在此浏览器中，无需账号，不会同步到云端。',
+  'A continued run restarts at its last room entrance. Export a backup to move your progress to another browser.': '继续时会从上次房间入口重新开始。若要迁移到其他浏览器，请先导出备份。',
+  'Another tab changed this save. This tab has stopped saving.': '其他标签页修改了存档，本页已停止保存。',
+  'Load the latest save': '载入最新存档',
+  'Controls & rules': '操作与规则',
+  'Find your rhythm.': '找到战斗节奏。',
+  'Made of good things.': '制作与鸣谢。',
+  'Your relics.': '你的遗物。',
+  'Make it yours.': '按你的习惯设置。',
+  'Cinder Below · an eight-room browser action roguelite by 4c.': 'Cinder Below · 4c 制作的八房间浏览器动作冒险。',
+  'Pixel art, soundtrack and sound effects:': '像素画、配乐与音效：',
+  'Game code and design created for this site. No assets from The Binding of Isaac are used.': '游戏代码与设计为本站制作，未使用 The Binding of Isaac 的素材。',
+  'Audio uses original downloaded recordings. Asset source paths, hashes and licenses are preserved with the editable source.': '音频使用下载的原始录音。素材来源路径、哈希及许可信息与可编辑源码一同保留。',
+  'Your first relic waits after the first chamber.': '清空第一个房间后，即可选择首件遗物。',
+  'Back': '返回',
+  "Replace this browser's Cinder Below progress with the imported save? It contains {rooms} cleared rooms and {wins} escapes. Export the current save first if you want to keep it.": '使用导入存档替换此浏览器中的 Cinder Below 进度？其中包含 {rooms} 个已清空房间和 {wins} 次成功逃离。如需保留当前进度，请先导出。',
+  'Replace with imported save': '替换为导入存档',
+  'Cancel': '取消',
+  'Audio could not start. You can keep playing and retry with the music button.': '声音未能启动，你可以继续游玩，稍后用声音按钮重试。',
+  'The browser refused the save lock. Progress is kept in memory; export it before closing.': '浏览器无法安全锁定存档，进度仍保留在本页内存中，请在关闭前导出。',
+  'This browser cannot safely coordinate local saves. Progress is kept in memory; export it before closing.': '此浏览器无法安全协调本地保存，进度仍保留在本页内存中，请在关闭前导出。',
+  'This checkpoint could not be read. Your lifetime progress is safe. Start a new descent.': '无法读取此房间检查点，累计进度仍然保留，请开始新一局。',
+  'The latest save could not be loaded. Export this tab before closing it.': '无法载入最新存档，请在关闭本页前导出当前进度。',
+  'Another tab updated your save. Load its latest version or export this one.': '其他标签页更新了存档，请载入最新版本，或先导出本页进度。',
+  'Save exported. Keep this file to restore your progress.': '存档已导出，请保留此文件以便恢复进度。',
+  'That file is too large to be a Cinder Below save.': '此文件过大，无法作为 Cinder Below 存档导入。',
+  'Invalid save file.': '存档文件无效。',
+  'Safe local saving is unavailable in this browser. The current progress was kept; export it before closing.': '此浏览器无法安全保存到本地，当前进度仍保留在本页，请在关闭前导出。',
+  'The browser refused the save lock. Your current progress was kept.': '浏览器无法安全锁定存档，当前进度已保留。',
+  'Could not import safely. The current save was kept.': '无法安全导入，当前存档已保留。',
+  'Save imported. Your descent is ready.': '存档已导入，可以继续冒险了。',
+  'This browser uses the full page instead. Rotate your phone for a wider arena.': '此浏览器会使用整个页面显示游戏，横置手机可获得更宽的战场。',
+  'Fullscreen is unavailable here. The game still fills this page.': '当前无法进入全屏，游戏仍会铺满本页。',
+  'Some artwork could not load. Reload this page to retry.': '部分画面素材加载失败，请刷新页面重试。',
+  'The save structure is too large.': '存档结构过大。',
+  'The save contains an invalid number.': '存档含有无效数字。',
+  'The save contains too much text.': '存档文字过长。',
+  'The save is not valid JSON data.': '存档不是有效的 JSON 数据。',
+  'The save contains an invalid list.': '存档列表无效。',
+  'The save contains an invalid object.': '存档对象无效。',
+  'The save contains an invalid field.': '存档字段无效。',
+  'Save fields are missing or unrecognized.': '存档字段不完整或无法识别。',
+  'This save version is not supported.': '不支持此存档版本。',
+  'The save revision is invalid.': '存档修订号无效。',
+  'Lifetime progress is invalid.': '累计进度无效。',
+  'The saved settings are invalid.': '存档中的设置无效。',
+  'The credited progress for this run is invalid.': '本局已结算的进度无效。',
+  'The room checkpoint is invalid and cannot be resumed.': '房间检查点无效，无法继续。',
+  'The weapon record is invalid.': '武器记录无效。',
+  'The save file is too large.': '存档文件过大。',
+  'The save file is too large or has an invalid format.': '存档文件过大或格式无效。',
+  'This JSON save could not be read. Select the original exported file.': '无法读取 JSON 存档，请选择原始导出文件。',
+  'The save is invalid.': '存档无效。',
+  'This browser has blocked local saves. Export this page’s progress before leaving.': '此浏览器已阻止本地保存，请在离开前导出本页进度。',
+  'The existing save could not be read and has been preserved. Import a backup to recover.': '原存档无法读取，已为你保留。请导入备份恢复。',
+  'The local save could not be read. Export this page’s progress.': '无法读取本地存档，请导出本页进度。',
+  'Another tab changed the save during confirmation. Reload before importing.': '确认期间其他标签页修改了存档，请刷新后再导入。',
+  'The existing save could not be read. Automatic overwrite was blocked. Import a backup to recover.': '原存档无法读取，已阻止自动覆盖。请导入备份恢复。',
+  'Another tab updated the save. Export this page’s progress, then reload.': '其他标签页更新了存档，请先导出本页进度，再刷新页面。',
+  'The save revision has reached its limit.': '存档修订号已达到上限。',
+  'Local saving failed. This page’s progress is still in memory; export it before leaving.': '本地保存失败，进度仍保留在本页内存中，请在离开前导出。',
+  'Cinderbolt': '烬火',
+  'Steady single firebolts.': '稳定发射单枚火弹。',
+  'Scatter': '散星',
+  'Three short-range pellets with a longer firing interval.': '一次射出三枚近距离散弹，射击间隔较长。',
+  'Needle': '银针',
+  'Faster, lighter shots that pierce one extra enemy.': '弹丸更快、伤害较低，可额外穿透一个敌人。',
+  'Split Flame': '裂焰',
+  'Add two half-damage side bolts per level.': '每级额外发射两枚侧向火弹，各造成一半伤害。',
+  'SPLIT': '分裂',
+  'Echo Stone': '回声石',
+  'Shots bounce off walls and pillars once per level.': '每级使弹丸可在墙壁和石柱间多反弹一次。',
+  'BOUNCE': '弹射',
+  'Heartseeker': '穿心针',
+  'Shots pass through one extra enemy per level.': '每级使弹丸可额外穿透一个敌人。',
+  'PIERCE': '穿透',
+  'Mothlight': '引火蝶',
+  'Shots turn toward nearby enemies. Each level increases steering.': '弹丸会转向附近敌人，每级提高追踪能力。',
+  'SEEK': '追踪',
+  'Chain Spark': '雷枝',
+  'Hits arc to another nearby enemy for half damage. Add one jump per level.': '命中时向附近另一个敌人传导一半伤害，每级增加一次跳跃。',
+  'CHAIN': '连锁',
+  'Ember Core': '余烬芯',
+  'Hits burn for two seconds, dealing 3 damage per second per level.': '命中后灼烧两秒，每级每秒造成 3 点伤害。',
+  'BURN': '灼烧',
+  'Frost Seal': '霜印',
+  'Hits slow enemies for two seconds: 20% per level, up to 60%.': '命中后使敌人减速两秒，每级减速 20%，最高 60%。',
+  'SLOW': '减速',
+  'Ash Bloom': '灰烬花',
+  'Defeated enemies explode for 12 nearby damage per level, with growing radius.': '击败敌人会引发爆炸，每级对附近敌人造成 12 点伤害并扩大范围。',
+  'EXPLODE': '爆裂',
+  'Orbit Blades': '环刃',
+  'Gain one orbiting blade per level. Each damages enemies on contact.': '每级获得一枚环绕身体的利刃，接触敌人时造成伤害。',
+  'ORBIT': '环绕',
+  'Firetrail': '火痕',
+  'Dashes leave a damaging trail for one second. Each level increases damage.': '冲刺留下一秒的伤害路径，每级提高伤害。',
+  'Nova Core': '星爆核',
+  'Nova gains 25% radius, 12 damage and faster charging per level.': '每级使星爆范围扩大 25%、伤害增加 12 点，并加快充能。',
+  'Blood Pact': '赤誓',
+  'Lose one maximum heart this run for 30% more shot damage per level.': '本局每级失去一颗生命上限，换取 30% 的射击伤害加成。',
+  'TRADEOFF': '代价',
+  'HUNT': '猎途',
+  'HUNT +EMBERS': '猎途 · 更多余烬',
+  'Hunt': '猎途',
+  'REFUGE': '庇所',
+  'REFUGE +1 HP': '庇所 · 恢复一颗心',
+  'Refuge': '庇所',
+  'Hunt · More foes and embers': '猎途 · 更多敌人与余烬',
+  'Refuge · Heal one heart': '庇所 · 恢复一颗心',
+  'MORE FOES · MORE EMBERS': '更多敌人 · 更多余烬',
+  'HEAL 1 · FEWER FOES': '恢复一颗心 · 更少敌人',
+  'World coordinates; origin top-left; x right, y down. Aim uses absolute world position.': '世界坐标：左上角为原点，x 向右、y 向下。瞄准使用世界绝对坐标。',
+  'Defeat every enemy. Avoid attack warnings; use dash and charged nova.': '击败全部敌人，避开攻击预警，使用冲刺和充能后的星爆。',
+  'Choose one relic.': '选择一件遗物。',
+  'Walk into Hunt or Refuge.': '进入猎途或庇所出口。',
+  'The Cinder Warden is defeated. All eight rooms are cleared.': '灰烬守卫已被击败，八个房间全部清空。',
+  'This run is over. Start a new descent.': '本局已结束，开始新一轮冒险。',
+});
+
+export function t(englishTemplate, vars = {}) {
+  const source = String(englishTemplate ?? '');
+  const template = language === 'zh-CN' && Object.hasOwn(zh, source) ? zh[source] : source;
+  return template.replace(/\{([A-Za-z][\w]*)\}/g, (placeholder, key) => vars != null && Object.hasOwn(vars, key) ? String(vars[key]) : placeholder);
+}
+
+const messagePrefixes = Object.freeze({
+  'Save failed: ': '保存失败：',
+  'Invalid save: ': '无效存档：',
+  'Import failed: ': '导入失败：',
+  'Could not import safely. ': '无法安全导入。',
+});
+// Longest first keeps complete warnings intact when a caller appends another sentence.
+const messageKeys = Object.keys(zh).filter((key) => /[.!?]$/.test(key)).sort((a, b) => b.length - a.length);
+
+export function translateMessage(rawEnglish) {
+  const source = String(rawEnglish ?? '');
+  if (language === 'en' || !source) return source;
+  if (Object.hasOwn(zh, source)) return zh[source];
+  let result = '', remaining = source;
+  while (remaining) {
+    const prefix = Object.keys(messagePrefixes).find((key) => remaining.startsWith(key));
+    const known = prefix || messageKeys.find((key) => remaining.startsWith(key));
+    if (known) {
+      result += prefix ? messagePrefixes[known] : zh[known];
+      remaining = remaining.slice(known.length);
+    } else {
+      result += remaining[0];
+      remaining = remaining.slice(1);
+    }
+  }
+  return result;
+}
+
+function localizeItem(item) {
+  const result = { ...item };
+  for (const field of ['name', 'description', 'tag']) {
+    if (typeof item[field] === 'string') result[field] = t(item[field]);
+  }
+  return result;
+}
+
+export function localizeWeapon(weapon) { return localizeItem(weapon); }
+export function localizeRelic(relic) { return localizeItem(relic); }
+
+export function applyTranslations(root = globalThis.document) {
+  if (!root) return 0;
+  const selector = '[data-i18n], [data-i18n-aria-label], [data-i18n-title], [data-i18n-content]';
+  const nodes = [...(root.matches?.(selector) ? [root] : []), ...(root.querySelectorAll?.(selector) || [])];
+  let count = 0;
+  for (const node of nodes) {
+    if (node.hasAttribute('data-i18n')) {
+      node.textContent = t(node.getAttribute('data-i18n'));
+      count++;
+    }
+    for (const attribute of ['aria-label', 'title', 'content']) {
+      if (node.hasAttribute(`data-i18n-${attribute}`)) {
+        node.setAttribute(attribute, t(node.getAttribute(`data-i18n-${attribute}`)));
+        count++;
+      }
+    }
+  }
+  return count;
+}

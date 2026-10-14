@@ -64,7 +64,7 @@ function normalize(data) {
   if (data.version !== 1) throw new Error('This save version is not supported.');
   if (!integer(data.revision, MAX_REVISION)) throw new Error('The save revision is invalid.');
   objectKeys(data.stats, STAT_KEYS);
-  if (STAT_KEYS.some(key => !integer(data.stats[key], key === 'bestRoom' ? 8 : MAX_COUNTER)) || data.stats.wins > data.stats.runs) throw new Error('Lifetime progress is invalid.');
+  if (STAT_KEYS.some(key => !integer(data.stats[key], key === 'bestRoom' ? 15 : MAX_COUNTER)) || data.stats.wins > data.stats.runs) throw new Error('Lifetime progress is invalid.');
   objectKeys(data.settings, SETTING_KEYS);
   if (SETTING_KEYS.some(key => typeof data.settings[key] !== 'boolean')) throw new Error('The saved settings are invalid.');
   const banked = data.banked === undefined ? { kills: 0, rooms: 0, embers: 0 } : data.banked;

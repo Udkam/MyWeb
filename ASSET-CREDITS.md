@@ -4,7 +4,7 @@ The game uses original **Ninja Adventure** assets by **Pixel-boy and AAA**, down
 
 Source archive: `Ninja Adventure - Asset Pack.zip`, read without modifying the preserved original. Its SHA-256, byte size, every selected original ZIP entry, local alias, image dimension and individual SHA-256 are in [the manifest](src/assets/manifest.json). Selected files are byte-for-byte original. Canvas uses source rectangles, integer scaling, ordinary transforms, and gameplay indicators; no generated or redrawn raster art is included.
 
-The subset contains 31 PNG images, 2 OGG music files, 5 WAV effects and the 2 original license/readme files: **2,742,833 bytes** before the manifest. The full source archive is not part of the public runtime.
+The subset contains 91 PNG images, 7 OGG music files, 5 WAV effects and the 2 original license/readme files: **9,114,026 bytes** before the manifest. The full source archive is not part of the public runtime.
 
 | Runtime role | Original asset | Verified frame layout |
 |---|---|---|
@@ -19,3 +19,9 @@ The subset contains 31 PNG images, 2 OGG music files, 5 WAV effects and the 2 or
 Audio remains the author's original recordings. `music-fight.ogg` is **17 - Fight** (32 s); `music-dungeon.ogg` is **21 - Dungeon** (60 s). Effects map `shot` to Launch, `dash` to Whoosh, `hit` to Hit1, `death` to Explosion2, `relic` to PowerUp1. Durations/sample rates were verified from the original OGG/PCM headers; listening quality, mixing and loop seam suitability require audition and are not implied by file names. Playback is owned by the app and begins after a user gesture.
 
 Research-only original contact sheets and the 532-page study stay outside this runtime. 0x72 DungeonTileset II was examined as an alternative; no art from that pack or another game's screenshots is included here.
+
+## Expanded campaign subset
+
+The campaign uses 20 distinct ordinary monster sheets (tiny Larva2 children excluded) and ten dedicated Boss families: GiantFrog, GiantBamboo, SquidGreen, GiantSlime, TenguBlue, GiantFlam, GiantBlueSamurai, DemonCyclop, GiantRacoonGold and GiantSpirit. The manifest records every source entry and all ten animation families, including rectangular 96×48 Samurai idle/walk/hit cells. No enemy is counted twice through a renamed copy. Some families have no dedicated attack strip; gameplay windups use existing original energy effects.
+
+Added original tracks: **18 - Aquatic** (mire), **10 - Dark Castle** (cinder), **28 - Tension** (storm), **24 - Final Area** (void), and **22 - Dream** (rift). The exact files, original bytes and SHA-256 values are in the manifest, together with the scene mapping. All five additions passed full FFmpeg decoding; they remain untranscoded. The five campaign biomes and purple rift use original interior/outdoor floor, nature, water, debris and FX crops. Palette/lighting adjustments happen in Canvas; no new raster assets are synthesized.

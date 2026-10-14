@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "revision": 0,
+  "stats": {
+    "runs": 1,
+    "wins": 0,
+    "kills": 0,
+    "rooms": 2,
+    "embers": 0,
+    "bestRoom": 3
+  },
+  "settings": {
+    "music": false,
+    "sfx": false,
+    "reduceMotion": false
+  },
+  "checkpoint": {
+    "kind": "cinder-below-run",
+    "version": 2,
+    "totalRooms": 15,
+    "seed": 424242,
+    "width": 1100,
+    "height": 720,
+    "room": 3,
+    "route": "refuge",
+    "weapon": "cinder",
+    "relics": {
+      "cold": 2
+    },
+    "hp": 6,
+    "novaCharge": 100,
+    "stats": {
+      "kills": 0,
+      "rooms": 2,
+      "embers": 0,
+      "shots": 0,
+      "hits": 0,
+      "damageTaken": 0,
+      "elapsed": 0
+    },
+    "time": 0,
+    "nextId": 6,
+    "adventure": {
+      "version": 1,
+      "spent": 0,
+      "claims": [],
+      "escort": null,
+      "cleanRooms": 0,
+      "roomDamage": 0
+    }
+  },
+  "banked": {
+    "kills": 0,
+    "rooms": 2,
+    "embers": 0
+  },
+  "unlocks": [
+    "cinder"
+  ]
+}

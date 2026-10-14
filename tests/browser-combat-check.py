@@ -59,6 +59,14 @@ def path_to(s, goal):
     start_point = (s['player']['x'], s['player']['y'])
     left, right, top, bottom = bounds(s, 20)
     goal = (min(right, max(left, goal[0])), min(bottom, max(top, goal[1])))
+    # An actual body can stand closer to a wall than the planner's safety margin.
+    # Walk back into navigable space with the real radius before inflating walls.
+    if blocked(s, start_point, 20):
+        exits = [(start_point[0] + math.cos(i * math.tau / 16) * r,
+                  start_point[1] + math.sin(i * math.tau / 16) * r)
+                 for r in [26, 52] for i in range(16)]
+        exits = [p for p in exits if not blocked(s, p, 20) and line_clear(s, start_point, p, 13)]
+        if exits: return min(exits, key=lambda p: dist(p, goal))
     if line_clear(s, start_point, goal, 19):
         return goal
     def key(p): return (round(p[0] / size), round(p[1] / size))
@@ -106,12 +114,16 @@ def path_to(s, goal):
 
 def movement(s, waypoint, fighting=True):
     p = s['player']; origin = (p['x'], p['y'])
+    # A full 240 ms prediction overshoots nearby corner waypoints and makes
+    # standing still win forever. Shorten the horizon near those waypoints.
+    horizon = min(.24, max(.04, dist(origin, waypoint) / 215))
+    clearance = p['r'] if blocked(s, origin, 15) else 15
     options = []
     for dx, dy in [(0, 0), (-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)]:
         length = math.hypot(dx, dy) or 1
         vx, vy = dx / length * 215, dy / length * 215
-        future = (origin[0] + vx * 0.24, origin[1] + vy * 0.24)
-        if not line_clear(s, origin, future, 15): continue
+        future = (origin[0] + vx * horizon, origin[1] + vy * horizon)
+        if not line_clear(s, origin, future, clearance): continue
         score = dist(future, waypoint) * 0.65
         risk = 0
         if fighting:
@@ -133,6 +145,11 @@ def movement(s, waypoint, fighting=True):
                 t = min(0.42, max(0, -(rx * rvx + ry * rvy) / (rvx * rvx + rvy * rvy + 0.001)))
                 separation = math.hypot(rx + rvx * t, ry + rvy * t)
                 risk += max(0, 40 - separation) ** 2 * 0.65
+            for hazard in s.get('hazards', []):
+                dangerous = hazard['kind'] == 'mine' or hazard.get('remaining', 9) < .65
+                if dangerous:
+                    d = dist(future, (hazard['x'], hazard['y']))
+                    risk += max(0, hazard.get('radius', 14) + 35 - d) ** 2 * 1.8
         options.append((score + risk, dx, dy, risk))
     if not options: return 0, 0, 0
     _, dx, dy, risk = min(options)
@@ -185,7 +202,7 @@ def run_attempt(page, index):
             attempt['waves'].append({'room': state['room'], 'wave': state.get('wave', 1), 'waveTotal': state.get('waveTotal', 1), 'time': state['time'], 'hp': state['player']['hp']})
             if state.get('wave') == 2 and state['room'] in (2, 7): attempt['screenshots'].append(capture(page, index, f'wave-{state["room"]}-2', state))
         for enemy in state['enemies']:
-            if enemy['type'] in ('sentinel', 'warden') and enemy.get('telegraph'):
+            if enemy['type'] == state.get('bossId') and enemy.get('telegraph'):
                 key = (state['room'], enemy['stage'], enemy['telegraph']['kind'])
                 if key not in seen_patterns:
                     seen_patterns.add(key)
@@ -227,10 +244,11 @@ def run_attempt(page, index):
         else:
             enemies = state['enemies']
             visible = [e for e in enemies if line_clear(state, player, (e['x'], e['y']), 5)]
-            target = min(visible or enemies, key=lambda e: dist(player, (e['x'], e['y'])))
+            attackable = [e for e in (visible or enemies) if e['phase'] not in ('burrow', 'blink')] or enemies
+            target = min(attackable, key=lambda e: dist(player, (e['x'], e['y'])) - (70 if e['type'] in ('medic', 'summoner') else 0))
             # Circle at firing distance, with A* to go around stone pillars.
             angle = math.atan2(player[1] - target['y'], player[0] - target['x']) + direction * 0.5
-            desired = 210 if target['type'] not in ('sentinel', 'warden') else 235
+            desired = 210 if target['type'] != state.get('bossId') else 250
             goal = (target['x'] + math.cos(angle) * desired, target['y'] + math.sin(angle) * desired)
             waypoint = path_to(state, goal)
             dx, dy, risk = movement(state, waypoint)
@@ -244,14 +262,15 @@ def run_attempt(page, index):
                 page.keyboard.press('e')
             if p['dashCooldown'] <= 0 and (risk > 110 or nearest < 65):
                 page.keyboard.press('Space')
-            if state['room'] in (4, 8) and state['room'] not in captured_bosses and any(e.get('telegraph') for e in enemies if e['type'] in ('sentinel', 'warden')):
+            if state.get('bossId') and state['room'] not in captured_bosses and any(e.get('telegraph') for e in enemies if e['type'] == state['bossId']):
                 captured_bosses.add(state['room'])
                 attempt['screenshots'].append(capture(page, index, f'boss-{state["room"]}', state))
         desired_keys = ({'d'} if dx > 0 else {'a'} if dx < 0 else set()) | ({'s'} if dy > 0 else {'w'} if dy < 0 else set())
         for key in held - desired_keys: page.keyboard.up(key)
         for key in desired_keys - held: page.keyboard.down(key)
         held = desired_keys
-        state = json.loads(page.evaluate('(ms) => window.advanceTime(ms)', MS))
+        tick_ms = min(MS, max(40, int(dist(player, waypoint) / 215 * 750))) if state['phase'] == 'exit' else MS
+        state = json.loads(page.evaluate('(ms) => window.advanceTime(ms)', tick_ms))
         current = (state['player']['x'], state['player']['y'])
         still = still + MS / 1000 if dist(previous, current) < 1 else 0
         previous = current

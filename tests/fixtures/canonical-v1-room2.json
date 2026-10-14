@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "revision": 0,
+  "stats": {
+    "runs": 3,
+    "wins": 1,
+    "kills": 40,
+    "rooms": 12,
+    "embers": 300,
+    "bestRoom": 6
+  },
+  "settings": {
+    "music": false,
+    "sfx": false,
+    "reduceMotion": false
+  },
+  "checkpoint": {
+    "kind": "cinder-below-run",
+    "version": 1,
+    "seed": 424242,
+    "width": 1100,
+    "height": 720,
+    "room": 2,
+    "route": "refuge",
+    "weapon": "needle",
+    "relics": {
+      "cold": 1
+    },
+    "hp": 5,
+    "novaCharge": 33,
+    "stats": {
+      "kills": 3,
+      "rooms": 1,
+      "embers": 11,
+      "shots": 7,
+      "hits": 5,
+      "damageTaken": 2,
+      "elapsed": 2.25
+    },
+    "time": 2.25,
+    "nextId": 6
+  },
+  "banked": {
+    "kills": 3,
+    "rooms": 1,
+    "embers": 11
+  },
+  "unlocks": [
+    "cinder",
+    "scatter",
+    "needle"
+  ]
+}

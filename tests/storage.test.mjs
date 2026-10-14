@@ -111,7 +111,7 @@ test('bad root, version, unknown fields, numbers, settings and inconsistent coun
   const invalid = [null, [], {}, { ...createDefaultSave(), version: 2 }];
   for (const mutate of [
     d => { d.extra = 1; }, d => { d.revision = -1; }, d => { d.revision = 0.5; },
-    d => { d.stats.runs = 1e10; }, d => { d.stats.wins = 1; }, d => { d.stats.bestRoom = 9; },
+    d => { d.stats.runs = 1e10; }, d => { d.stats.wins = 1; }, d => { d.stats.bestRoom = 16; },
     d => { d.settings.music = 'yes'; }, d => { d.stats.rooms = -1; },
     d => { d.banked.kills = 1; }, d => { d.banked.unknown = 0; }, d => { d.banked = null; }, d => { d.settings.extra = true; },
   ]) { const data = createDefaultSave(); mutate(data); invalid.push(data); }
@@ -156,4 +156,12 @@ test('revision overflow refuses write without damaging an otherwise readable bac
   assert.equal(loadSave(store).status, 'ready');
   assert.equal(saveSave(data, store).status, 'invalid');
   assert.equal(store.getItem(SAVE_KEY), raw);
+});
+
+test('the unchanged v1 save envelope accepts modern v2 checkpoints and legacy v1 progress without migration', () => {
+  const current=createDefaultSave();current.stats.bestRoom=15;current.stats.rooms=15;current.stats.runs=1;current.stats.wins=1;
+  current.checkpoint=snapshot(createRun({seed:39}));
+  const parsed=parseImport(exportSave(current));assert.equal(parsed.error,null);assert.equal(parsed.data.version,1);assert.equal(parsed.data.checkpoint.version,2);assert.equal(parsed.data.stats.bestRoom,15);
+  const legacy=createDefaultSave();legacy.checkpoint=snapshot(createRun({seed:39,campaign:'legacy'}));delete legacy.checkpoint.adventure;
+  const old=parseImport(exportSave(legacy));assert.equal(old.error,null);assert.equal(old.data.checkpoint.version,1);assert.equal(restoreRun(old.data.checkpoint).totalRooms,8);
 });

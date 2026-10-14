@@ -1,0 +1,9 @@
+{
+  "fixture": "canonical-v1-room2.json",
+  "source": "E:/Proj/Active/MyWeb/cinder-below/src/engine.js",
+  "source_sha256": "73f3275c72442981a0f1927a137cef55e3dc9057033173d085f27a2cbb22f1e9",
+  "generation": "Old createRun + explicit entry fixture + old enterRoom/snapshot/exportSave, without changing checkpoint version.",
+  "captured_at": "2026-10-14",
+  "checkpoint_version": 1,
+  "room": 2
+}

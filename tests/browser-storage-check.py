@@ -39,6 +39,9 @@ def load(context, name):
     page.on('pageerror', lambda error: errors.append({'case': name, 'error': str(error)}))
     page.goto(URL, wait_until='networkidle')
     page.wait_for_function('window.render_game_to_text && JSON.parse(window.render_game_to_text()).ui.ready')
+    # Keep the existing English diagnostic assertions; localization has its own suite.
+    if observe(page)['ui']['language'] != 'en':
+        page.locator('#language-toggle').click()
     return page
 
 

@@ -449,6 +449,825 @@
       "bytes": 599,
       "sha256": "6865198a6d7b052636269e9db0de966304737d5f8bacf683f2ac06ad60a68bd7",
       "modified": false
+    },
+    {
+      "file": "sniper.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Monster/Owl2/Owl2.png",
+      "bytes": 3663,
+      "sha256": "d94dc8b6edf6ba7d74169b3c59b5aa638d8149556a91d11fcc646008bb528cbd",
+      "modified": false,
+      "dimensions": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "brood.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Monster/SpiderRed/SpriteSheet.png",
+      "bytes": 1843,
+      "sha256": "0cebb91df803f6a75466c7c5fd2bc2a1163c9ac4be555953012dad61c5ba9be4",
+      "modified": false,
+      "dimensions": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "meteor.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Monster/Flam2/SpriteSheet.png",
+      "bytes": 3317,
+      "sha256": "d6cc9b3211972f1191501993147570cfa34f24ebf36425040b33f44785c12df3",
+      "modified": false,
+      "dimensions": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "tiny.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Monster/Larva2/Larva2.png",
+      "bytes": 3954,
+      "sha256": "ec5375594e7cfbacd586f6621e9f64dd68ddb1a12e630a12e87737f6fd060bff",
+      "modified": false,
+      "dimensions": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "traveler.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Character/Monk/SeparateAnim/Walk.png",
+      "bytes": 4567,
+      "sha256": "55ccc341cb6bb97d4ed13972b430eddf1b614b33f0e9bbd422d7b8ff781525f9",
+      "modified": false,
+      "dimensions": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "ghost.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Monster/Spirit/SpriteSheet.png",
+      "bytes": 3309,
+      "sha256": "044a4ca59820177ebe827f69af3f094efbeaab586d1044507d7ba0e652b2a0d9",
+      "modified": false,
+      "dimensions": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "crypt-interior.png",
+      "original": "Ninja Adventure - Asset Pack/Backgrounds/Tilesets/Interior/TilesetInterior.png",
+      "bytes": 14493,
+      "sha256": "49b76b218b3fbb3308984f7579609822eb99d464557aaa6859296e11378f42ba",
+      "modified": false,
+      "dimensions": [
+        256,
+        320
+      ]
+    },
+    {
+      "file": "weaver.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Monster/Snake/Snake.png",
+      "bytes": 3769,
+      "sha256": "ae74cfa2a1ad659c3fd5b602fa6a10a3b845c2dea33b96c0dd9990c8f88c0f9a",
+      "modified": false,
+      "dimensions": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "bomber.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Monster/Mushroom/mushroom.png",
+      "bytes": 3406,
+      "sha256": "21e40fad5ef2a0ddff9ef3f131341697a1bc6858741e7e4d72a713bf33ff3921",
+      "modified": false,
+      "dimensions": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "trapper.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Monster/Bamboo/SpriteSheet.png",
+      "bytes": 3661,
+      "sha256": "89563b60160c261861b445cd93803beea5e68df21fd032b68c89622421fe7e9b",
+      "modified": false,
+      "dimensions": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "summoner.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Monster/Dragon/SpriteSheet.png",
+      "bytes": 3639,
+      "sha256": "ce4b37aedb75fc928d5847b2863974165b13cdafea721b5def1c932d00300222",
+      "modified": false,
+      "dimensions": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "leech.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Monster/Octopus/SpriteSheet.png",
+      "bytes": 3350,
+      "sha256": "f005e6113e548edcdb5d85fbbaa1f58ad18d33942acfa13fa6af46635e51c926",
+      "modified": false,
+      "dimensions": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "shieldbearer.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Monster/Mollusc/Mollusc.png",
+      "bytes": 3228,
+      "sha256": "6f51dfc125cbe67bc7dfe5e19f55a8cbd15d0520b1e899ff7ca428040b901521",
+      "modified": false,
+      "dimensions": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "prism.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Monster/Cyclope/SpriteSheet.png",
+      "bytes": 3846,
+      "sha256": "1f72bfeb41ed428faafe25aa6326185cd97874455a913f8849cefcfae5c0fd94",
+      "modified": false,
+      "dimensions": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "boomerang.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Monster/Reptile/Reptile.png",
+      "bytes": 3886,
+      "sha256": "2840f2dc5d0232154649ecf157919b69ef7ec0adfd1a5c622ab3d599b64f7746",
+      "modified": false,
+      "dimensions": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "burrower.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Monster/Mole/Mole.png",
+      "bytes": 3511,
+      "sha256": "368cb529700b3aa2a0f429d031fa7e6863ea22cf49c1711f8cd59169eca83819",
+      "modified": false,
+      "dimensions": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "medic.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Monster/HeartGreen/SpriteSheet.png",
+      "bytes": 1267,
+      "sha256": "73e41abf5dcea6d2e2e235a712976a77a438ea145483ae5f940571d01ca0c5a4",
+      "modified": false,
+      "dimensions": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "duelist.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Monster/Beast/Beast.png",
+      "bytes": 3837,
+      "sha256": "7c79c8ddf253c50e5e38172704d61b777d1cd2d15d09189b6d63585553080e60",
+      "modified": false,
+      "dimensions": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "orbiter.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Monster/LanternRed/SpriteSheet.png",
+      "bytes": 923,
+      "sha256": "835ba536895ac67d0a008f6266840d698ed3a428f5ab47c0330a5820bc0061e8",
+      "modified": false,
+      "dimensions": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "frost.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Monster/AxolotBlue/SpriteSheet.png",
+      "bytes": 3767,
+      "sha256": "cb36fe161b395be510d2844011ead66b20868a931d0df60bedafdd4ff267d47b",
+      "modified": false,
+      "dimensions": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "bomb.png",
+      "original": "Ninja Adventure - Asset Pack/Items/Projectile/Bomb.png",
+      "bytes": 256,
+      "sha256": "7bb2685d7b5dc3759fbaeb453521514e02112e4402a2197e55b8e8d52a863863",
+      "modified": false,
+      "dimensions": [
+        12,
+        13
+      ]
+    },
+    {
+      "file": "ice-spike.png",
+      "original": "Ninja Adventure - Asset Pack/FX/Projectile/IceSpike.png",
+      "bytes": 3268,
+      "sha256": "94ff74617f81f1ebc5b9a5ac6892157607340c5c10e56889e2908250732c6923",
+      "modified": false,
+      "dimensions": [
+        144,
+        10
+      ]
+    },
+    {
+      "file": "rock.png",
+      "original": "Ninja Adventure - Asset Pack/Items/Resource/Rock.png",
+      "bytes": 314,
+      "sha256": "c86c7f19f5f6b909337c2ecdd6fe0bbb789266a953dfbc2635b04896936f6ed7",
+      "modified": false,
+      "dimensions": [
+        16,
+        16
+      ]
+    },
+    {
+      "file": "shuriken.png",
+      "original": "Ninja Adventure - Asset Pack/Items/Projectile/Shuriken.png",
+      "bytes": 299,
+      "sha256": "006799c47d9a6ee6b9158fc33e15e70c04ffe2b713f5d90bb07258485a886184",
+      "modified": false,
+      "dimensions": [
+        15,
+        15
+      ]
+    },
+    {
+      "file": "briar-idle.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Boss/GiantBamboo/Idle.png",
+      "bytes": 4049,
+      "sha256": "b6030c6c44f34445f354febbb75e0abdd3eab3c515d53453a4443c98ce565a10",
+      "modified": false,
+      "license": "CC0-1.0",
+      "dimensions": [
+        372,
+        62
+      ],
+      "frame_w": 62,
+      "frame_h": 62,
+      "frames": 6
+    },
+    {
+      "file": "briar-charge.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Boss/GiantBamboo/Charge.png",
+      "bytes": 3512,
+      "sha256": "69a77012dc1a0a132c65c8e8ab70aaaee6316e4d2597d02566fa2b1098fbe585",
+      "modified": false,
+      "license": "CC0-1.0",
+      "dimensions": [
+        186,
+        62
+      ],
+      "frame_w": 62,
+      "frame_h": 62,
+      "frames": 3
+    },
+    {
+      "file": "briar-attack.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Boss/GiantBamboo/Attack.png",
+      "bytes": 4671,
+      "sha256": "fba4d5ec9a21c4e2ca773c44e544d0dce43743fbccdffbc31c8fb5eca9553b86",
+      "modified": false,
+      "license": "CC0-1.0",
+      "dimensions": [
+        310,
+        62
+      ],
+      "frame_w": 62,
+      "frame_h": 62,
+      "frames": 5
+    },
+    {
+      "file": "briar-hit.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Boss/GiantBamboo/Hit.png",
+      "bytes": 4857,
+      "sha256": "6baa8443dc499abd18c1bde62b0c08fceae9f33785a6ceab82bdab77e4fa7613",
+      "modified": false,
+      "license": "CC0-1.0",
+      "dimensions": [
+        248,
+        62
+      ],
+      "frame_w": 62,
+      "frame_h": 62,
+      "frames": 4
+    },
+    {
+      "file": "leviathan-idle.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Boss/SquidGreen/Idle.png",
+      "bytes": 1334,
+      "sha256": "313ca24b0612e55cff0f2c62e4d97218aa1720133cfdda2cd1d10f642b0b9199",
+      "modified": false,
+      "license": "CC0-1.0",
+      "dimensions": [
+        304,
+        79
+      ],
+      "frame_w": 76,
+      "frame_h": 79,
+      "frames": 4
+    },
+    {
+      "file": "leviathan-attack.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Boss/SquidGreen/Attack.png",
+      "bytes": 2342,
+      "sha256": "376407aea2c4fe277577646a9614d8e8653421c0aa2189cdc2d872a3e9d243d5",
+      "modified": false,
+      "license": "CC0-1.0",
+      "dimensions": [
+        456,
+        79
+      ],
+      "frame_w": 76,
+      "frame_h": 79,
+      "frames": 6
+    },
+    {
+      "file": "leviathan-shoot.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Boss/SquidGreen/Shoot.png",
+      "bytes": 2429,
+      "sha256": "83a74e520ace4c4043bcc43c70e8556f19ee144ab3054a40dd8ab9ee011b2143",
+      "modified": false,
+      "license": "CC0-1.0",
+      "dimensions": [
+        380,
+        79
+      ],
+      "frame_w": 76,
+      "frame_h": 79,
+      "frames": 5
+    },
+    {
+      "file": "leviathan-hit.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Boss/SquidGreen/Hit.png",
+      "bytes": 2090,
+      "sha256": "d7f1653035b1c39f59db6c5bfed09f6fbb657ce4c8a3d8df8feacec4d0ae8b8c",
+      "modified": false,
+      "license": "CC0-1.0",
+      "dimensions": [
+        304,
+        79
+      ],
+      "frame_w": 76,
+      "frame_h": 79,
+      "frames": 4
+    },
+    {
+      "file": "mirror-idle.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Boss/GiantSlime/Idle.png",
+      "bytes": 841,
+      "sha256": "5eb1c425443d8757eb4636be322c3fb365170240e27919820789a32f1d3d9ea4",
+      "modified": false,
+      "license": "CC0-1.0",
+      "dimensions": [
+        310,
+        52
+      ],
+      "frame_w": 62,
+      "frame_h": 52,
+      "frames": 5
+    },
+    {
+      "file": "mirror-jump.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Boss/GiantSlime/Jump.png",
+      "bytes": 3974,
+      "sha256": "c2852aee858fca53dcc22cb023a120c551b08d0ce4cb5ab08410ab9d6a699ea6",
+      "modified": false,
+      "license": "CC0-1.0",
+      "dimensions": [
+        806,
+        52
+      ],
+      "frame_w": 62,
+      "frame_h": 52,
+      "frames": 13
+    },
+    {
+      "file": "mirror-hit.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Boss/GiantSlime/Hit.png",
+      "bytes": 2723,
+      "sha256": "252acda7e6f8791530de4d208b070e58e50433dacb1a07156d5940491a6c39ba",
+      "modified": false,
+      "license": "CC0-1.0",
+      "dimensions": [
+        310,
+        52
+      ],
+      "frame_w": 62,
+      "frame_h": 52,
+      "frames": 5
+    },
+    {
+      "file": "kiln-idle.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Boss/GiantFlam/Idle.png",
+      "bytes": 2303,
+      "sha256": "2cbe6951a3209c3204bdc7b634f72e474e38bc14eda51726cb1126712ff97687",
+      "modified": false,
+      "license": "CC0-1.0",
+      "dimensions": [
+        250,
+        50
+      ],
+      "frame_w": 50,
+      "frame_h": 50,
+      "frames": 5
+    },
+    {
+      "file": "kiln-hit.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Boss/GiantFlam/Hit.png",
+      "bytes": 2082,
+      "sha256": "00ea580c02798e3ac56c3f061d7ea74b66979a31b998d5c5a66299ceeb93ce63",
+      "modified": false,
+      "license": "CC0-1.0",
+      "dimensions": [
+        150,
+        50
+      ],
+      "frame_w": 50,
+      "frame_h": 50,
+      "frames": 3
+    },
+    {
+      "file": "tempest-idle.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Boss/GiantBlueSamurai/Idle.png",
+      "bytes": 3120,
+      "sha256": "6e9b02eeda3cfc07ac33dd1ca6d682c17333f4356769f34d7ddd8805f85b6029",
+      "modified": false,
+      "license": "CC0-1.0",
+      "dimensions": [
+        576,
+        48
+      ],
+      "frame_w": 96,
+      "frame_h": 48,
+      "frames": 6
+    },
+    {
+      "file": "tempest-chargeleft.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Boss/GiantBlueSamurai/ChargeLeft.png",
+      "bytes": 3252,
+      "sha256": "8e15e5ba39eeb6c7378bd43a45fbb453092ebc44e73d28e359eb813b4d0014e2",
+      "modified": false,
+      "license": "CC0-1.0",
+      "dimensions": [
+        288,
+        96
+      ],
+      "frame_w": 96,
+      "frame_h": 96,
+      "frames": 3
+    },
+    {
+      "file": "tempest-attackleft.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Boss/GiantBlueSamurai/AttackLeft.png",
+      "bytes": 3325,
+      "sha256": "128c59a924e0e36c70d0b1693c060e8481c52d20fff49e57b706b510ab80426e",
+      "modified": false,
+      "license": "CC0-1.0",
+      "dimensions": [
+        384,
+        96
+      ],
+      "frame_w": 96,
+      "frame_h": 96,
+      "frames": 4
+    },
+    {
+      "file": "tempest-walk.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Boss/GiantBlueSamurai/Walk.png",
+      "bytes": 2155,
+      "sha256": "0bfe296a87d6e7a20b09aea471d6e60ae22132deb8a6c91a6c3125d53f232f16",
+      "modified": false,
+      "license": "CC0-1.0",
+      "dimensions": [
+        576,
+        48
+      ],
+      "frame_w": 96,
+      "frame_h": 48,
+      "frames": 6
+    },
+    {
+      "file": "tempest-hit.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Boss/GiantBlueSamurai/Hit.png",
+      "bytes": 3978,
+      "sha256": "fc9370f4ac61358e58862f5ce0630947194025bfef46822ecea3bfbd862bd320",
+      "modified": false,
+      "license": "CC0-1.0",
+      "dimensions": [
+        384,
+        48
+      ],
+      "frame_w": 96,
+      "frame_h": 48,
+      "frames": 4
+    },
+    {
+      "file": "eclipse-idle.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Boss/DemonCyclop/Idle.png",
+      "bytes": 1590,
+      "sha256": "0bf748c6b777a2c0b77eead35b13e5e21e3a08e2bcbc69e8bc8b6fce52221a60",
+      "modified": false,
+      "license": "CC0-1.0",
+      "dimensions": [
+        250,
+        50
+      ],
+      "frame_w": 50,
+      "frame_h": 50,
+      "frames": 5
+    },
+    {
+      "file": "eclipse-walk.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Boss/DemonCyclop/Walk.png",
+      "bytes": 2030,
+      "sha256": "170669561646d42f3500ec137b69fad91b1f3453aa9902bdb8aa90eae4f37593",
+      "modified": false,
+      "license": "CC0-1.0",
+      "dimensions": [
+        300,
+        50
+      ],
+      "frame_w": 50,
+      "frame_h": 50,
+      "frames": 6
+    },
+    {
+      "file": "eclipse-hit.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Boss/DemonCyclop/Hit.png",
+      "bytes": 2041,
+      "sha256": "6546e595f653c4de180534c193012fc6a13729bf9eb880f283c593a7ffd46857",
+      "modified": false,
+      "license": "CC0-1.0",
+      "dimensions": [
+        150,
+        50
+      ],
+      "frame_w": 50,
+      "frame_h": 50,
+      "frames": 3
+    },
+    {
+      "file": "sovereign-idle.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Boss/GiantRacoonGold/Idle.png",
+      "bytes": 1207,
+      "sha256": "0bb87a7466ddf36b111763567eee41e12f95118c2cd1d380f0bf4511617757a9",
+      "modified": false,
+      "license": "CC0-1.0",
+      "dimensions": [
+        360,
+        60
+      ],
+      "frame_w": 60,
+      "frame_h": 60,
+      "frames": 6
+    },
+    {
+      "file": "sovereign-charge.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Boss/GiantRacoonGold/Charge.png",
+      "bytes": 1664,
+      "sha256": "39b6d5299b88aecc60b42b11b5986afeec76e7c1c21b86766b7030d4e967a613",
+      "modified": false,
+      "license": "CC0-1.0",
+      "dimensions": [
+        120,
+        60
+      ],
+      "frame_w": 60,
+      "frame_h": 60,
+      "frames": 2
+    },
+    {
+      "file": "sovereign-attack.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Boss/GiantRacoonGold/Attack.png",
+      "bytes": 2651,
+      "sha256": "0d8165036968b8bd01278bf554bd37ada2eb7fef5e79579d3a6f476b9f596e35",
+      "modified": false,
+      "license": "CC0-1.0",
+      "dimensions": [
+        240,
+        60
+      ],
+      "frame_w": 60,
+      "frame_h": 60,
+      "frames": 4
+    },
+    {
+      "file": "sovereign-jump.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Boss/GiantRacoonGold/Jump.png",
+      "bytes": 2797,
+      "sha256": "b7c9793cf1521aa1bd103cc06387fcda1397823b616137170df646c1420964b3",
+      "modified": false,
+      "license": "CC0-1.0",
+      "dimensions": [
+        300,
+        60
+      ],
+      "frame_w": 60,
+      "frame_h": 60,
+      "frames": 5
+    },
+    {
+      "file": "chronarch-idle.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Boss/GiantSpirit/Idle.png",
+      "bytes": 2139,
+      "sha256": "258b38baa3606ed9592d63b98a34d61eae9ce1a457db0cad5f38ba662b540175",
+      "modified": false,
+      "license": "CC0-1.0",
+      "dimensions": [
+        250,
+        50
+      ],
+      "frame_w": 50,
+      "frame_h": 50,
+      "frames": 5
+    },
+    {
+      "file": "chronarch-hit.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Boss/GiantSpirit/Hit.png",
+      "bytes": 1995,
+      "sha256": "2fc6e5c3bd4ed2dc3be5ed12e361707a65a1283513627e949e3ac898d7593556",
+      "modified": false,
+      "license": "CC0-1.0",
+      "dimensions": [
+        150,
+        50
+      ],
+      "frame_w": 50,
+      "frame_h": 50,
+      "frames": 3
+    },
+    {
+      "file": "outdoor-floor.png",
+      "original": "Ninja Adventure - Asset Pack/Backgrounds/Tilesets/TilesetFloor.png",
+      "bytes": 29615,
+      "sha256": "e111065065edf806e7e893330086e68efc8755175d92f14d087b42d40a331e16",
+      "modified": false,
+      "dimensions": [
+        352,
+        417
+      ]
+    },
+    {
+      "file": "water.png",
+      "original": "Ninja Adventure - Asset Pack/Backgrounds/Tilesets/TilesetWater.png",
+      "bytes": 23565,
+      "sha256": "927e1fa1e793bb0398fdaad40cea22792c20f66703cdba80fb9462df7cbc275c",
+      "modified": false,
+      "dimensions": [
+        448,
+        272
+      ]
+    },
+    {
+      "file": "nature.png",
+      "original": "Ninja Adventure - Asset Pack/Backgrounds/Tilesets/TilesetNature.png",
+      "bytes": 43359,
+      "sha256": "51eedd957ad4ac88988d170aa83a42404ef8fdebff9e6753b6fe80841ab3d5bb",
+      "modified": false,
+      "dimensions": [
+        384,
+        336
+      ]
+    },
+    {
+      "file": "floor-detail.png",
+      "original": "Ninja Adventure - Asset Pack/Backgrounds/Tilesets/TilesetFloorDetail.png",
+      "bytes": 5446,
+      "sha256": "eab91fc2a1d10191e3c26a6e936175a2492b6ef481c4ba7d984b717954bf1c01",
+      "modified": false,
+      "dimensions": [
+        256,
+        80
+      ]
+    },
+    {
+      "file": "hole.png",
+      "original": "Ninja Adventure - Asset Pack/Backgrounds/Tilesets/TilesetHole.png",
+      "bytes": 1774,
+      "sha256": "da537b5c6a1385214b4a9f8016ab31e5961b47630b0272f484e4efe87bffe99f",
+      "modified": false,
+      "dimensions": [
+        176,
+        80
+      ]
+    },
+    {
+      "file": "thunder.png",
+      "original": "Ninja Adventure - Asset Pack/FX/Elemental/Thunder/SpriteSheet.png",
+      "bytes": 688,
+      "sha256": "a6563e86290a06e44e005733786a8576b991f7dfda83b613f145372af1d2fe7d",
+      "modified": false,
+      "dimensions": [
+        160,
+        28
+      ]
+    },
+    {
+      "file": "purple-ripples.png",
+      "original": "Ninja Adventure - Asset Pack/Backgrounds/Animated/Water Ripples/SpriteSheetPurple.png",
+      "bytes": 249,
+      "sha256": "df498d1914574c36779d9b6e57e05eedb594eed91a7a1ee409f0ddc1273c424c",
+      "modified": false,
+      "dimensions": [
+        64,
+        16
+      ]
+    },
+    {
+      "file": "tempest-chargeright.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Boss/GiantBlueSamurai/ChargeRight.png",
+      "bytes": 3301,
+      "sha256": "95fed0a3cf1a31df15a62a3b38580b2d0cb03381bd1c9ceb02c39457d7fa9b1c",
+      "modified": false,
+      "dimensions": [
+        288,
+        96
+      ],
+      "frame_w": 96,
+      "frame_h": 96,
+      "frames": 3
+    },
+    {
+      "file": "tempest-attackright.png",
+      "original": "Ninja Adventure - Asset Pack/Actor/Boss/GiantBlueSamurai/AttackRight.png",
+      "bytes": 3224,
+      "sha256": "860699ad1b52b8b7ef1655d37926504b4349c60c7baab1ca680cb5b4c4460d3e",
+      "modified": false,
+      "dimensions": [
+        384,
+        96
+      ],
+      "frame_w": 96,
+      "frame_h": 96,
+      "frames": 4
+    },
+    {
+      "file": "music-aquatic.ogg",
+      "original": "Ninja Adventure - Asset Pack/Audio/Musics/18 - Aquatic.ogg",
+      "bytes": 904691,
+      "sha256": "6b3b8218c8781c4df242fa35da94112c1187d763e37d8be5610e6ce0a8bc49d0",
+      "modified": false,
+      "seconds": 37.091,
+      "sample_rate": 44100
+    },
+    {
+      "file": "music-dark-castle.ogg",
+      "original": "Ninja Adventure - Asset Pack/Audio/Musics/10 - Dark Castle.ogg",
+      "bytes": 676245,
+      "sha256": "41fa5596c4fa928aed2f4b6ee96ea38b3270008fea852285ffc55e1e77aef427",
+      "modified": false,
+      "seconds": 33.231,
+      "sample_rate": 44100
+    },
+    {
+      "file": "music-tension.ogg",
+      "original": "Ninja Adventure - Asset Pack/Audio/Musics/28 - Tension.ogg",
+      "bytes": 649105,
+      "sha256": "37f6260be41d2f10315acabafed4157343fa6f2eecadfba852e8a8def52448f4",
+      "modified": false,
+      "seconds": 26.571,
+      "sample_rate": 44100
+    },
+    {
+      "file": "music-final-area.ogg",
+      "original": "Ninja Adventure - Asset Pack/Audio/Musics/24 - Final Area.ogg",
+      "bytes": 1543478,
+      "sha256": "7af5cbbca397fcf3ad7426d0734085095a7eb67eea9a78bfb16205eee5453c1a",
+      "modified": false,
+      "seconds": 63.429,
+      "sample_rate": 44100
+    },
+    {
+      "file": "music-dream.ogg",
+      "original": "Ninja Adventure - Asset Pack/Audio/Musics/22 - Dream.ogg",
+      "bytes": 2333929,
+      "sha256": "a3baf1b0a7da883334caf20ba9b09f72e65d6459b6888b2905cdf1905034ced9",
+      "modified": false,
+      "seconds": 96.0,
+      "sample_rate": 44100
     }
   ],
   "total_bytes": 2742833,
@@ -459,5 +1278,401 @@
     "warden": "idle68x68 six frames; hit68x68 eight frames; walk82x82 ten frames; attack82x82 fifteen frames; single facing.",
     "effects": "fireball/energy 16x16 four frames; energy-big24x24 four; impact40x40 nine; smoke32x32 six; slash32x32 four; flame25x30 eight (visually checked)."
   },
-  "audio_scope": "Files decoded through container headers/PCM metadata only; musical fit and loop seams have not been auditioned."
+  "audio_scope": "Files decoded through container headers/PCM metadata only; musical fit and loop seams have not been auditioned.",
+  "runtime_roles": {
+    "sniper": "Owl2 red-eyed flying sniper",
+    "orbiter": "LanternRed",
+    "brood": "SpiderRed brood caller",
+    "meteor": "Flam2 falling-fire caster",
+    "tiny": "Larva2 small spawned larva",
+    "traveler": "Monk rescued traveler",
+    "ghost": "Spirit friendly secret visitor",
+    "weaver": "Snake",
+    "bomber": "Mushroom",
+    "trapper": "Bamboo",
+    "summoner": "Dragon",
+    "leech": "Octopus",
+    "shieldbearer": "Mollusc",
+    "prism": "Cyclope",
+    "boomerang": "Reptile",
+    "burrower": "Mole",
+    "medic": "HeartGreen",
+    "frost": "AxolotBlue",
+    "duelist": "Beast"
+  },
+  "boss_animations": {
+    "briar": {
+      "source_boss": "GiantBamboo",
+      "animations": [
+        {
+          "file": "briar-idle.png",
+          "frame_w": 62,
+          "frame_h": 62,
+          "frames": 6
+        },
+        {
+          "file": "briar-charge.png",
+          "frame_w": 62,
+          "frame_h": 62,
+          "frames": 3
+        },
+        {
+          "file": "briar-attack.png",
+          "frame_w": 62,
+          "frame_h": 62,
+          "frames": 5
+        },
+        {
+          "file": "briar-hit.png",
+          "frame_w": 62,
+          "frame_h": 62,
+          "frames": 4
+        }
+      ]
+    },
+    "leviathan": {
+      "source_boss": "SquidGreen",
+      "animations": [
+        {
+          "file": "leviathan-idle.png",
+          "frame_w": 76,
+          "frame_h": 79,
+          "frames": 4
+        },
+        {
+          "file": "leviathan-attack.png",
+          "frame_w": 76,
+          "frame_h": 79,
+          "frames": 6
+        },
+        {
+          "file": "leviathan-shoot.png",
+          "frame_w": 76,
+          "frame_h": 79,
+          "frames": 5
+        },
+        {
+          "file": "leviathan-hit.png",
+          "frame_w": 76,
+          "frame_h": 79,
+          "frames": 4
+        }
+      ]
+    },
+    "mirror": {
+      "source_boss": "GiantSlime",
+      "animations": [
+        {
+          "file": "mirror-idle.png",
+          "frame_w": 62,
+          "frame_h": 52,
+          "frames": 5
+        },
+        {
+          "file": "mirror-jump.png",
+          "frame_w": 62,
+          "frame_h": 52,
+          "frames": 13
+        },
+        {
+          "file": "mirror-hit.png",
+          "frame_w": 62,
+          "frame_h": 52,
+          "frames": 5
+        }
+      ]
+    },
+    "kiln": {
+      "source_boss": "GiantFlam",
+      "animations": [
+        {
+          "file": "kiln-idle.png",
+          "frame_w": 50,
+          "frame_h": 50,
+          "frames": 5
+        },
+        {
+          "file": "kiln-hit.png",
+          "frame_w": 50,
+          "frame_h": 50,
+          "frames": 3
+        }
+      ]
+    },
+    "tempest": {
+      "source_boss": "GiantBlueSamurai",
+      "animations": [
+        {
+          "file": "tempest-idle.png",
+          "frame_w": 96,
+          "frame_h": 48,
+          "frames": 6
+        },
+        {
+          "file": "tempest-chargeleft.png",
+          "frame_w": 96,
+          "frame_h": 96,
+          "frames": 3
+        },
+        {
+          "file": "tempest-attackleft.png",
+          "frame_w": 96,
+          "frame_h": 96,
+          "frames": 4
+        },
+        {
+          "file": "tempest-walk.png",
+          "frame_w": 96,
+          "frame_h": 48,
+          "frames": 6
+        },
+        {
+          "file": "tempest-hit.png",
+          "frame_w": 96,
+          "frame_h": 48,
+          "frames": 4
+        },
+        {
+          "file": "tempest-chargeright.png",
+          "frame_w": 96,
+          "frame_h": 96,
+          "frames": 3
+        },
+        {
+          "file": "tempest-attackright.png",
+          "frame_w": 96,
+          "frame_h": 96,
+          "frames": 4
+        }
+      ]
+    },
+    "eclipse": {
+      "source_boss": "DemonCyclop",
+      "animations": [
+        {
+          "file": "eclipse-idle.png",
+          "frame_w": 50,
+          "frame_h": 50,
+          "frames": 5
+        },
+        {
+          "file": "eclipse-walk.png",
+          "frame_w": 50,
+          "frame_h": 50,
+          "frames": 6
+        },
+        {
+          "file": "eclipse-hit.png",
+          "frame_w": 50,
+          "frame_h": 50,
+          "frames": 3
+        }
+      ]
+    },
+    "sovereign": {
+      "source_boss": "GiantRacoonGold",
+      "animations": [
+        {
+          "file": "sovereign-idle.png",
+          "frame_w": 60,
+          "frame_h": 60,
+          "frames": 6
+        },
+        {
+          "file": "sovereign-charge.png",
+          "frame_w": 60,
+          "frame_h": 60,
+          "frames": 2
+        },
+        {
+          "file": "sovereign-attack.png",
+          "frame_w": 60,
+          "frame_h": 60,
+          "frames": 4
+        },
+        {
+          "file": "sovereign-jump.png",
+          "frame_w": 60,
+          "frame_h": 60,
+          "frames": 5
+        }
+      ]
+    },
+    "chronarch": {
+      "source_boss": "GiantSpirit",
+      "animations": [
+        {
+          "file": "chronarch-idle.png",
+          "frame_w": 50,
+          "frame_h": 50,
+          "frames": 5
+        },
+        {
+          "file": "chronarch-hit.png",
+          "frame_w": 50,
+          "frame_h": 50,
+          "frames": 3
+        }
+      ]
+    },
+    "sentinel": {
+      "source_boss": "GiantFrog",
+      "animations": [
+        {
+          "file": "sentinel-idle.png",
+          "frame_w": 40,
+          "frame_h": 40,
+          "frames": 5
+        },
+        {
+          "file": "sentinel-charge.png",
+          "frame_w": 40,
+          "frame_h": 40,
+          "frames": 7
+        },
+        {
+          "file": "sentinel-attack.png",
+          "frame_w": 40,
+          "frame_h": 40,
+          "frames": 3
+        },
+        {
+          "file": "sentinel-jump.png",
+          "frame_w": 40,
+          "frame_h": 40,
+          "frames": 6
+        },
+        {
+          "file": "sentinel-hit.png",
+          "frame_w": 40,
+          "frame_h": 40,
+          "frames": 3
+        }
+      ]
+    },
+    "warden": {
+      "source_boss": "TenguBlue",
+      "animations": [
+        {
+          "file": "warden-idle.png",
+          "frame_w": 68,
+          "frame_h": 68,
+          "frames": 6
+        },
+        {
+          "file": "warden-attack.png",
+          "frame_w": 82,
+          "frame_h": 82,
+          "frames": 15
+        },
+        {
+          "file": "warden-walk.png",
+          "frame_w": 82,
+          "frame_h": 82,
+          "frames": 10
+        },
+        {
+          "file": "warden-hit.png",
+          "frame_w": 68,
+          "frame_h": 68,
+          "frames": 8
+        }
+      ]
+    }
+  },
+  "music_scenes": {
+    "hollow": "music-dungeon.ogg",
+    "mire": "music-aquatic.ogg",
+    "cinder": "music-dark-castle.ogg",
+    "storm": "music-tension.ogg",
+    "void": "music-final-area.ogg",
+    "rift": "music-dream.ogg",
+    "boss": "music-fight.ogg"
+  },
+  "biome_floor_crops": {
+    "hollow": {
+      "file": "floor.png",
+      "rects": [
+        [
+          256,
+          208,
+          16,
+          16
+        ],
+        [
+          272,
+          208,
+          16,
+          16
+        ]
+      ]
+    },
+    "mire": {
+      "file": "outdoor-floor.png",
+      "rects": [
+        [
+          16,
+          128,
+          16,
+          16
+        ]
+      ]
+    },
+    "cinder": {
+      "file": "floor.png",
+      "rects": [
+        [
+          256,
+          208,
+          16,
+          16
+        ],
+        [
+          272,
+          208,
+          16,
+          16
+        ]
+      ]
+    },
+    "storm": {
+      "file": "outdoor-floor.png",
+      "rects": [
+        [
+          16,
+          352,
+          16,
+          16
+        ]
+      ]
+    },
+    "void": {
+      "file": "floor.png",
+      "rects": [
+        [
+          256,
+          208,
+          16,
+          16
+        ],
+        [
+          272,
+          208,
+          16,
+          16
+        ]
+      ]
+    },
+    "rift": {
+      "file": "water.png",
+      "rects": [
+        [
+          224,
+          112,
+          16,
+          16
+        ]
+      ]
+    }
+  }
 }

@@ -1,28 +1,40 @@
-# Implementation
+# Cinder Below — 实现与验证
 
-## Runtime
+静态 HTML、CSS 与原生 JavaScript，无运行时 npm 依赖。`build.mjs` 将 `src` 复制为 `dist`；ChatGPT Sites 使用已跟踪的 `.openai/hosting.json` 部署静态目录。研究、源码测试、截图和原始素材包不进入公开构建。
 
-- `engine.js`: deterministic seed-based world, 120 Hz caller tick, room/wave state, collisions, enemies, bosses, relic effects and entrance snapshots. It uses no DOM, wall clock or ambient random values.
-- `renderer.js`: original sprite sheets with inspected direction/frame mapping, cached dungeon floor/walls, visible telegraphs, effects and title composition. It reads state without owning the simulation.
-- `input.js`: keyboard, mouse and independent pointer-captured mobile sticks. Blur, cancel, modal transitions and resizing clear held input.
-- `app.js`: lifecycle, semantic HUD/dialogs, fixed-step accumulator, fullscreen, settings, source-safe imports, deterministic test interface and Web Lock coordinated persistence.
-- `storage.js`: bounded schema, prototype/field/numeric validation, revision CAS, explicit exact-original replacement, local failure reporting and backup format.
-- `audio.js`: downloaded recordings through Web Audio and HTML audio. Starts after a gesture; bounded voices and rate-limited shots; pauses in the background.
+## 模块边界
 
-The world adapts its bounds to the viewport. Portrait reserves its bottom band for touch controls. Resizing repositions entities, checks obstacle overlaps and preserves the current run. CSS accounts for mobile safe areas and prevents page overflow. Browser-native fullscreen is requested only through an input gesture.
+| 文件 | 责任 |
+| --- | --- |
+| `src/engine.js` | 固定步长更新、碰撞、种子生成、五段路线、遗物、支线、异界和入口快照 |
+| `src/monsters.js` | 十二个扩展普通怪与十个独立首领的行为、阶段、受伤修正 |
+| `src/renderer.js` | 像素精灵、背景缓存、弹幕、落点、视觉反馈与素材加载统计 |
+| `src/input.js` | 键鼠、双摇杆和一次性动作；独立触点，不互相抢占 |
+| `src/audio.js` | 原版音效池、段落音乐、渐变增益、浏览器音频解锁与暂停 |
+| `src/storage.js` | 严格导入、Web Locks、修订冲突、备份与累计进度 |
+| `src/app.js` | 界面状态、保存协调、奖励选择、语言刷新与无障碍状态 |
+| `src/i18n.js`、`src/field-guide.js` | 中英文文字与二十普通怪、十首领的机制图鉴 |
 
-## Progress accounting
+## 可复现世界
 
-Run statistics and lifetime statistics are separate. `banked` records how much of the current run has already been credited. An entrance checkpoint can be older than `banked`; replaying its already-credited portion does not duplicate lifetime rewards. New runs reset only this bookkeeping and retain unlock progress. Completion clears the active checkpoint. Pausing saves an entrance checkpoint, not a frozen bullet field.
+新局使用浏览器随机源获得种子，之后由确定性随机函数生成敌群、六布局洗牌、Boss 与异界法则。普通物种逐步加入生成池，不把二十种塞进一房。Boss 每三房出现一次，从每段专属二选一池抽取。召唤、活怪、弹幕、陷阱与暂态障碍有上限，死亡或换房清理归属内容。
 
-Another tab never replaces an active world. Remote changes pause and offer a manual load. Read/write failures leave live progress available for export. Lack of Web Locks produces explicit memory-only operation rather than a silently non-atomic cross-tab write.
+异界仅作用于下一房。回声给双方子弹增加反弹次数；过载改变星爆充能和敌弹速度；玻璃改变玩家弹伤与敌弹命中伤害。入口与存档恢复从种子推导同一法则，离开房间恢复普通规则。
 
-## Evidence boundaries
+## 存档兼容
 
-The 532 references are actual author-page readings with mechanism notes and source hashes. The ledger states each group's depth and preserves the distinction between author claims, partial readings, short browser plays and complete gameplay checks. It is not a claim of playing 532 games.
+外层键 `cinder-below-v1` 与版本 1 保持不变。新 checkpoint 为版本 2，保存十五房 campaign；原 checkpoint 版本 1 继续八房。旧档缺少 adventure 时添加默认值，显式非法字段拒绝导入。语言单独保存到 `cinder-below-language`，切换语言不写游戏存档、不重新抽遗物、不重复结算。
 
-The first combat pilot cleared an early single-wave build in 55.92 simulated seconds. This exposed insufficient encounter depth; multi-wave normal rooms and finite second-stage boss support were added before publication. The original 4–7 minute design budget was a hypothesis, not a verified claim. Actual final-build run results are recorded in `.qa/combat-report.json`; an automated pilot is not a human difficulty benchmark.
+房间入口保存整组玩家、种子、遗物、任务与钱包状态。房内重新加载会将整房进度回退，不单独保留已领奖励或扣款。累计收入使用原有 banked 防重；可花费余烬由 gross 收入减去 adventure.spent 得到。多标签争用时暂停当前标签并要求读取最新档或导出本地状态。
 
-Node model tests cover actual effects and progression boundaries. Browser tests cover real keyboard/mouse/touch actions, source assets, audio/fullscreen, pause, death/retry, save restoration, corruption and concurrency failures. Combat pilots invoke only normal UI input, read-only state descriptions and the public time-step hook; they do not grant themselves health, relics or victory. Local emulated phone checks do not claim a physical iOS/Android device test.
+## 画面与响应式
 
-Publication uses the official Sites source helper and archive-backed saved version. The main `personal-web` repository receives its new MyWeb display name only after the deployed game is publicly reachable. The previous accepted homepage/theme work remains outside this change.
+通过原图帧宽、帧高和帧数切片，不假定所有 Boss 都是同一种尺寸。美术合约测试核验文件哈希、帧尺寸、二十普通精灵与十首领原图的唯一性。背景缓存区分全部生物群系；暂停或减少动画设置下不持续推进世界。普通 windup 只绘制自身闪光、朝向和动画；meteor／lightning 是唯一地面落点提示，地雷属于持续存在的实体陷阱。
+
+旋屏使用新的世界尺寸变换玩家、敌人、障碍、交互物、弹丸和首领锚点。手机 HUD 采用五组进度点；奖励卡、语言按钮、暂停、双摇杆、冲刺、星爆和临近交互分别检查触点与遮挡。
+
+## 检查与证据
+
+按顺序运行 `npm run check`、`npm run test`、`npm run build`。浏览器脚本与使用方法见 README；开发用 `?test=1` 开启可控时间推进，`render_game_to_text` 提供只读世界摘要。普通公开访问依正常 RAF 运行。
+
+本地 `.qa` 保存每次检查的 JSON、代表截图和最终发布记录；实际发布的 commit、saved version、deployment ID 以 `.qa/release.json` 为准。正式 source helper 负责提交、推送与构建打包，不把本地成功等同公开上线。
