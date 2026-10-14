@@ -3,6 +3,7 @@
 import { t } from './i18n.js';
 import { discoveryInfo } from './discovery.js';
 import { MUSIC_CUES } from './audio.js';
+import { BOSS_POOLS } from './engine.js';
 const FILES = {
   playerIdle: 'player-idle.png', playerWalk: 'player-walk.png', playerAttack: 'player-attack.png', playerDead: 'player-dead.png',
   slime: 'slime.png', shooter: 'shooter.png', charger: 'charger.png', caster: 'caster.png',
@@ -38,6 +39,7 @@ const art = Object.create(null);
 let promise;
 let backgroundCache;
 let titleBackdropCache;
+const viewportScales=new WeakMap();
 export const assetStatus = { ready: false, failed: [], loaded: 0, total: Object.keys(FILES).length };
 export const AUDIO = Object.freeze(Object.fromEntries(Object.entries({ ...Object.fromEntries(Object.entries(MUSIC_CUES).map(([key,cue])=>[key,cue.file])), shot: 'shot.wav', dash: 'dash.wav', hit: 'hit.wav', death: 'death.wav', relic: 'relic.wav' }).map(([key, name]) => [key, new URL(`./assets/${name}`, import.meta.url).href])));
 
@@ -56,6 +58,16 @@ function sprite(ctx, key, sx, sy, sw, sh, x, y, w, h) {
   const image = art[key];
   if (image) ctx.drawImage(image, sx, sy, sw, sh, Math.round(x), Math.round(y), Math.round(w), Math.round(h));
 }
+// Character texels occupy an integer number of CSS pixels after the world
+// transform. DPR then adds resolution, rather than an extra fractional stretch.
+export function pixelFrame(width,height,size,scaleX=1,scaleY=scaleX) {
+  const factor=Math.max(1,Math.round(size*scaleX/width));
+  return {w:width*factor/scaleX,h:height*factor/scaleY,factor};
+}
+function crispSprite(ctx,key,sx,sy,sw,sh,x,y,w,h) {
+  const scale=viewportScales.get(ctx)||{x:1,y:1},image=art[key];
+  if(image)ctx.drawImage(image,sx,sy,sw,sh,Math.round(x*scale.x)/scale.x,Math.round(y*scale.y)/scale.y,w,h);
+}
 function whole(ctx, key, x, y, w, h) { const image = art[key]; if (image) sprite(ctx, key, 0, 0, image.width, image.height, x, y, w, h); }
 function strip(ctx, key, frameSize, count, frame, x, y, size = frameSize * 2, height = size) {
   sprite(ctx, key, ((Math.floor(frame) % count) + count) % count * frameSize, 0, frameSize, frameSize, x - size / 2, y - height / 2, size, height);
@@ -67,7 +79,8 @@ export function directionColumn(angle = Math.PI / 2) {
 function actor(ctx, key, e, time, size, moving, reduceMotion) {
   const direction = directionColumn(e.angle);
   const frame = moving && !reduceMotion ? Math.floor(time * 9) % 4 : 0;
-  sprite(ctx, key, direction * 16, frame * 16, 16, 16, e.x - size / 2, e.y - size * 0.68, size, size);
+  const scale=viewportScales.get(ctx)||{x:1,y:1},pixel=pixelFrame(16,16,size,scale.x,scale.y);
+  crispSprite(ctx,key,direction*16,frame*16,16,16,e.x-pixel.w/2,e.y-pixel.h*.68,pixel.w,pixel.h);
 }
 function shadow(ctx, x, y, rx, ry, opacity = 0.4) {
   ctx.fillStyle = `rgba(4,5,12,${opacity})`;
@@ -77,19 +90,6 @@ function halo(ctx, x, y, r, color) {
   const g = ctx.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, color); g.addColorStop(1, 'transparent');
   ctx.fillStyle = g; ctx.fillRect(x - r, y - r, r * 2, r * 2);
 }
-function nineSlice(ctx, x, y, w, h, green = false) {
-  const srcX = green ? 80 : 0, srcY = 96, unit = Math.min(24, w / 3, h / 3);
-  // The original wall set has 16px corners around an 80px frame.
-  const axisX = [x, x + unit, x + w - unit], axisY = [y, y + unit, y + h - unit];
-  const sizesX = [unit, w - unit * 2, unit], sizesY = [unit, h - unit * 2, unit];
-  for (let row = 0; row < 3; row += 1) for (let col = 0; col < 3; col += 1) {
-    // Keep the hollow center clear: stone floor below remains visible.
-    if (row === 1 && col === 1) continue;
-    const sw = col === 1 ? 16 : 16, sh = row === 1 ? 16 : 16;
-    sprite(ctx, 'walls', srcX + [0, 16, 64][col], srcY + [0, 16, 64][row], sw, sh, axisX[col], axisY[row], sizesX[col], sizesY[row]);
-  }
-}
-
 // Ground layers use original atlas cells. These surfaces never imply damage;
 // only state.obstacles determines solid ground or blocked chasms.
 function tiledRegion(ctx,key,sx,sy,sw,sh,x,y,w,h,unit=32) {
@@ -108,15 +108,19 @@ function drawFloorZone(ctx,z,biome) {
     ctx.fillStyle='rgba(15,24,29,.66)';ctx.fillRect(x,y,w,h);
     ctx.strokeStyle='#686b65';ctx.lineWidth=2;ctx.strokeRect(x+1,y+1,w-2,h-2);
   } else if(z.kind==='mud') {
-    tiledRegion(ctx,'outdoorFloor',240,128,16,16,x,y,w,h,32);
-    ctx.fillStyle='rgba(15,26,19,.30)';ctx.fillRect(x,y,w,h);
+    tiledRegion(ctx,'outdoorFloor',256,128,16,16,x,y,w,h,32);
+    ctx.fillStyle='rgba(15,26,19,.47)';ctx.fillRect(x,y,w,h);
   } else if(z.kind==='grate') {
+    ctx.globalAlpha=.34;
     tiledRegion(ctx,'floor',224,224,16,16,x,y,w,h,32);
+    ctx.globalAlpha=1;
     ctx.fillStyle='rgba(13,13,18,.26)';ctx.fillRect(x,y,w,h);
     ctx.globalAlpha=.7;
     for(let xx=x;xx<x+w;xx+=32)sprite(ctx,'pipes',16,0,16,16,xx,y-4,Math.min(32,x+w-xx),20);
   } else if(z.kind==='rune'||z.kind==='court') {
+    ctx.globalAlpha=.25;
     tiledRegion(ctx,'floor',256,208,16,16,x,y,w,h,32);
+    ctx.globalAlpha=1;
     ctx.fillStyle=biome==='void'||biome==='rift'?'rgba(84,68,110,.10)':'rgba(131,150,108,.08)';ctx.fillRect(x,y,w,h);
     ctx.globalAlpha=z.kind==='rune'?.40:.27;
     const size=Math.min(w,h,176);
@@ -126,7 +130,9 @@ function drawFloorZone(ctx,z,biome) {
     for(let offset=0;offset<w-12;offset+=32)if(Math.floor(offset/32)%3!==1)for(const yy of [y,y+h-8])sprite(ctx,'floor',272,192,16,8,x+offset,yy,Math.min(26,w-offset),8);
     for(let offset=12;offset<h-12;offset+=36)if(Math.floor(offset/36)%3!==2)for(const xx of [x,x+w-8])sprite(ctx,'floor',240,208,8,16,xx,y+offset,8,Math.min(28,h-offset));
   } else {
+    ctx.globalAlpha=.27;
     tiledRegion(ctx,'floor',256,224,16,16,x,y,w,h,32);
+    ctx.globalAlpha=1;
     ctx.fillStyle='rgba(39,43,37,.13)';ctx.fillRect(x,y,w,h);
     ctx.strokeStyle='rgba(146,145,114,.26)';ctx.lineWidth=1;ctx.strokeRect(x+.5,y+.5,w-1,h-1);
   }
@@ -158,7 +164,7 @@ function makeBackdrop(state) {
   if(backgroundCache?.key===key)return backgroundCache.canvas;
   const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;
   const ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=false;
-  const palettes={hollow:['#10191a','rgba(7,18,18,.17)'],mire:['#0c1c1a','rgba(9,29,25,.58)'],cinder:['#241716','rgba(36,16,18,.20)'],storm:['#111d29','rgba(15,28,44,.30)'],void:['#171320','rgba(27,15,39,.26)'],rift:['#211327','rgba(31,15,46,.33)']};
+  const palettes={hollow:['#10191a','rgba(9,20,22,.54)'],mire:['#0c1c1a','rgba(9,29,25,.65)'],cinder:['#241716','rgba(32,19,24,.55)'],storm:['#111d29','rgba(15,28,44,.55)'],void:['#171320','rgba(27,19,39,.58)'],rift:['#211327','rgba(31,19,46,.59)']};
   const palette=palettes[biome]||palettes.hollow;
   ctx.fillStyle=palette[0];ctx.fillRect(0,0,width,height);
   ctx.save();ctx.beginPath();ctx.rect(24,24,width-48,height-48);ctx.clip();
@@ -213,7 +219,7 @@ function makeBackdrop(state) {
 }
 
 function drawObstacle(ctx, o, biome) {
-  const { x,y,w,h }=o, warm=biome==='cinder', green=!warm;
+  const { x,y,w,h }=o, warm=biome==='cinder';
   if(o.kind==='pit') {
     const edge=Math.min(12,w/3,h/3);
     ctx.fillStyle=warm?'#27171a':biome==='mire'?'#092521':'#090c15';ctx.fillRect(x,y,w,h);
@@ -241,24 +247,30 @@ function drawObstacle(ctx, o, biome) {
     return;
   }
   if(o.kind==='rubble') {
+    ctx.save();ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();
     ctx.fillStyle=warm?'#393039':'#344039';ctx.fillRect(x,y,w,h);
     for(let dy=0;dy<h;dy+=22) for(let dx=0;dx<w;dx+=22) {
       const size=Math.min(30,w-dx+5,h-dy+5);whole(ctx,'rock',x+dx-2,y+dy-2,size,size);
     }
-    ctx.fillStyle='rgba(6,9,15,.20)';ctx.fillRect(x,y+h-5,w,5);return;
+    ctx.fillStyle='rgba(6,9,15,.20)';ctx.fillRect(x,y+h-5,w,5);ctx.restore();
+    ctx.strokeStyle='#758276';ctx.lineWidth=1;ctx.strokeRect(x+.5,y+.5,w-1,h-1);return;
   }
-  for(let dy=0;dy<h;dy+=24) for(let dx=0;dx<w;dx+=24) sprite(ctx,'floor',208,224,16,16,x+dx,y+dy,Math.min(24,w-dx),Math.min(24,h-dy));
-  nineSlice(ctx,x,y,w,h,green);
-  if(o.kind==='pillar') {
-    const size=Math.max(16,Math.min(w-8,h-8,40));
-    sprite(ctx,'walls',green?112:32,128,16,16,x+(w-size)/2,y+(h-size)/2,size,size);
-  } else if(o.kind==='altar') {
-    const size=Math.min(w*.72,h*.72,48);sprite(ctx,'props',warm?96:64,32,16,16,x+(w-size)/2,y+(h-size)/2-3,size,size);
-  } else {
-    const ix=warm?32:160;
-    for(let dx=8;dx<w-24;dx+=40) sprite(ctx,'interior',ix,240,16,16,x+dx,y+4,24,Math.min(24,h-8));
+  // A solid slab replaces the old hollow room-frame crop. The front wall is
+  // inside the collision box and the full top remains visibly impassable.
+  const face=Math.min(20,h*.32),top=h-face,unit=Math.min(16,w/3,top/3),baseY=warm?0:96;
+  const dx=[x,x+unit,x+w-unit],dy=[y,y+unit,y+top-unit],dw=[unit,w-2*unit,unit],dh=[unit,top-2*unit,unit];
+  for(let row=0;row<3;row++)for(let col=0;col<3;col++)sprite(ctx,'floor',176+col*16,baseY+row*16,16,16,dx[col],dy[row],dw[col],dh[row]);
+  // A restrained original stone texture keeps tall slabs from becoming flat
+  // colour cards while the continuous bevel still reads as an unbroken wall.
+  ctx.save();ctx.globalAlpha=.15;tiledRegion(ctx,'floor',256,224,16,16,x+unit,y+unit,w-unit*2,top-unit*2,32);ctx.restore();
+  ctx.fillStyle=warm?'rgba(45,20,29,.28)':'rgba(15,32,34,.24)';ctx.fillRect(x,y,w,top);
+  tiledRegion(ctx,'relief',64,warm?96:16,16,32,x,y+top,w,face,24);
+  ctx.fillStyle='rgba(6,13,20,.36)';ctx.fillRect(x,y+top,w,face);
+  ctx.strokeStyle=warm?'#ab8762':'#829a85';ctx.lineWidth=1.5;ctx.strokeRect(x+.75,y+.75,w-1.5,h-1.5);
+  ctx.fillStyle=warm?'#c3a47d':'#b0bea3';ctx.fillRect(x+3,y+2,Math.max(0,w-6),2);
+  if(o.kind==='altar') {
+    const size=Math.min(w*.55,top*.70,40);sprite(ctx,'props',warm?96:64,32,16,16,x+(w-size)/2,y+(top-size)/2,size,size);
   }
-  ctx.fillStyle='rgba(7,9,16,.28)';ctx.fillRect(x+3,y+h-7,Math.max(0,w-6),5);
 }
 
 // Ordinary attack geometry is intentionally never painted onto the ground.
@@ -266,9 +278,13 @@ function drawObstacle(ctx, o, biome) {
 function drawWindup(ctx,e,time,reduceMotion) {
   if(e.phase!=='windup'||e.type==='burrower'&&e.untargetable) return;
   const progress=1-Math.max(0,e.windup||0)/Math.max(.001,e.windupMax||1);
-  const color=e.type==='medic'?'rgba(145,238,154,.27)':e.type==='frost'?'rgba(128,217,244,.25)':'rgba(255,180,101,.28)';
-  halo(ctx,e.x,e.y-e.r*.65,e.r+13+progress*8,color);
-  strip(ctx,'energyBig',24,4,reduceMotion?1:time*9,e.x,e.y-e.r*.85,10+progress*17);
+  const color=e.type==='medic'?'#b8f5be':e.type==='chronarch'?'#a9efdb':e.type==='frost'?'#b9eafb':'#ffe2a3';
+  const top=e.y-(e.boss?e.r*2.5:e.r*2.1),reach=e.boss?18:10;
+  // Charge marks attach to the body. There is no aiming rectangle or ground fan.
+  ctx.save();ctx.strokeStyle='#11131e';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(e.x-reach,top-4);ctx.lineTo(e.x,top-10-progress*4);ctx.lineTo(e.x+reach,top-4);ctx.stroke();
+  ctx.strokeStyle=color;ctx.lineWidth=2;ctx.stroke();ctx.restore();
+  strip(ctx,'energyBig',24,4,reduceMotion?1:time*6,e.x,e.y-e.r*.65,12+progress*13);
+  if(e.aimLocked){const a=e.angle||0,x=e.x+Math.cos(a)*e.r*.8,y=e.y-e.r*.7+Math.sin(a)*e.r*.4;ctx.fillStyle='#fff5d1';ctx.fillRect(x-3,y-3,6,6);}
 }
 function drawHazard(ctx,h,time,reduceMotion) {
   if(h.kind==='mine') {
@@ -353,17 +369,21 @@ function drawBoss(ctx,e,time,size,reduceMotion) {
   if(e.phase==='windup') pose=poses.charge?'charge':poses.chargeleft?(right?'chargeright':'chargeleft'):'idle';
   else if(e.phase==='burst'||e.phase==='recover') pose=poses.attack?'attack':poses.attackleft?(right?'attackright':'attackleft'):poses.shoot?'shoot':'idle';
   else if(e.phase==='charge'||e.phase==='jump') pose=poses.jump?'jump':poses.walk?'walk':'idle';
-  if(e.hitFlash>0&&poses.hit&&!reduceMotion)pose='hit';
+  // GiantSpirit's original hurt frames become orange fire. Keeping its cool
+  // silhouette avoids confusing the time spirit with Kiln during sustained fire;
+  // drawEnemy still supplies the separate original impact animation on each hit.
+  if(e.hitFlash>0&&poses.hit&&!reduceMotion&&e.type!=='chronarch')pose='hit';
   const [fw,fh,count]=poses[pose];
   let frame=reduceMotion?0:Math.floor(time*(pose==='idle'?7:11))%count;
   if(pose.startsWith('charge'))frame=reduceMotion?0:Math.floor((1-Math.max(0,e.windup||0)/Math.max(.001,e.windupMax||1))*(count-1));
   if(pose==='hit')frame=Math.max(0,Math.min(count-1,Math.floor((1-e.hitFlash/.1)*count)));
-  const dw=size,dh=size*fh/fw;
-  sprite(ctx,`${e.type}_${pose}`,frame*fw,0,fw,fh,e.x-dw/2,e.y-dh+size*.15,dw,dh);
+  const scale=viewportScales.get(ctx)||{x:1,y:1},factor=pixelFrame(poses.idle[0],poses.idle[1],size,scale.x,scale.y).factor;
+  const dw=fw*factor/scale.x,dh=fh*factor/scale.y,foot=poses.idle[0]*factor/scale.x*.15;
+  crispSprite(ctx,`${e.type}_${pose}`,frame*fw,0,fw,fh,e.x-dw/2,e.y-dh+foot,dw,dh);
 }
 function drawEnemy(ctx, e, time, reduceMotion) {
   const boss = Boolean(e.boss || BOSS_ANIMATIONS[e.type]);
-  const size = boss ? Math.max(e.r * 3.7, e.type === 'tempest' ? 152 : e.type === 'leviathan' ? 132 : 114) : e.type === 'tiny' ? 26 : Math.max(38,e.r*2.8);
+  const size = boss ? Math.max(e.r * 4.1, e.type === 'tempest' ? 176 : e.type === 'leviathan' ? 152 : 138) : e.type === 'tiny' ? 26 : Math.max(40,e.r*2.8);
   if(e.phase==='burrow'&&e.untargetable) {
     shadow(ctx,e.x,e.y+3,e.r*.8,4,.3);
     if(!reduceMotion)strip(ctx,'smoke',32,6,time*8,e.x,e.y-3,24);return;
@@ -374,8 +394,15 @@ function drawEnemy(ctx, e, time, reduceMotion) {
   if(e.phase==='blink')ctx.globalAlpha=.2;
   if(e.type==='kiln'&&!e.coreOpen)ctx.globalAlpha=.64;
   if(e.mirrorDecoy) { ctx.globalAlpha=.28;drawBoss(ctx,{...e,type:'mirror',phase:'chase'},time,78,reduceMotion); }
-  else if(boss)drawBoss(ctx,e,time,size,reduceMotion);
-  else actor(ctx,FILES[e.type]?e.type:'slime',e,time+(Number(e.id)||0)*.17,size,true,reduceMotion);
+  else {
+    const body=()=>boss?drawBoss(ctx,e,time,size,reduceMotion):actor(ctx,FILES[e.type]?e.type:'slime',e,time+(Number(e.id)||0)*.17,size,true,reduceMotion);
+    if(e.phase==='windup') {
+      const dpr=(viewportScales.get(ctx)||{}).dpr||1;
+      ctx.save();ctx.shadowColor=e.type==='medic'?'#a8eeb1':e.type==='frost'?'#a2dcf5':'#f4b36b';ctx.shadowBlur=0;
+      for(const [x,y] of [[-2,0],[2,0],[0,-2],[0,2]]){ctx.shadowOffsetX=x*dpr;ctx.shadowOffsetY=y*dpr;body();}ctx.restore();
+    }
+    body();
+  }
   ctx.restore();
   drawWindup(ctx, e, time, reduceMotion);
   if(e.type==='kiln') {
@@ -432,9 +459,10 @@ function drawPlayer(ctx, player, state, reduceMotion) {
   ctx.beginPath(); ctx.arc(player.x, player.y, player.r + 17, a - .22, a + .22); ctx.stroke();
 }
 function drawBullet(ctx,b,time,reduceMotion) {
-  const player=b.owner==='player',size=Math.max(player?13:16,b.r*3.2),angle=Math.atan2(b.vy,b.vx);
-  ctx.save();ctx.translate(b.x,b.y);
-  if(b.paused){ctx.globalAlpha=.38;reduceMotion=true;}
+  const player=b.owner==='player',size=Math.max(player?16:18,b.r*3.2),angle=Math.atan2(b.vy,b.vx),scale=viewportScales.get(ctx)||{x:1,y:1};
+  ctx.save();ctx.translate(Math.round(b.x*scale.x)/scale.x,Math.round(b.y*scale.y)/scale.y);
+  if(b.paused){ctx.globalAlpha=.62;reduceMotion=true;}
+  if(!player){ctx.fillStyle='#100e1c';ctx.beginPath();ctx.arc(0,0,Math.max(7,b.r+4),0,Math.PI*2);ctx.fill();}
   if(b.motion==='boomerang') {
     ctx.rotate(reduceMotion?angle:time*15);whole(ctx,'shuriken',-12,-12,24,24);
   } else if(b.slowDuration>0||b.style==='frost'||b.kind==='frost') {
@@ -442,10 +470,10 @@ function drawBullet(ctx,b,time,reduceMotion) {
   } else if(b.style==='prism') {
     ctx.rotate(reduceMotion?angle:time*5);strip(ctx,'energyBig',24,4,reduceMotion?0:time*9,0,0,size+5);
   } else {
-    ctx.rotate(angle+Math.PI/4);
-    strip(ctx,player?'fireball':'energy',16,4,reduceMotion?0:time*12,0,0,size);
+    const frame=reduceMotion?1:Math.floor(time*9)%4,pixel=pixelFrame(16,16,size,scale.x,scale.y);
+    crispSprite(ctx,player||b.style==='flame'?'fireball':'energy',frame*16,0,16,16,-pixel.w/2,-pixel.h/2,pixel.w,pixel.h);
   }
-  if(!player){ctx.strokeStyle='#2a183e';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(0,0,Math.max(4,b.r+1),0,Math.PI*2);ctx.stroke();}
+  if(!player){ctx.strokeStyle=b.slowDuration>0?'#a9e4ff':b.paused?'#c0a3dc':'#ee9dc4';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(0,0,Math.max(6,b.r+2),0,Math.PI*2);ctx.stroke();ctx.fillStyle='#fff8eb';ctx.fillRect(-1.5,-1.5,3,3);}
   ctx.restore();
 }
 function drawEffect(ctx, e, reduceMotion) {
@@ -505,8 +533,8 @@ function drawGates(ctx, state, reduceMotion, scaleY=1) {
 
 // The title has a separate presentation stage: no live-room entities, camera
 // mutation, collision, or independent clock. Its only motion input is run time.
-function makeTitleBackdrop(width,height) {
-  const key=`${Math.ceil(width)}:${Math.ceil(height)}`;
+function makeTitleBackdrop(width,height,titleAct) {
+  const key=`${Math.ceil(width)}:${Math.ceil(height)}:${titleAct}`;
   if(titleBackdropCache?.key===key)return titleBackdropCache.canvas;
   const canvas=document.createElement('canvas');canvas.width=Math.ceil(width);canvas.height=Math.ceil(height);
   const ctx=canvas.getContext('2d'),portrait=height>width,compact=!portrait&&height<=500;ctx.imageSmoothingEnabled=false;
@@ -515,13 +543,13 @@ function makeTitleBackdrop(width,height) {
   halo(ctx,px,py,Math.min(width*.47,height*.58),'rgba(55,91,113,.20)');
   halo(ctx,width*.91,height*.82,Math.min(width*.45,height*.62),'rgba(116,61,44,.10)');
   // Original stone tiles on a receding plinth, surrounded by open darkness.
-  const platform=portrait?[[width*.66,height*.08],[width*.96,height*.08],[width*1.16,height*.45],[width*.70,height*.45]]:compact?[[width*.38,height*.30],[width*.48,height*.30],[width*.51,height*.93],[width*.32,height*.93]]:[[width*.70,height*.39],[width*.91,height*.39],[width*1.08,height*.94],[width*.52,height*.94]];
+  const platform=portrait?[[width*.66,height*.08],[width*.96,height*.08],[width*1.16,height*.45],[width*.70,height*.45]]:compact?[[width*.38,height*.30],[width*.48,height*.30],[width*.51,height*.93],[width*.32,height*.93]]:[[width*.60,height*.30],[width*.96,height*.30],[width*1.08,height*.96],[width*.48,height*.96]];
   const polygon=(offset=0)=>{ctx.beginPath();platform.forEach(([x,y],i)=>i?ctx.lineTo(x,y+offset):ctx.moveTo(x,y+offset));ctx.closePath();};
   polygon(18);ctx.fillStyle='#070a10';ctx.fill();
   ctx.save();polygon();ctx.clip();
   const floorLeft=Math.min(...platform.map(point=>point[0])),floorTop=Math.min(...platform.map(point=>point[1]));
   tiledRegion(ctx,'floor',256,208,16,16,floorLeft,floorTop,Math.max(...platform.map(point=>point[0]))-floorLeft,height*.94-floorTop,portrait||compact?32:48);
-  ctx.fillStyle='rgba(5,14,24,.51)';ctx.fillRect(0,0,width,height);
+  ctx.fillStyle=['rgba(5,20,24,.62)','rgba(8,31,27,.62)','rgba(29,17,23,.62)','rgba(9,25,43,.62)','rgba(25,15,38,.62)'][titleAct-1];ctx.fillRect(0,0,width,height);
   const line=portrait?width*.80:compact?width*.40:width*.76;
   ctx.globalAlpha=.21;
   tiledRegion(ctx,'floor',272,224,16,16,line,height*.35,portrait||compact?42:64,height*.61,32);
@@ -530,9 +558,29 @@ function makeTitleBackdrop(width,height) {
   ctx.restore();
   ctx.strokeStyle='rgba(128,149,156,.17)';ctx.lineWidth=2;polygon();ctx.stroke();
   if(!portrait&&!compact) {
-    for(const [x,y,size] of [[.635,.67,55],[.94,.63,70],[.585,.84,78],[.97,.84,96]]) {
-      ctx.globalAlpha=.40;sprite(ctx,'ruins',16,48,16,48,width*x,height*y-size*.8,size*.36,size);ctx.globalAlpha=1;
+    const biome=['hollow','mire','cinder','storm','void'][titleAct-1],unit=Math.min(32,width/45);
+    // Receding chamber architecture, steps and side alcoves explain the route
+    // to the boss. These are a title composition, never live collision data.
+    for(let i=0;i<5;i++) {
+      const w=width*(.13+i*.017),x=width*.80-w/2,y=height*(.58+i*.029);
+      drawObstacle(ctx,{x,y,w,h:Math.max(15,height*.026),kind:'wall'},biome);
     }
+    for(const x of [width*.60,width*.95]) {
+      drawObstacle(ctx,{x:x-unit*.6,y:height*.31,w:unit*1.8,h:height*.29,kind:'pillar'},biome);
+      sprite(ctx,'props',32,32,16,16,x-unit*.5,height*.30-unit*.35,unit*1.5,unit*1.5);
+    }
+    ctx.globalAlpha=.80;
+    for(const [x,y,size] of [[.54,.84,74],[.965,.85,90]])sprite(ctx,'ruins',16,48,16,48,width*x,height*y-size*.8,size*.36,size);
+    ctx.globalAlpha=1;
+    // A visible treasure alcove and a shrine promise the optional discoveries.
+    drawObstacle(ctx,{x:width*.89,y:height*.76,w:70,h:35,kind:'altar'},biome);
+    sprite(ctx,'decor',112,16,16,16,width*.90,height*.73,48,48);
+    drawObstacle(ctx,{x:width*.57,y:height*.69,w:58,h:40,kind:'altar'},biome);
+    whole(ctx,'book',width*.57+13,height*.69-18,32,32);
+    if(titleAct===2)for(const x of [.55,.94])sprite(ctx,'nature',64,0,32,32,width*x,height*.63,72,72);
+    if(titleAct===3)for(const x of [.565,.97])tiledRegion(ctx,'pipes',0,16,16,16,width*x,height*.37,20,height*.31,24);
+    if(titleAct===4)for(const x of [.63,.93])sprite(ctx,'pipes',80,0,16,48,width*x,height*.20,24,100);
+    if(titleAct===5)for(const [x,y]of[[.61,.66],[.93,.60]])sprite(ctx,'nature',256,224,32,32,width*x,height*y,72,72);
   }
   // A broad quiet area is reserved for the real HTML title, actions and guide.
   const veil=ctx.createLinearGradient(0,0,width,0);
@@ -541,13 +589,13 @@ function makeTitleBackdrop(width,height) {
   if(portrait){const fade=ctx.createLinearGradient(0,height*.30,0,height*.58);fade.addColorStop(0,'rgba(8,14,22,0)');fade.addColorStop(1,'rgba(8,14,22,1)');ctx.fillStyle=fade;ctx.fillRect(0,height*.30,width,height*.70);}
   titleBackdropCache={key,canvas};return canvas;
 }
-function drawTitleScene(ctx,state,width,height,reduceMotion,titleWeapon) {
+function drawTitleScene(ctx,state,width,height,reduceMotion,titleWeapon,titleAct) {
   const portrait=height>width,compact=!portrait&&height<=500,time=reduceMotion?0:state.time;
   const palette=titleWeapon==='scatter'?['#d4b6f0','rgba(147,94,180,.14)']:titleWeapon==='needle'?['#a2e9df','rgba(70,163,168,.15)']:['#f1b489','rgba(231,120,58,.15)'];
-  ctx.drawImage(makeTitleBackdrop(width,height),0,0);
-  const bossX=width*(portrait?.86:compact?.43:.80),bossY=height*(portrait?.17:compact?.47:.47),playerX=width*(portrait?.85:compact?.36:.69),playerY=height*(portrait?.32:compact?.81:.81);
+  ctx.drawImage(makeTitleBackdrop(width,height,titleAct),0,0);
+  const bossX=width*(portrait?.86:compact?.43:.80),bossY=height*(portrait?.17:compact?.47:.55),playerX=width*(portrait?.85:compact?.36:.69),playerY=height*(portrait?.32:compact?.81:.85);
   const bossSize=portrait?Math.min(110,width*.27):compact?Math.min(94,width*.11,height*.25):Math.min(300,height*.39,width*.25),playerSize=portrait?48:compact?42:Math.max(48,Math.min(96,height*.14));
-  const portalY=bossY-bossSize*.43,ringR=bossSize*.45;
+  const portalY=bossY-bossSize*(portrait||compact?.43:.25),ringR=bossSize*(portrait||compact?.45:.38);
   ctx.save();if(portrait)ctx.globalAlpha=.95;else if(compact)ctx.globalAlpha=.78;
   halo(ctx,bossX,portalY,ringR*2,'rgba(128,130,218,.15)');
   for(let i=0;i<2;i++) {
@@ -559,7 +607,8 @@ function drawTitleScene(ctx,state,width,height,reduceMotion,titleWeapon) {
   for(let i=0;i<3;i++){const a=orbitAngle+i*Math.PI*2/3;strip(ctx,'energyBig',24,4,reduceMotion?1:time*4+i,bossX+Math.cos(a)*ringR*1.12,portalY+Math.sin(a)*ringR*1.30,portrait?12:21);}
   shadow(ctx,bossX,bossY+bossSize*.12,bossSize*.37,bossSize*.13,.56);
   const bob=reduceMotion?0:Math.sin(time*.8)*Math.min(3,bossSize*.018);
-  drawBoss(ctx,{type:'warden',x:bossX,y:bossY+bob,r:29,phase:'chase'},time,bossSize,reduceMotion);
+  drawBoss(ctx,{type:BOSS_POOLS[titleAct-1][titleAct===1?1:0],x:bossX,y:bossY+bob,r:29,phase:'chase'},time,bossSize,reduceMotion);
+  if(!portrait&&!compact)for(const x of [width*.60,width*.95])sprite(ctx,'flame',(reduceMotion?2:2+Math.floor(time*6)%3)*25,0,25,30,x-10,height*.30-21,36,43);
   halo(ctx,playerX,playerY-14,playerSize*1.12,palette[1]);
   shadow(ctx,playerX,playerY+playerSize*.22,playerSize*.32,playerSize*.09,.6);
   actor(ctx,'playerIdle',{x:playerX,y:playerY,angle:Math.atan2(bossY-playerY,bossX-playerX)},time,playerSize,false,true);
@@ -585,13 +634,14 @@ function drawTitleScene(ctx,state,width,height,reduceMotion,titleWeapon) {
   ctx.restore();
 }
 
-export function render(ctx, state, { width, height, dpr = 1, reduceMotion = false, title = false, titleWeapon = 'cinder' } = {}) {
+export function render(ctx, state, { width, height, dpr = 1, reduceMotion = false, title = false, titleWeapon = 'cinder', titleAct = 1 } = {}) {
   if (!state || !ctx) return;
   width ||= state.width; height ||= state.height;
   ctx.save(); ctx.imageSmoothingEnabled = false;
+  viewportScales.set(ctx,{x:title?1:width/state.width,y:title?1:height/state.height,dpr});
   ctx.fillStyle = '#111019'; ctx.fillRect(0, 0, width, height);
   if (!assetStatus.ready) { ctx.restore(); return; }
-  if(title){drawTitleScene(ctx,state,width,height,reduceMotion,titleWeapon);ctx.restore();return;}
+  if(title){drawTitleScene(ctx,state,width,height,reduceMotion,titleWeapon,Math.max(1,Math.min(5,Math.trunc(titleAct)||1)));ctx.restore();return;}
   ctx.scale(width / state.width, height / state.height);
   if (!reduceMotion && !title && state.shake > 0) {
     const n = Math.min(4, state.shake * 5); ctx.translate(Math.sin(state.time * 73) * n, Math.cos(state.time * 91) * n);

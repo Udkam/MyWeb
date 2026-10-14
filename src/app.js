@@ -17,14 +17,14 @@ const icons = { split: '⋔', ricochet: '↱', pierce: '↟', seeking: '✧', ch
 const weaponIcons = { cinder: 'ϟ', scatter: '⋔', needle: '↟' };
 const initial = loadSave();
 let data = initial.data || createDefaultSave(), saveStatus = initial.status, saveMessage = initial.message || '', storageRaw = initial.raw;
-let mode = 'title', paused = false, ready = false, selectedWeapon = 'cinder', state, preview;
+let mode = 'title', paused = false, ready = false, selectedWeapon = 'cinder', titleAct = 1, state, preview;
 let manualTime = testMode, accumulator = 0, lastFrame = 0, lastHud = '', lastBuild = '', bannerUntil = 0, toastTimer;
 let queue = Promise.resolve(), conflicted = false, titleBeforeMenu = null, pendingImport = null;
 let menuSection = 'settings', endUnlocks = [], bannerText = null, currentToast = '';
-let artFailed = false;
+let artFailed = false, audioActivated = false, audioStarting = false;
 let onboarding = null, guideSignature = '', frameRequest = 0, lastTitlePaint = 0, drawCount = 0;
 const dims = { width: 0, height: 0, dpr: 1 };
-const audio = createAudio(() => toast('Audio could not start. You can keep playing and retry with the music button.'));
+const audio = createAudio(() => toast('Audio could not start. You can keep playing and retry with the music button.'), () => syncAudioUI());
 const input = createInput(canvas, () => state || preview, command);
 const currentWorld = () => state || preview;
 const reducedMotion = () => motionQuery.matches || data.settings.reduceMotion;
@@ -54,6 +54,7 @@ function logicalSize() {
 function resize() {
   const rect = canvas.getBoundingClientRect(); dims.width = rect.width; dims.height = rect.height; dims.dpr = Math.min(devicePixelRatio || 1, 2);
   canvas.width = Math.round(dims.width * dims.dpr); canvas.height = Math.round(dims.height * dims.dpr);
+  placeBossHud();
   const size = logicalSize();
   if (state) setWorldSize(state, size.width, size.height);
   if (preview) setWorldSize(preview, size.width, size.height);
@@ -69,7 +70,7 @@ function syncSoundscape() { audio.setScene({ title: mode === 'title', biome: sta
 function draw() {
   if (!ready || !currentWorld()) return;
   ctx.setTransform(dims.dpr, 0, 0, dims.dpr, 0, 0);
-  render(ctx, mode === 'title' ? preview : state, { ...dims, reduceMotion: reducedMotion(), title: mode === 'title', titleWeapon: selectedWeapon });
+  render(ctx, mode === 'title' ? preview : state, { ...dims, reduceMotion: reducedMotion(), title: mode === 'title', titleWeapon: selectedWeapon, titleAct });
   drawCount++;
 }
 function syncTitle() {
@@ -95,10 +96,52 @@ function syncTitle() {
   if (data.checkpoint) $('resume-run').innerHTML = `${t('Continue · room {room}', { room: data.checkpoint.room })} <span>↗</span>`;
   const localReady = ['ready', 'empty', 'saved'].includes(saveStatus);
   $('load-message').textContent = artFailed ? t('Some artwork could not load. Reload this page to retry.') : !ready ? t('Loading the dungeon.') : localReady ? t('Auto-saved here · Resume at the room entrance') : `${translateMessage(saveMessage || 'Progress is currently in memory only.')} ${t('Open settings to export a backup.')}`;
-  $('audio-toggle').dataset.active = String(data.settings.music || data.settings.sfx);
-  $('audio-toggle').setAttribute('aria-label', t(data.settings.music || data.settings.sfx ? 'Mute audio' : 'Enable audio'));
+  syncAudioUI(); syncActPreview();
   syncMotion();
 }
+
+const ACT_PREVIEWS = [
+  ['THE HOLLOW', 'Broken stone. A guardian blocks the descent.'],
+  ['THE MIRE', 'Roots, drowned passages and a hungry deep.'],
+  ['THE CINDER VAULT', 'Molten ruins. The furnace does not sleep.'],
+  ['THE STORM', 'Lightning and relentless pursuit.'],
+  ['THE VOID', 'Time fractures at the final threshold.'],
+];
+function syncActPreview() {
+  const focused = document.activeElement?.dataset?.act;
+  $('act-preview-options').replaceChildren(...ACT_PREVIEWS.map(([name], i) => {
+    const button = document.createElement('button'); button.type = 'button'; button.dataset.act = String(i + 1);
+    button.setAttribute('aria-pressed', String(titleAct === i + 1));
+    button.innerHTML = `<span aria-hidden="true">0${i + 1}</span><strong>${t(name)}</strong>`;
+    button.addEventListener('click', () => { titleAct = i + 1; syncActPreview(); draw(); });
+    return button;
+  }));
+  if (focused) $('act-preview-options').querySelector(`[data-act="${focused}"]`)?.focus({ preventScroll: true });
+  $('act-preview-detail').textContent = t(ACT_PREVIEWS[titleAct - 1][1]);
+}
+function syncAudioUI() {
+  const status = audio.status(), enabled = data.settings.music || data.settings.sfx;
+  const playing = status.musicPlaying && data.settings.music;
+  $('audio-toggle').dataset.active = String(audioActivated && enabled && !status.blocked);
+  $('audio-toggle').setAttribute('aria-label', t(!audioActivated || status.blocked ? 'Enable audio' : enabled ? 'Mute audio' : 'Enable audio'));
+  $('music-start').dataset.playing = String(playing);
+  $('music-start-label').textContent = t(audioStarting && !playing ? 'Starting music…' : playing ? 'Music on' : data.settings.music ? 'Click to start music' : 'Enable music');
+  $('music-state').textContent = t(playing ? 'Juhani Junkala · CC0' : audioStarting ? 'Loading recording' : 'Sound starts after your first interaction');
+}
+async function activateSound() {
+  if (audioStarting || document.hidden || paused) return;
+  audioActivated = true; audioStarting = true; syncAudioUI();
+  try { const waking = audio.resume(); await audio.configure(data.settings); await waking; }
+  finally { audioStarting = false; syncAudioUI(); }
+}
+function firstSoundGesture(event) {
+  if (!event.isTrusted || audioActivated || paused || mode !== 'title' || !(data.settings.music || data.settings.sfx)) return;
+  if (['KeyM', 'KeyP', 'Escape'].includes(event.code)) return;
+  if (event.target instanceof Element && event.target.closest('#audio-toggle,#music-start,#pause-button,#how-to-play,#credits-button,#title-import,input')) return;
+  void activateSound();
+}
+document.addEventListener('pointerdown', firstSoundGesture, { capture: true });
+document.addEventListener('keydown', firstSoundGesture, { capture: true });
 
 function persist() {
   queue = queue.catch(() => {}).then(async () => {
@@ -144,7 +187,7 @@ function begin(resume = false) {
   }
   if (firstRun) onboarding = createOnboarding(state);
   lastBuild = ''; setMode('playing'); canvas.focus({ preventScroll: true });
-  roomBanner(); checkpoint(); void audio.resume(); void audio.configure(data.settings); announce(t('Room {room}. Move, aim and shoot. Space to dash.', { room: state.room }));
+  roomBanner(); checkpoint(); audioActivated = true; void audio.resume(); void audio.configure(data.settings); announce(t('Room {room}. Move, aim and shoot. Space to dash.', { room: state.room }));
 }
 function setBanner(key, values = {}, duration = 2.5) {
   bannerText = { key, values }; bannerUntil = state.time + duration;
@@ -159,7 +202,11 @@ function translatedBanner() {
 }
 function roomBanner() {
   const boss = state.enemies.find(e => e.boss);
-  if (boss) { setBanner('BOSS · {name}', { bossId: boss.type }); }
+  if (boss) {
+    // The persistent boss bar supplies the name and phase; do not cover its body tell.
+    bannerText = null; bannerUntil = state.time; $('room-banner').textContent = '';
+    announce(t('BOSS · {name}', { name: fieldGuide().find(entry => entry.id === boss.type)?.name || boss.type }));
+  }
   else if (state.biome === 'rift') setBanner(({ echo: 'RIFT · ECHO', surge: 'RIFT · SURGE', glass: 'RIFT · GLASS' })[state.riftRule] || 'THE OTHER SIDE', {}, 4.2);
   else if (state.totalRooms === 15 && state.room % 3 === 1) setBanner('ACT {act} · {name}', { act: state.act, actKey: state.actName });
   else {
@@ -226,14 +273,28 @@ function updateHUD() {
   if (state.phase === 'combat' && state.riftRule && state.time < bannerUntil) $('objective').textContent = riftDescription(state.riftRule);
   if (state.time >= bannerUntil) $('room-banner').textContent = '';
   const boss = state.enemies.find((e) => e.boss && e.hp > 0);
+  document.body.dataset.bossActive = String(!!boss);
+  placeBossHud();
   $('boss-hud').hidden = !boss;
-  if (boss) { const name = fieldGuide().find(entry => entry.id === boss.type)?.name || boss.type; $('boss-name').textContent = boss.stage > 1 ? t('{name} · PHASE {stage}', { name, stage: boss.stage }) : name; $('boss-fill').style.width = `${Math.max(0, boss.hp / boss.maxHp * 100)}%`; }
+  if (boss) {
+    const name = fieldGuide().find(entry => entry.id === boss.type)?.name || boss.type;
+    $('boss-name').textContent = boss.stage > 1 ? t('{name} · PHASE {stage}', { name, stage: boss.stage }) : name;
+    $('boss-fill').style.width = `${Math.max(0, boss.hp / boss.maxHp * 100)}%`;
+    $('boss-hud').dataset.tell = boss.phase;
+    const compact = matchMedia('(max-width:700px),(max-height:500px)').matches;
+    const statusKey = boss.phase === 'windup' ? compact ? 'WINDUP' : 'WINDUP · WATCH THE BOSS' : boss.phase === 'recover' ? compact ? 'COUNTER' : 'OPENING · COUNTERATTACK' : ['charge','burst'].includes(boss.phase) ? compact ? 'ATTACK' : 'ATTACK · KEEP MOVING' : compact ? 'BOSS' : 'BOSS ENCOUNTER';
+    $('boss-status').textContent = `${boss.stage > 1 && compact ? `${boss.stage} · ` : ''}${t(statusKey)}`;
+    $('boss-name').title = $('boss-name').textContent;
+  }
   $('dash').dataset.ready = String(p.dashCooldown <= 0); $('dash').querySelector('i').style.height = `${Math.min(100, p.dashCooldown / 1.35 * 100)}%`;
   $('nova').dataset.ready = String(p.novaCharge >= p.novaMax); $('nova').querySelector('i').style.height = `${Math.max(0, 100 - p.novaCharge / p.novaMax * 100)}%`;
   $('dash').setAttribute('aria-label', p.dashCooldown > 0 ? t('Dash recovering, {seconds} seconds', { seconds: p.dashCooldown.toFixed(1) }) : t('Dash ready'));
   $('nova').setAttribute('aria-label', t('Nova {percent} percent charged', { percent: Math.floor(p.novaCharge / p.novaMax * 100) }));
   updateAdventure();
   const build = JSON.stringify(state.relics);
+  $('build-menu-toggle').hidden = mode !== 'playing' || Object.keys(state.relics).length === 0;
+  $('build-count').textContent = Object.keys(state.relics).length;
+  $('build-menu-toggle').setAttribute('aria-label', t('Open {count} relics', { count: Object.keys(state.relics).length }));
   if (build !== lastBuild) {
     lastBuild = build;
     $('build-strip').replaceChildren(...Object.entries(state.relics).map(([id, count]) => {
@@ -242,6 +303,15 @@ function updateHUD() {
       button.innerHTML = `${icons[id]}<small>${count}</small>`;
       button.addEventListener('click', () => { openMenu('build'); }); return button;
     }));
+  }
+}
+function placeBossHud() {
+  const hud = $('boss-hud');
+  const shortLandscape = dims.width > 700 && dims.height <= 500;
+  const target = shortLandscape ? $('run-hud') : $('combat-ui');
+  if (hud.parentElement !== target) {
+    if (shortLandscape) target.append(hud);
+    else target.insertBefore(hud, $('objective'));
   }
 }
 function updateGuide() {
@@ -388,7 +458,7 @@ function bindMenu() {
   $('import-save')?.addEventListener('click', () => $('import-file').click());
   $('reload-save')?.addEventListener('click', () => {
     const newest = loadSave(); if (!['ready', 'empty'].includes(newest.status)) { toast('The latest save could not be loaded. Export this tab before closing it.'); return; }
-    data = newest.data; storageRaw = newest.raw; saveStatus = newest.status; saveMessage = newest.message; conflicted = false; state = null; menu.close(); paused = false; setMode('title'); syncTitle();
+    data = newest.data; storageRaw = newest.raw; saveStatus = newest.status; saveMessage = newest.message; conflicted = false; state = null; menu.close(); paused = false; setMode('title'); syncTitle(); void audio.resume(); void audio.configure(data.settings);
   });
   $('menu-help')?.addEventListener('click', () => { menu.close(); openMenu('help'); });
   $('menu-journal')?.addEventListener('click', () => { menuSection = 'journal'; renderMenu(); });
@@ -423,7 +493,7 @@ function renderImportConfirmation() {
     try { result = await navigator.locks.request('cinder-below-v1', () => saveSave(pendingImport, undefined, { replace: true, expectedRaw: storageRaw })); }
     catch { toast('The browser refused the save lock. Your current progress was kept.'); return; }
     if (!result.ok) { toast(result.message || 'Could not import safely. The current save was kept.'); return; }
-    data = result.data; storageRaw = result.raw; saveStatus = result.status; saveMessage = result.message; conflicted = false; state = null; paused = false; pendingImport = null; menu.close(); setMode('title'); syncTitle(); toast('Save imported. Your descent is ready.');
+    data = result.data; storageRaw = result.raw; saveStatus = result.status; saveMessage = result.message; conflicted = false; state = null; paused = false; pendingImport = null; menu.close(); setMode('title'); syncTitle(); audioActivated = true; void audio.resume(); void audio.configure(data.settings); toast('Save imported. Your descent is ready.');
   });
   $('cancel-import').addEventListener('click', () => { pendingImport = null; menuSection = 'settings'; renderMenu(); });
 }
@@ -434,7 +504,11 @@ async function fullscreen() {
     else toast('This browser uses the full page instead. Rotate your phone for a wider arena.');
   } catch { toast('Fullscreen is unavailable here. The game still fills this page.'); }
 }
-async function toggleAudio() { const enabled = !(data.settings.music || data.settings.sfx); data.settings.music = enabled; data.settings.sfx = enabled; syncTitle(); await audio.configure(data.settings); await persist(); if (paused) audio.suspend(); }
+async function toggleAudio() {
+  if ((!audioActivated || audio.status().blocked) && (data.settings.music || data.settings.sfx) && !paused) { await activateSound(); return; }
+  const enabled = !(data.settings.music || data.settings.sfx); data.settings.music = enabled; data.settings.sfx = enabled;
+  audioActivated = true; syncTitle(); await audio.configure(data.settings); await persist(); if (paused) audio.suspend();
+}
 function command(name, arg) {
   if (name === 'pause') { if (menu.open) closeMenu(); else openMenu(); }
   else if (name === 'fullscreen') void fullscreen();
@@ -478,8 +552,15 @@ $('play').addEventListener('click', () => begin()); $('resume-run').addEventList
 $('back-title').addEventListener('click', toTitle); $('abandon').addEventListener('click', toTitle);
 $('pause-button').addEventListener('click', () => openMenu()); $('continue').addEventListener('click', closeMenu); $('close-menu').addEventListener('click', closeMenu);
 $('how-to-play').addEventListener('click', () => openMenu('help')); $('credits-button').addEventListener('click', () => openMenu('credits'));
+$('title-import').addEventListener('click', () => { openMenu(); $('import-file').click(); });
+$('music-start').addEventListener('click', async () => {
+  if (audio.status().musicPlaying && data.settings.music) { data.settings.music = false; await audio.configure(data.settings); await persist(); }
+  else { data.settings.music = true; await activateSound(); await persist(); }
+  syncAudioUI();
+});
 $('audio-toggle').addEventListener('click', toggleAudio); $('fullscreen').addEventListener('click', fullscreen); $('import-file').addEventListener('change', importFile);
 $('interact-button').addEventListener('click', useNearby);
+$('build-menu-toggle').addEventListener('click', () => openMenu('build'));
 $('dismiss-guide').addEventListener('click', () => { onboarding?.dismiss(); updateGuide(); canvas.focus({ preventScroll: true }); });
 menu.addEventListener('cancel', (e) => { e.preventDefault(); closeMenu(); });
 window.addEventListener('resize', resize);
@@ -499,7 +580,7 @@ function accessibleWorld() {
     gates: world.gates.map(gate => ({ ...gate, label: t(gate.label) })),
     choices: world.choices.map(localizeRelic) };
 }
-window.render_game_to_text = () => JSON.stringify({ ...accessibleWorld(), ui: { mode, paused, ready, language: getLanguage(), menuOpen: menu.open, selectedWeapon, storageStatus: saveStatus, lifetime: data.stats, unlockedWeapons: WEAPONS.filter(unlocked).map((w) => w.id), input: input.status(), audio: audio.status(), art: assetStatus, guide: onboarding?.status() || null, motion: { reduced: reducedMotion(), animating: !!frameRequest, drawCount, titleTime: preview?.time || 0 } }, viewport: { ...dims, world: logicalSize() } });
+window.render_game_to_text = () => JSON.stringify({ ...accessibleWorld(), ui: { mode, paused, ready, language: getLanguage(), menuOpen: menu.open, selectedWeapon, titleAct, storageStatus: saveStatus, lifetime: data.stats, unlockedWeapons: WEAPONS.filter(unlocked).map((w) => w.id), input: input.status(), audio: audio.status(), art: assetStatus, guide: onboarding?.status() || null, motion: { reduced: reducedMotion(), animating: !!frameRequest, drawCount, titleTime: preview?.time || 0 } }, viewport: { ...dims, world: logicalSize() } });
 window.advanceTime = async (ms) => {
   manualTime = true; const duration = Math.max(0, Math.min(Number(ms) || 0, 60000)) / 1000;
   syncMotion();

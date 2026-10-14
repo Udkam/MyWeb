@@ -4,13 +4,14 @@ test setup; gameplay state is never injected. Writes evidence to .qa/storage/.
 """
 import json
 import pathlib
+import sys
 from datetime import datetime, timezone
 from playwright.sync_api import sync_playwright
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 OUT = ROOT / '.qa' / 'storage'
 OUT.mkdir(parents=True, exist_ok=True)
-URL = 'http://127.0.0.1:4328/src/?test=1'
+URL = next((value for value in sys.argv[1:] if value.startswith(('http://','https://'))), 'http://127.0.0.1:4328/src/?test=1')
 KEY = 'cinder-below-v1'
 results, errors = [], []
 
@@ -119,7 +120,10 @@ def case_reload_bad_remote(browser):
     a.locator('#play').click()
     a.wait_for_timeout(150)
     b = load(context, 'reload-bad-remote-peer')
-    b.locator('#audio-toggle').click()
+    # Audio activation alone now preserves settings. Change a real setting to
+    # produce the competing save revision this conflict scenario needs.
+    settings(b)
+    b.locator('#setting-motion').check()
     a.wait_for_selector('#reload-save')
     before = observe(a)['ui']['lifetime'].copy()
     b.evaluate('(key) => localStorage.setItem(key, "{broken-after-conflict")', KEY)

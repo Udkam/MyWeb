@@ -36,6 +36,23 @@ const alive = (e) => e && !e.dead && e.hp > 0;
 const clamp = (value, low, high) => Math.max(low, Math.min(high, value));
 const angleDifference = (a, b) => Math.atan2(Math.sin(a - b), Math.cos(a - b));
 
+// Bosses contest distance before committing, then keep a real, readable lock.
+// Normal enemies retain their original tells and pursuit. No extra damage/HP.
+const BOSS_REACH = Object.freeze({ sentinel: 190, briar: 310, leviathan: 270, mirror: 340, warden: 340, kiln: 260, tempest: 340, eclipse: 330, sovereign: 350, chronarch: 240 });
+function bossPosition(s, e, api, dt, winding = false) {
+  const angle = api.angleTo(e, s.player), distance = api.distance(e, s.player);
+  if (distance > BOSS_REACH[e.type]) {
+    walk(e, api, angle, winding ? ['sentinel', 'kiln', 'chronarch'].includes(e.type) ? 115 : 78 : 140, dt);
+  } else if (!winding && ['mirror', 'tempest', 'warden'].includes(e.type)) {
+    walk(e, api, angle + (e.orbitSign || 1) * Math.PI / 2, e.type === 'tempest' ? 96 : 65, dt);
+  } else { e.vx = 0; e.vy = 0; }
+}
+
+function followup(s, e, api, action, duration = .65, angle) {
+  e.comboStep = 1;
+  prepare(s, e, api, action, duration, angle);
+}
+
 function walk(e, api, angle, speed, dt) {
   const slow = Number.isFinite(api.slow) ? clamp(api.slow, 0, 1) : 1;
   e.vx = Math.cos(angle) * speed * slow;
@@ -45,7 +62,7 @@ function walk(e, api, angle, speed, dt) {
 
 function rest(e, duration = .6, cooldown = .6) {
   e.phase = 'recover'; e.recoverTime = duration; e.specialCooldown = cooldown;
-  e.windup = 0; e.telegraph = null; e.vx = 0; e.vy = 0;
+  e.windup = 0; e.telegraph = null; e.vx = 0; e.vy = 0; e.aimLocked = false;
   if (e.type === 'kiln') e.coreOpen = true;
 }
 
@@ -54,6 +71,7 @@ function prepare(s, e, api, action, duration, angle = api.angleTo(e, s.player)) 
   e.channelStartHp = e.hp;
   e.attackX = s.player.x; e.attackY = s.player.y;
   e.attackAngleOffset = angleDifference(angle, api.angleTo(e, s.player));
+  if (isBoss(e)) { e.bossPressure = true; e.aimLocked = false; e.aimLockTime = Math.min(.38, Math.max(.32, duration * .55)); }
   if (e.type === 'kiln') e.coreOpen = false;
   api.windup(e, 'self', duration, angle, 0, { visible: false });
 }
@@ -217,12 +235,12 @@ function release(s, e, api) {
     for (const offset of [-.2, 0, .2]) fire(e, api, e.angle + offset, 185, { slowFactor: .55, slowDuration: 1.4, color: '#92ddec', style: 'frost' });
     rest(e, .45, 1.4);
   } else if (action === 'duelist' || action === 'sentinel-charge') {
-    beginCharge(e, action === 'duelist' ? 390 : 390, action === 'duelist' ? .18 : .36);
+    beginCharge(e, action === 'duelist' ? 390 : 440, action === 'duelist' ? .18 : clamp(api.distance(e, s.player) / 440 + .18, .6, 1.05));
   } else if (action === 'sentinel-cross') {
-    beginBurst(e, 'sentinel-cross', e.stage === 2 ? 7 : 5, .22);
+    beginBurst(e, 'sentinel-cross', e.stage === 2 ? 8 : 6, .2);
   } else if (action === 'warden-blink') {
     const point = landing(s, e, api); e.blinkX = point.x; e.blinkY = point.y;
-    e.phase = 'blink'; e.blinkTime = .2; e.untargetable = true;
+    e.phase = 'blink'; e.blinkTime = .2; e.untargetable = true; e.postBlink = 'warden-rain';
   } else if (action === 'warden-rain') {
     const offsets = e.stage === 2 ? [[0, 0], [-74, 0], [74, 0], [0, -74], [0, 74]] : [[0, 0], [-74, 0], [74, 0]];
     const bottom = s.height - (s.height > s.width ? 175 : 70);
@@ -230,26 +248,25 @@ function release(s, e, api) {
       const x = clamp(e.attackX + dx, 60, s.width - 60), y = clamp(e.attackY + dy, 100, bottom);
       api.hazard(x, y, 36, .95, { kind: 'meteor', ownerId: e.id });
     }
-    rest(e, .55, e.stage === 2 ? .3 : .7);
+    if (!e.comboStep) followup(s, e, api, 'warden-spin', .65);
+    else rest(e, .65, .3);
   } else if (action === 'warden-spin') {
     beginBurst(e, 'warden-spin', e.stage === 2 ? 9 : 6, .2);
   } else if (action === 'warden-rage') {
     beginBurst(e, 'warden-rage', 10, .15);
   } else if (action === 'briar-roots') {
     plantThorns(s, e, api);
-    if (e.stage === 2) { for (const offset of [-.4, 0, .4]) fire(e, api, e.angle + offset, 170, { color: '#b3cf8f' }); }
-    rest(e, .7, .5);
+    followup(s, e, api, 'briar-seeds', .65);
   } else if (action === 'briar-seeds') {
-    for (const offset of [-.4, -.2, 0, .2, .4]) fire(e, api, e.angle + offset, 175, { color: '#b3cf8f', life: 4 });
-    rest(e, .65, .5);
+    beginBurst(e, action, e.stage === 2 ? 4 : 3, .3);
   } else if (action === 'leviathan-tide') {
     beginBurst(e, action, 3, .38);
   } else if (action === 'leviathan-surf') {
-    beginCharge(e, 330, .45);
+    beginCharge(e, 350, .65);
   } else if (action === 'mirror-split') {
-    makeDecoys(s, e, api); rest(e, .65, .5);
+    makeDecoys(s, e, api); followup(s, e, api, e.stage === 2 ? 'mirror-swap' : 'mirror-shards', .65);
   } else if (action === 'mirror-swap') {
-    swapDecoy(s, e, api); prepare(s, e, api, 'mirror-shards', .65);
+    swapDecoy(s, e, api); followup(s, e, api, 'mirror-shards', .7);
   } else if (action === 'mirror-shards') {
     beginBurst(e, action, e.stage === 2 ? 3 : 2, .35);
   } else if (action === 'kiln-flames') {
@@ -266,10 +283,11 @@ function release(s, e, api) {
       const y = clamp(e.attackY + (e.stage === 2 ? offset : 0), 100, s.height - (s.height > s.width ? 175 : 70));
       api.hazard(x, y, 30, .9, { kind: 'lightning', ownerId: e.id });
     }
-    rest(e, .55, .3);
+    if (!e.comboStep) followup(s, e, api, 'tempest-spiral', .65);
+    else rest(e, .65, .35);
   } else if (action === 'eclipse-orbs') {
-    for (const offset of [-.35, .35]) fire(e, api, e.angle + offset, 80, { r: 9, homing: .55, sourceId: e.id, style: 'dark-orb', color: '#ac83d8', life: 5 });
-    rest(e, .7, .45);
+    for (const offset of [-.42, .42]) fire(e, api, e.angle + offset, 112, { r: 9, homing: .72, sourceId: e.id, style: 'dark-orb', color: '#ac83d8', life: 7 });
+    followup(s, e, api, 'eclipse-snipe', .8);
   } else if (action === 'eclipse-blink') {
     if (e.stage === 2) for (const b of s.bullets) if (b.sourceId === e.id && b.style === 'dark-orb') b.dead = true;
     const point = landing(s, e, api); e.blinkX = point.x; e.blinkY = point.y;
@@ -283,7 +301,7 @@ function release(s, e, api) {
   } else if (action === 'chronarch-stop') {
     beginBurst(e, action, 5, .22);
   } else if (action === 'chronarch-charge') {
-    beginCharge(e, 370, e.chronoCrossThrust ? .22 : .3);
+    beginCharge(e, 370, e.chronoCrossThrust ? .44 : .62);
   } else rest(e);
 }
 
@@ -291,6 +309,22 @@ function updateAction(s, e, dt, api) {
   if (e.phase === 'windup') {
     if ((e.specialAction === 'leech' || e.specialAction === 'medic') && e.hp < e.channelStartHp) {
       api.effect('hit', e.x, e.y, .15, { radius: 16, color: '#e6d5ed' }); rest(e, .6, 1.1); return true;
+    }
+    if (isBoss(e)) {
+      e.aimLocked = e.windup <= e.aimLockTime;
+      if (!e.aimLocked) {
+        bossPosition(s, e, api, dt, true);
+        // Slow/paused shots lead a steady runner, making a direction change
+        // useful. The final body tell still locks; nothing tracks on release.
+        const rangedLead = { sentinel: 1.15, kiln: 1.25, leviathan: 1.25, chronarch: 1.7 }[e.type];
+        const lead = e.specialAction.includes('charge') || e.specialAction.includes('surf') ? clamp(.35 + api.distance(e, s.player) / 500, .65, 1.1) : rangedLead ?? (e.stage >= 2 ? .78 : .66);
+        const bottom = s.height - (s.height > s.width ? 175 : 70);
+        e.attackX = clamp(s.player.x + (s.player.vx || 0) * lead, 60, s.width - 60);
+        e.attackY = clamp(s.player.y + (s.player.vy || 0) * lead, 100, bottom);
+        const target = api.angleTo(e, { x: e.attackX, y: e.attackY }) + (e.attackAngleOffset || 0);
+        e.angle += clamp(angleDifference(target, e.angle), -2.8 * dt, 2.8 * dt);
+        if (e.telegraph) e.telegraph.angle = e.angle;
+      } else { e.vx = 0; e.vy = 0; }
     }
     e.windup = Math.max(0, e.windup - dt);
     if (e.telegraph) e.telegraph.remaining = e.windup;
@@ -308,19 +342,21 @@ function updateAction(s, e, dt, api) {
     if (e.burstTimer <= 0 && e.burstLeft > 0) {
       const index = e.burstTotal - e.burstLeft;
       if (e.specialAction === 'prism') cross(e, api, e.angle + index * .23, 185, { bounces: 1, style: 'prism', color: '#9ee4de', life: 4 });
-      else if (e.specialAction === 'sentinel-cross') cross(e, api, e.angle - .45 + index * .18, e.stage === 2 ? 220 : 195, { color: '#f5a474' });
+      else if (e.specialAction === 'sentinel-cross') cross(e, api, e.angle - .6 + index * .24, e.stage === 2 ? 270 : 245, { color: '#f5a474' });
       else if (e.specialAction === 'warden-spin') cross(e, api, e.angle + index * .3, e.stage === 2 ? 235 : 195, { color: '#d6a4ef' });
       else if (e.specialAction === 'warden-rage') {
         for (let i = 0; i < 3; i++) fire(e, api, e.angle + index * .23 + i * TAU / 3, 240, { color: '#ef799b' });
+      } else if (e.specialAction === 'briar-seeds') {
+        for (const offset of [-.56, -.28, 0, .28, .56]) fire(e, api, e.angle + offset + (index % 2 ? .12 : -.12), 225, { color: '#b3cf8f', life: 4 });
       } else if (e.specialAction === 'leviathan-tide') {
-        for (const offset of [-.38, 0, .38]) fire(e, api, e.angle + offset + (index % 2 ? .14 : -.14), 205, { motion: 'boomerang', turnAfter: .75, returnSpeed: 230, returnX: e.x, returnY: e.y, life: 3.8, color: '#87cbdc' });
+        for (const offset of [-.5, 0, .5]) fire(e, api, e.angle + offset + (index % 2 ? .17 : -.17), 230, { motion: 'boomerang', turnAfter: clamp(api.distance(e, s.player) / 230 + .4, 1.25, 2.3), returnSpeed: 260, returnX: e.x, returnY: e.y, life: 5.4, color: '#87cbdc' });
       } else if (e.specialAction === 'mirror-shards') {
         cross(e, api, e.angle + index * .28, 215, { bounces: 1, color: '#c3e1ed', style: 'prism', life: 4 });
       } else if (e.specialAction === 'kiln-flames') {
         const side = e.stage === 2 ? (index % 2 ? -1 : 1) : 0;
         const originX = e.x + Math.cos(e.angle + Math.PI / 2) * side * (e.r + 6);
         const originY = e.y + Math.sin(e.angle + Math.PI / 2) * side * (e.r + 6);
-        for (const offset of [-.2, 0, .2]) api.bullet(originX, originY, e.angle + offset + (index - 2) * .14, 215, 1, { life: 1.2, r: 7, color: '#ff925c', style: 'flame' });
+        for (const offset of [-.28, 0, .28]) api.bullet(originX, originY, e.angle + offset + (index - 2) * .18, 245, 1, { life: 2.7, r: 7, color: '#ff925c', style: 'flame' });
       } else if (e.specialAction === 'tempest-spiral') {
         for (const phase of [0, Math.PI]) {
           const angle = e.angle + index * .3 + phase;
@@ -330,20 +366,25 @@ function updateAction(s, e, dt, api) {
         cross(e, api, e.angle + index * Math.PI / 4, 460, { life: 2.2, color: '#c89de7' });
       } else if (e.specialAction === 'sovereign-formation') {
         const arms = e.stage;
-        for (let arm = 0; arm < arms; arm++) for (const offset of [-.17, 0, .17]) fire(e, api, e.angle + arm * TAU / arms + offset + index * .12, 205, { color: '#edc484', life: 3.1 });
+        for (let arm = 0; arm < arms; arm++) for (const offset of [-.25, 0, .25]) fire(e, api, e.angle + arm * TAU / arms + offset + index * .18, 245, { color: '#edc484', life: 3.5 });
       } else if (e.specialAction === 'chronarch-stop') {
-        for (const offset of [-.25, 0, .25]) {
-          const angle = e.angle + offset + index * .11;
-          fire(e, api, angle, 155, { baseAngle: angle, pauseAfter: .32, pauseFor: .9, releaseSpeed: 320, color: '#98e4de', life: 3.7 });
+        for (const offset of [-.4, 0, .4]) {
+          const angle = e.angle + offset + (index - 2) * .2;
+          fire(e, api, angle, 190, { baseAngle: angle, pauseAfter: .55, pauseFor: .75, releaseSpeed: 350, color: '#98e4de', life: 4.5 });
         }
       }
       e.burstLeft--; e.burstTimer += e.burstInterval;
       if (e.burstLeft <= 0) {
-        if (e.type === 'leviathan' && e.stage === 2 && e.specialAction === 'leviathan-tide') {
-          e.chainLeft = 1; prepare(s, e, api, 'leviathan-surf', .65, api.angleTo(e, s.player) + Math.PI / 2);
+        if (e.type === 'sentinel' && e.specialAction === 'sentinel-cross') {
+          e.chainLeft = e.stage === 2 ? 1 : 0; followup(s, e, api, 'sentinel-charge', .75);
+        } else if (e.type === 'leviathan' && e.specialAction === 'leviathan-tide') {
+          e.chainLeft = e.stage === 2 ? 1 : 0; followup(s, e, api, 'leviathan-surf', .75, api.angleTo(e, s.player) + .45);
         } else if (e.type === 'kiln') {
           e.coreAngle = e.angle + (e.stage === 2 ? Math.PI / 2 : 0); rest(e, 1.25, .45);
-        } else rest(e, isBoss(e) ? .75 : .5, isBoss(e) && e.stage === 2 ? .35 : .8);
+        } else if (e.type === 'chronarch' && e.specialAction === 'chronarch-stop' && !e.comboStep) {
+          e.rewindX = e.x; e.rewindY = e.y; e.chainLeft = 1; e.chronoCrossThrust = false;
+          followup(s, e, api, 'chronarch-charge', .9);
+        } else rest(e, isBoss(e) ? .75 : .5, isBoss(e) ? .35 : .8);
       }
     }
     return true;
@@ -359,10 +400,10 @@ function updateAction(s, e, dt, api) {
           api.effect('rewind', old.x, old.y, .35, { x2: e.x, y2: e.y, color: '#98e4de' });
         }
         e.chronoCrossThrust = e.specialAction === 'chronarch-charge' && e.stage === 2;
-        const angle = api.angleTo(e, s.player) + (e.specialAction === 'leviathan-surf' ? -Math.PI / 2 : e.chronoCrossThrust ? Math.PI / 2 : 0);
+        const angle = api.angleTo(e, s.player) + (e.specialAction === 'leviathan-surf' ? -.45 : e.chronoCrossThrust ? Math.PI / 2 : 0);
         prepare(s, e, api, e.specialAction, e.type === 'duelist' ? .3 : .55, angle);
       }
-      else rest(e, e.type === 'duelist' ? .8 : .95, .65);
+      else rest(e, e.type === 'duelist' ? .8 : .85, e.type === 'duelist' ? .65 : .35);
     }
     return true;
   }
@@ -404,10 +445,11 @@ function updateSentinel(s, e, dt, api) {
   }
   if (updateAction(s, e, dt, api)) return;
   e.angle = api.angleTo(e, s.player); e.cooldown = Math.max(0, (e.cooldown ?? .5) - dt);
-  walk(e, api, e.angle, 30, dt);
+  bossPosition(s, e, api, dt);
   if (!e.cooldown) {
     const action = (e.pattern || 0) % 2 === 0 ? 'sentinel-cross' : 'sentinel-charge';
     e.pattern = (e.pattern || 0) + 1;
+    e.comboStep = 0;
     if (action === 'sentinel-charge') e.chainLeft = 1;
     prepare(s, e, api, action, action === 'sentinel-charge' ? .9 : .8);
   }
@@ -421,17 +463,19 @@ function updateWarden(s, e, dt, api) {
   }
   if (updateAction(s, e, dt, api)) return;
   e.angle = api.angleTo(e, s.player); e.cooldown = Math.max(0, (e.cooldown ?? .6) - dt);
-  walk(e, api, e.angle + Math.PI / 2, 34, dt);
+  bossPosition(s, e, api, dt);
   if (!e.cooldown) {
     const actions = ['warden-blink', 'warden-rain', 'warden-spin'];
     const action = actions[(e.pattern || 0) % actions.length]; e.pattern = (e.pattern || 0) + 1;
+    e.comboStep = 0;
     prepare(s, e, api, action, action === 'warden-blink' ? .75 : .8);
   }
 }
 
 function beginBossAction(s, e, api, action) {
   let angle = api.angleTo(e, s.player);
-  if (action === 'leviathan-surf') { angle += Math.PI / 2; e.chainLeft = e.stage === 2 ? 1 : 0; }
+  e.comboStep = 0;
+  if (action === 'leviathan-surf') { angle += .45; e.chainLeft = e.stage === 2 ? 1 : 0; }
   if (action === 'chronarch-charge') { e.rewindX = e.x; e.rewindY = e.y; e.chainLeft = 1; e.chronoCrossThrust = false; }
   if (e.type === 'tempest') e.orbitSign = e.stage === 2 ? -(e.orbitSign || 1) : 1;
   prepare(s, e, api, action, action === 'chronarch-charge' ? .9 : .8, angle);
@@ -448,14 +492,13 @@ function updateOtherBoss(s, e, dt, api) {
   if (updateAction(s, e, dt, api)) return;
   const angle = api.angleTo(e, s.player);
   e.angle = angle; e.cooldown = Math.max(0, (e.cooldown ?? .6) - dt);
-  const speed = { briar: 16, leviathan: 35, mirror: 40, kiln: 12, tempest: 80, eclipse: 16, sovereign: 20, chronarch: 35 }[e.type];
-  walk(e, api, angle + (['mirror', 'tempest'].includes(e.type) ? (e.orbitSign || 1) * Math.PI / 2 : 0), speed, dt);
+  bossPosition(s, e, api, dt);
   if (e.cooldown) return;
   const patterns = {
     briar: ['briar-roots', 'briar-seeds'],
     leviathan: e.stage === 2 ? ['leviathan-tide'] : ['leviathan-tide', 'leviathan-surf'],
     mirror: e.stage === 2 ? ['mirror-split', 'mirror-swap'] : ['mirror-split', 'mirror-shards'],
-    kiln: ['kiln-flames', 'kiln-vent'],
+    kiln: ['kiln-flames'],
     tempest: ['tempest-spiral', 'tempest-thunder'],
     eclipse: ['eclipse-orbs', 'eclipse-blink'],
     sovereign: e.stage >= 3 ? ['sovereign-formation'] : ['sovereign-command', 'sovereign-formation'],

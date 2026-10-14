@@ -25,8 +25,10 @@ try:
         page = browser.new_page(viewport={'width': 1280, 'height': 800})
         page.on('pageerror', lambda e: report['errors'].append(str(e)))
         page.on('console', lambda e: report['errors'].append(e.text) if e.type == 'error' else None)
+        # A blank same-origin page isolates module playback from the real app's
+        # first-interaction audio. The application case below uses a fresh page.
+        page.route(URL, lambda route: route.fulfill(status=200, content_type='text/html', body='<html><body></body></html>'))
         page.goto(URL)
-        page.wait_for_function('typeof window.render_game_to_text === "function"')
         page.evaluate("""async () => {
           window.musicElements = []; window.musicConnections = []; window.musicWarnings = [];
           const NativeAudio = window.Audio;

@@ -263,15 +263,15 @@ function makeRoom(s, capture = true) {
   if (capture) s.entrance = entranceData(s);
 }
 function entranceData(s) {
-  return { kind: 'cinder-below-run', version: s.campaign === 'legacy' ? 1 : 2, ...(s.campaign === 'legacy' ? {} : { totalRooms: MAX_ROOMS }), ...(s.mapVersion === 2 ? { mapVersion: 2 } : {}), seed: s.seed, width: s.width, height: s.height,
+  return { kind: 'cinder-below-run', version: s.campaign === 'legacy' ? 1 : 2, ...(s.campaign === 'legacy' ? {} : { totalRooms: MAX_ROOMS }), ...([2, 3].includes(s.mapVersion) ? { mapVersion: s.mapVersion } : {}), seed: s.seed, width: s.width, height: s.height,
     room: s.room, route: s.route, weapon: s.player.weapon, relics: clone(s.relics), hp: s.player.hp,
     novaCharge: s.player.novaCharge, stats: clone(s.stats), time: s.time, nextId: s.nextId, adventure: clone(s.adventure) };
 }
-export function createRun({ seed = 20261014, width = 1100, height = 720, weapon = 'cinder', meta = {}, campaign = 'five-acts', mapVersion = campaign === 'legacy' ? 1 : 2 } = {}) {
+export function createRun({ seed = 20261014, width = 1100, height = 720, weapon = 'cinder', meta = {}, campaign = 'five-acts', mapVersion = campaign === 'legacy' ? 1 : 3 } = {}) {
   void meta;
   const s = { width: clamp(finite(width) ? width : 1100, 380, 4000), height: clamp(finite(height) ? height : 720, 560, 4000),
     time: 0, seed: (Number(seed) >>> 0) || 1, rng: 1, room: 1, route: 'hunt', phase: 'combat', nextId: 1,
-    mapVersion: mapVersion === 2 ? 2 : 1, campaign: campaign === 'legacy' ? 'legacy' : 'five-acts', totalRooms: campaign === 'legacy' ? 8 : MAX_ROOMS,
+    mapVersion: [2, 3].includes(mapVersion) ? mapVersion : 1, campaign: campaign === 'legacy' ? 'legacy' : 'five-acts', totalRooms: campaign === 'legacy' ? 8 : MAX_ROOMS,
     player: { x: 0, y: 0, r: 13, hp: 6, maxHp: 6, angle: -Math.PI / 2, vx: 0, vy: 0, invuln: 0,
       dashTime: 0, dashCooldown: 0, dashVX: 0, dashVY: 0, fireCooldown: 0, novaCharge: 100, novaMax: 100,
       recoil: 0, slowTime: 0, slowFactor: 1, weapon: WEAPONS.some(w => w.id === weapon) ? weapon : 'cinder' },
@@ -729,7 +729,7 @@ export function setWorldSize(s, width, height) {
   // Rebuild seeded visual semantics on rotation; legacy collision scaling is exact.
   const geometry = buildRoomGeometry({ ...s, bounds: next, boss: isBossRoom(s) });
   s.floorZones = geometry.floorZones; s.landmarks = geometry.landmarks;
-  if (s.mapVersion === 2) s.obstacles = [...geometry.obstacles, ...s.obstacles.filter(o => o.temporary)];
+  if (s.mapVersion >= 2) s.obstacles = [...geometry.obstacles, ...s.obstacles.filter(o => o.temporary)];
   resolveBody(s, s.player);
   for (const item of s.interactables) resolveBody(s, item);
   s.landmarks = s.landmarks.filter(p => !s.interactables.some(item => distance(p, item) < 45));
@@ -768,7 +768,7 @@ export function restoreRun(data) {
     const allowed = ['kind', 'version', 'seed', 'width', 'height', 'room', 'route', 'weapon', 'relics', 'hp', 'novaCharge', 'stats', 'time', 'nextId'];
     if (data.version === 2) allowed.push('totalRooms');
     if (Object.keys(data).some(k => !allowed.includes(k) && k !== 'adventure' && k !== 'mapVersion') || allowed.some(k => !Object.hasOwn(data, k))) return null;
-    if (Object.hasOwn(data, 'mapVersion') && data.mapVersion !== 2) return null;
+    if (Object.hasOwn(data, 'mapVersion') && ![2, 3].includes(data.mapVersion)) return null;
     const maxRooms = data.version === 1 ? 8 : MAX_ROOMS;
     if (data.version === 2 && data.totalRooms !== MAX_ROOMS) return null;
     if (!Number.isInteger(data.seed) || data.seed < 1 || data.seed > 4294967295 || !Number.isInteger(data.room) || data.room < 1 || data.room > maxRooms || !['hunt', 'refuge', ...(data.version === 2 ? ['rift'] : [])].includes(data.route) || !WEAPONS.some(w => w.id === data.weapon)) return null;
@@ -796,7 +796,7 @@ export function describe(s) {
     mapVersion: s.mapVersion, roomShape: s.roomShape, layoutVariant: clone(s.layoutVariant), floorZones: clone(s.floorZones), landmarks: clone(s.landmarks),
     wave: s.wave, waveTotal: s.waveTotal, waveDelay: round(s.waveDelay), layout: s.layout, biome: s.biome, baseBiome: s.baseBiome, act: s.act, actName: s.actName, bossId: s.bossId, riftRule: s.riftRule,
     player: Object.fromEntries(Object.entries(s.player).filter(([k]) => !['fireCooldown', 'dashVX', 'dashVY'].includes(k)).map(([k, v]) => [k, typeof v === 'number' ? round(v) : v])),
-    enemies: s.enemies.map(e => ({ id: e.id, type: e.type, boss: e.boss, x: round(e.x), y: round(e.y), r: e.r, hp: round(e.hp), maxHp: e.maxHp, phase: e.phase, stage: e.stage, windup: round(e.windup), telegraph: e.telegraph ? { ...e.telegraph } : null, burnTime: round(e.burnTime), coldTime: round(e.coldTime) })),
+    enemies: s.enemies.map(e => ({ id: e.id, type: e.type, boss: e.boss, x: round(e.x), y: round(e.y), r: e.r, hp: round(e.hp), maxHp: e.maxHp, phase: e.phase, stage: e.stage, windup: round(e.windup), ...(e.boss ? { action: e.specialAction || null, angle: round(e.angle), aimLocked: Boolean(e.aimLocked), comboStep: e.comboStep || 0, coreOpen: Boolean(e.coreOpen) } : {}), telegraph: e.telegraph ? { ...e.telegraph } : null, burnTime: round(e.burnTime), coldTime: round(e.coldTime) })),
     bullets: s.bullets.map(b => ({ id: b.id, owner: b.owner, x: round(b.x), y: round(b.y), vx: round(b.vx), vy: round(b.vy), r: b.r, ...(b.motion ? { motion: b.motion } : {}), ...(b.paused !== undefined ? { paused: b.paused } : {}) })),
     obstacles: clone(s.obstacles), gates: clone(s.gates), relics: { ...s.relics }, choices: s.choices.map(id => ({ ...RELICS.find(r => r.id === id), nextLevel: level(s, id) + 1 })),
     hazards: clone(s.hazards), interactables: clone(s.interactables), adventure: clone(s.adventure), wallet: availableEmbers(s),

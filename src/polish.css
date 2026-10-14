@@ -1,0 +1,76 @@
+/* Quiet HUD surfaces make actual attacks, routes and discoveries readable. */
+#boss-hud{padding:8px 13px 7px;background:#12121ddd;border:1px solid #d1977948;border-radius:4px;box-shadow:0 5px 15px #0004}
+#boss-name{font-size:14px;line-height:1.5;color:#ffe8d2;font-weight:700}
+.boss-track{height:7px;margin-top:5px;border:1px solid #db85664d;background:#342330;overflow:hidden;border-radius:2px}
+#boss-fill{background:linear-gradient(90deg,#b84242,#ed9975);transition:width .1s linear}
+#boss-status{font-size:10px;line-height:1.5;letter-spacing:.1em;display:block;color:#cba596;margin-top:4px}
+#boss-hud[data-tell=windup]{border-color:#efc076;background:#291b20ef}
+#boss-hud[data-tell=windup] #boss-status{color:#ffd699}
+#boss-hud[data-tell=recover] #boss-status{color:#ade1c9}
+.room-banner{background:#14121bdc;border:1px solid #c4976d70;padding:10px 20px;border-radius:3px;line-height:1.5;font-family:system-ui,sans-serif;font-weight:750;letter-spacing:.04em;max-width:70vw;white-space:normal;z-index:1;box-shadow:0 5px 20px #0004}
+.room-banner:empty{display:none}
+#discovery-panel{background:#101b22f5;border-color:#e0b478;border-left:4px solid #ffca84;padding:13px 15px;box-shadow:0 5px 15px #0006}
+#discovery-kicker{color:#ffd69e;font-size:11px;letter-spacing:.1em}
+#discovery-title{font-size:17px;line-height:1.5;color:#fff0d8}
+#discovery-detail{font-size:14px;line-height:1.65;color:#e2d8cf}
+#discovery-hint{font-size:12px;color:#badfcf}
+#discovery-panel[data-near=true]{border-color:#ffe0a2;background:#172c2cf5;box-shadow:0 0 0 2px #ffd58d2b,0 7px 20px #0006}
+#interact-button{min-height:48px;border:1px solid #ffe4a2;background:#233c34f5;color:#f5ffe8;box-shadow:0 4px 15px #0008;font-size:14px}
+#interact-button kbd{background:#deefcc;color:#243b30;border:0;font-size:13px}
+.objective{font-size:13px;line-height:1.6;background:#161722ed;border:1px solid #c1a08860;color:#ffead1;padding:8px 13px;max-width:78vw;border-radius:3px}
+.relic-card{background:linear-gradient(150deg,#24222fe8,#151722f5);border-color:#7d6b787d;box-shadow:0 10px 25px #0004;transition:transform .18s,border-color .18s,background .18s}
+.relic-card:hover,.relic-card:focus-visible{transform:translateY(-5px);border-color:var(--card-color);background:linear-gradient(150deg,#34303eef,#1b1c29f5)}
+.relic-desc{font-size:14px;line-height:1.65;color:#e0d2c9}
+.relic-name{font-size:22px;line-height:1.5}
+.relic-tag{font-size:11px;letter-spacing:.1em}
+.relic-level{font-size:12px}
+.end-content{padding:26px;background:#12121edb;border:1px solid #b68b6760;border-radius:5px;box-shadow:0 12px 40px #0005}
+.end-content h2{font-family:system-ui,sans-serif;font-weight:750;line-height:1.3}
+dialog{border:1px solid #ba9a7380;background:#161722f5;box-shadow:0 14px 60px #0008}
+.menu-prose{font-size:14px;line-height:1.8;color:#d8cfc6}
+.credits-links{font-size:14px;line-height:1.8}
+.save-status{font-size:13px;line-height:1.8;color:#dcc9b5}
+.warning-box{border-color:#f8c87b;background:#4b322767;font-size:14px;line-height:1.8}
+#toast{font-size:14px;line-height:1.65;border:1px solid #e1b283;box-shadow:0 6px 24px #0006}
+#combat-ui:has(#discovery-panel:not([hidden])) .room-banner{top:auto;bottom:110px;font-size:17px;max-width:60vw}
+#combat-ui:has(#interact-button:not([hidden])) .room-banner{display:none}
+#build-menu-toggle{display:none;pointer-events:auto;background:#181e2bee;border:1px solid #a6927a9c;border-radius:3px;color:#efd8bd;min-width:94px;min-height:44px;padding:8px 12px;font-size:12px;gap:10px;align-items:center;justify-content:space-between}
+#build-menu-toggle b{color:#b9e5d3;font-size:15px}
+@media(max-width:700px){
+  #boss-hud{width:min(126px,calc(100vw - 204px));padding:6px 8px;top:auto;bottom:calc(26px + var(--safe-bottom))}
+  #boss-name{font-size:11px;white-space:nowrap;display:block;overflow:hidden;text-overflow:ellipsis}#boss-status{font-size:9px;margin-top:3px}
+  .room-banner{top:24%;font-size:18px;padding:8px 12px;max-width:80vw}
+  #discovery-panel{top:116px;width:min(230px,calc(100vw - 28px));padding:10px 12px}
+  #discovery-title{font-size:16px}#discovery-detail{font-size:13px;line-height:1.6}#discovery-kicker{font-size:10px}#discovery-hint{font-size:12px}
+  .objective{font-size:12px;max-width:90vw}
+  .end-content{padding:20px 16px;width:min(430px,90vw)}
+  .relic-name{font-size:19px}.relic-desc{font-size:13px;line-height:1.6}
+  .build-strip{left:14px;right:14px;bottom:calc(137px + var(--safe-bottom));max-width:none;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;pointer-events:auto;padding:2px 1px}
+  .build-strip::-webkit-scrollbar{display:none}
+  .build-icon{width:32px;height:32px;flex:0 0 32px;font-size:18px}
+  .build-strip{display:none}
+  #build-menu-toggle{display:flex;position:fixed;left:14px;bottom:calc(225px + var(--safe-bottom))}
+  #touch-controls{left:14px;right:14px;bottom:calc(18px + var(--safe-bottom))}
+  .stick{width:clamp(84px,26vw,104px);height:clamp(84px,26vw,104px)}
+  #combat-ui:has(#discovery-panel:not([hidden])) .room-banner{bottom:calc(181px + var(--safe-bottom));max-width:90vw;font-size:15px}
+}
+@media(max-height:500px){
+  #boss-hud{position:static;transform:none;padding:3px 8px;width:min(190px,24vw);margin-left:auto;flex-shrink:0}
+  #boss-name{font-size:11px}#boss-status{font-size:9px;margin-top:2px}
+  #discovery-panel{top:113px;width:215px;padding:8px 10px}
+  #discovery-title{font-size:14px}#discovery-detail{font-size:12px;line-height:1.5}#discovery-hint{font-size:11px}
+  #interact-button{min-height:44px;font-size:12px}
+  .room-banner{top:33%;font-size:17px;max-width:58vw;padding:6px 12px}
+  .relic-name{font-size:17px}.relic-desc{font-size:12px;line-height:1.55}
+  .end-content{padding:16px;max-height:calc(100dvh - 70px);overflow-y:auto}
+  .build-strip{left:calc(124px + var(--safe-left));right:calc(124px + var(--safe-right));bottom:15px;max-width:none;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;pointer-events:auto;padding:2px 1px}
+  .build-icon{width:28px;height:28px;flex:0 0 28px;font-size:16px}
+  .build-strip{display:none}
+  #build-menu-toggle{display:flex;position:static;min-width:88px;min-height:44px;gap:7px;padding:6px 9px;margin-left:auto;font-size:11px}
+  body:not([data-mode=title]) .wordmark{display:none}
+  #topbar{gap:12px}
+  #run-hud{gap:10px;flex-wrap:nowrap}
+  body[data-boss-active=true] #room-strip{display:none}
+  #combat-ui:has(#discovery-panel:not([hidden])) .room-banner{bottom:63px;max-width:60vw;font-size:13px}
+}
+body[data-reduce-motion=true] #boss-fill{transition:none}

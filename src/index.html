@@ -9,6 +9,7 @@
     <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="./styles.css" />
     <link rel="stylesheet" href="./home.css" />
+    <link rel="stylesheet" href="./polish.css" />
   </head>
   <body>
     <main id="game" aria-label="Cinder Below 游戏" data-i18n-aria-label="Cinder Below game">
@@ -19,6 +20,7 @@
         <div id="run-hud" hidden>
           <div class="vitals"><div id="hearts" aria-label="生命" data-i18n-aria-label="Health"></div><span id="ember-count">0</span><span class="ember-symbol" aria-hidden="true">◆</span></div>
           <div id="room-strip" aria-label="闯关进度" data-i18n-aria-label="Run progress"></div>
+          <button id="build-menu-toggle" type="button" hidden><span data-i18n="RELICS">遗物</span><b id="build-count">0</b></button>
         </div>
         <div class="tools">
           <button class="icon-button language-button" id="language-toggle" type="button" aria-label="切换到英语" data-i18n-aria-label="Switch to English" title="切换到英语" data-i18n-title="Switch to English">EN</button>
@@ -33,6 +35,7 @@
             <div class="eyebrow"><span class="eyebrow-rule" aria-hidden="true"></span><span data-i18n="PIXEL ACTION · FIVE RANDOMIZED ACTS">像素动作 · 五段随机冒险</span></div>
             <h1 id="game-title">CINDER<br /><span>BELOW</span></h1>
             <p class="title-copy" data-i18n="Clear rooms. Stack relics. Descend with a different build.">清房、叠遗物，带着新打法闯过深渊。</p>
+            <p class="home-facts"><span data-i18n="15 ROOMS">15 间战场</span><span data-i18n="10 BOSSES">10 位首领</span><span data-i18n="RANDOM RELIC BUILDS">随机遗物构筑</span></p>
           </div>
           <div class="title-play">
             <div class="loadout-label"><span data-i18n="CHOOSE YOUR FIRST SPARK">选择你的初始火种</span><span id="unlocks-caption"></span></div>
@@ -51,11 +54,13 @@
             <div class="title-stats" id="title-stats"></div>
           </div>
         </div>
-        <div class="title-foot"><button id="how-to-play" class="text-button"><span class="help-key" aria-hidden="true">?</span><span data-i18n="Controls & rules">操作与规则</span></button><button id="credits-button" class="text-button" data-i18n="Credits">制作名单</button><span class="title-save-note" data-i18n="PLAY INSTANTLY · SAVED ON THIS DEVICE">即开即玩 · 本机保存</span></div>
+        <div class="home-preview-controls" aria-label="五段环境预览" data-i18n-aria-label="Preview the five acts"><span class="preview-label" data-i18n="CHOOSE A WORLD TO PREVIEW">窥见深渊</span><div id="act-preview-options"></div><p id="act-preview-detail"></p></div>
+        <div class="home-audio"><button id="music-start" type="button"><span aria-hidden="true">♪</span><span id="music-start-label" data-i18n="Click to start music">点击开启音乐</span></button><span id="music-state" role="status"></span></div>
+        <div class="title-foot"><button id="how-to-play" class="text-button"><span class="help-key" aria-hidden="true">?</span><span data-i18n="Controls & rules">操作与规则</span></button><button id="title-import" class="text-button" data-i18n="Import save">导入存档</button><button id="credits-button" class="text-button" data-i18n="Credits">制作名单</button><span class="title-save-note" data-i18n="PLAY INSTANTLY · SAVED ON THIS DEVICE">即开即玩 · 本机保存</span></div>
       </section>
       <div id="combat-ui" hidden>
         <div id="room-banner" class="room-banner" aria-live="polite"></div>
-        <div id="boss-hud" hidden><span id="boss-name"></span><div class="boss-track"><div id="boss-fill"></div></div></div>
+        <div id="boss-hud" hidden><span id="boss-name"></span><div class="boss-track"><div id="boss-fill"></div></div><span id="boss-status"></span></div>
         <div id="objective" class="objective"></div>
         <aside id="first-run-guide" hidden aria-label="新手指引" data-i18n-aria-label="First-run guide"><div class="guide-copy" role="status" aria-live="polite"><span id="guide-step"></span><strong id="guide-action"></strong><p id="guide-detail"></p></div><button id="dismiss-guide" type="button" aria-label="关闭新手指引" data-i18n-aria-label="Dismiss the guide">×</button><div class="guide-progress" aria-hidden="true"><i></i><i></i><i></i></div></aside>
         <aside id="discovery-panel" hidden aria-label="房内奇遇" data-i18n-aria-label="Optional discovery"><span id="discovery-kicker"></span><strong id="discovery-title"></strong><p id="discovery-detail"></p><small id="discovery-hint"></small></aside>

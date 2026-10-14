@@ -13,10 +13,12 @@ import sys
 from playwright.sync_api import sync_playwright
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-OUT = ROOT / '.qa' / 'production-v6'
+sys.path.insert(0, str(ROOT/'tests'))
+from browser_navigation import waypoint_to
+OUT = ROOT / '.qa' / 'production-v7'
 OUT.mkdir(parents=True, exist_ok=True)
-URL = sys.argv[1] if len(sys.argv)>1 else 'https://foreseer-focus-desk.fresh-ape-5596.chatgpt.site'
-REPORT = {'url': URL, 'date': '2026-10-14', 'expected_source_commit': sys.argv[2] if len(sys.argv)>2 else None, 'method': 'Anonymous browser contexts, normal RAF and mouse/keyboard/native multitouch; render_game_to_text read only', 'checks': [], 'page_errors': [], 'console_errors': [], 'resource_failures': [], 'screenshots': []}
+URL = (sys.argv[1] if len(sys.argv)>1 else 'https://foreseer.site/cinder-below/').rstrip('/')
+REPORT = {'url': URL, 'date': '2026-10-15', 'expected_source_commit': sys.argv[2] if len(sys.argv)>2 else None, 'method': 'Anonymous browser contexts, normal RAF and mouse/keyboard/native multitouch; render_game_to_text read only', 'checks': [], 'page_errors': [], 'console_errors': [], 'resource_failures': [], 'screenshots': []}
 DIST = ROOT / 'dist'
 
 
@@ -33,7 +35,13 @@ def state(page):
 def monitor(page, label):
     page.on('pageerror', lambda error: REPORT['page_errors'].append({'surface': label, 'error': str(error)}))
     page.on('console', lambda message: REPORT['console_errors'].append({'surface': label, 'error': message.text}) if message.type == 'error' else None)
-    page.on('requestfailed', lambda request: REPORT['resource_failures'].append({'surface': label, 'url': request.url, 'failure': request.failure}))
+    def failed_request(request):
+        item = {'surface':label, 'url':request.url, 'failure':request.failure, 'resource_type':request.resource_type}
+        if getattr(page, '_qa_closing', False) and request.failure == 'net::ERR_ABORTED':
+            REPORT.setdefault('teardown_cancellations', []).append(item)
+        else:
+            REPORT['resource_failures'].append(item)
+    page.on('requestfailed', failed_request)
     page.on('response', lambda response: REPORT['resource_failures'].append({'surface': label, 'url': response.url, 'status': response.status}) if response.status >= 400 else None)
 
 
@@ -66,15 +74,25 @@ def desktop(browser):
     context = browser.new_context(viewport={'width': 1440, 'height': 960}, device_scale_factor=1)
     page = open_game(context, 'desktop')
     screenshot(page, 'desktop-title.png')
-    files = ['engine.js','monsters.js','app.js','renderer.js','input.js','storage.js','styles.css','home.css','onboarding.js','i18n.js','field-guide.js','audio.js','rooms.js','discovery.js']
+    for act in range(1,6):
+        page.locator(f'#act-preview-options [data-act="{act}"]').click()
+        check(state(page)['ui']['titleAct']==act, f'desktop: public act {act} preview changes')
+    page.wait_for_function('JSON.parse(window.render_game_to_text()).ui.audio.musicPlaying')
+    check(state(page)['ui']['mode']=='title', 'desktop: first ordinary interaction starts title music before combat')
+    files = ['engine.js','monsters.js','app.js','renderer.js','input.js','storage.js','styles.css','home.css','polish.css','onboarding.js','i18n.js','field-guide.js','audio.js','rooms.js','discovery.js']
     files += [str(path.relative_to(DIST)).replace(chr(92),'/') for path in (DIST/'assets'/'music').glob('*.ogg')]
     files += [str(path.relative_to(DIST)).replace('\\','/') for path in DIST.rglob('*.json') if 'manifest' in path.name or 'asset-map' in path.name]
     REPORT['public_hashes'] = []
     for name in files:
-        response = context.request.get(URL + '/' + name, timeout=30000)
-        entry = {'file':name,'http_status':response.status}
-        if response.ok:
-            entry['public_sha256'] = hashlib.sha256(response.body()).hexdigest()
+        response = page.evaluate("""async name => {
+          const response = await fetch(new URL(name, location.href));
+          const bytes = await response.arrayBuffer();
+          const hash = await crypto.subtle.digest('SHA-256', bytes);
+          return {status:response.status, sha256:Array.from(new Uint8Array(hash), n=>n.toString(16).padStart(2,'0')).join('')};
+        }""", name)
+        entry = {'file':name,'http_status':response['status']}
+        if response['status'] == 200:
+            entry['public_sha256'] = response['sha256']
             entry['local_sha256'] = hashlib.sha256((DIST/name).read_bytes()).hexdigest()
             entry['matches'] = entry['public_sha256'] == entry['local_sha256']
         REPORT['public_hashes'].append(entry)
@@ -98,18 +116,27 @@ def desktop(browser):
     page.keyboard.down('w'); page.wait_for_timeout(350); page.keyboard.up('w')
     # Aim at an actual living target, updating through real pointer movement.
     mouse_down = False
-    for _ in range(22):
+    attack_keys = set()
+    for _ in range(70):
         s = state(page)
         if s['phase'] != 'combat': break
         target = min(s['enemies'], key=lambda e: math.hypot(e['x'] - s['player']['x'], e['y'] - s['player']['y']))
         box = page.locator('#world').bounding_box()
         page.mouse.move(box['x'] + target['x'] / s['width'] * box['width'], box['y'] + target['y'] / s['height'] * box['height'])
         if not mouse_down: page.mouse.down(); mouse_down = True
+        point = waypoint_to(s, (target['x'], target['y']))
+        dx, dy = point[0]-s['player']['x'], point[1]-s['player']['y']
+        distance = math.hypot(target['x']-s['player']['x'], target['y']-s['player']['y'])
+        wanted = (({'d'} if dx>7 else {'a'} if dx < -7 else set()) | ({'s'} if dy>7 else {'w'} if dy < -7 else set())) if distance > 105 else set()
+        attack_keys = held_keys(page, attack_keys, wanted)
         page.wait_for_timeout(120)
+        if state(page)['stats']['hits'] > 0: break
+    held_keys(page, attack_keys, set())
     if mouse_down: page.mouse.up()
     attacked = state(page)
     check(attacked['stats']['shots'] > 0, 'desktop: holding mouse produces actual shots', attacked['stats'])
     check(attacked['stats']['hits'] > 0 or attacked['stats']['kills'] > 0, 'desktop: projectiles actually hit an enemy', attacked['stats'])
+    check(attacked['ui']['audio']['musicPlaying'] and attacked['ui']['audio']['context'] == 'running' and attacked['ui']['audio']['position'] > .2, 'desktop: downloaded music plays after pause and resume', attacked['ui']['audio'])
     screenshot(page, 'desktop-combat.png')
     # Deliberately approach enemies with ordinary movement and stop firing, so damage
     # and the real loss/retry path are observable without setting health values.
@@ -120,7 +147,8 @@ def desktop(browser):
         s = state(page)
         if s['phase'] in ('dead', 'reward'): break
         enemy = min(s['enemies'], key=lambda e: math.hypot(e['x'] - s['player']['x'], e['y'] - s['player']['y']))
-        dx, dy = enemy['x'] - s['player']['x'], enemy['y'] - s['player']['y']
+        waypoint = waypoint_to(s, (enemy['x'], enemy['y']))
+        dx, dy = waypoint[0] - s['player']['x'], waypoint[1] - s['player']['y']
         wanted = ({'d'} if dx > 15 else {'a'} if dx < -15 else set()) | ({'s'} if dy > 15 else {'w'} if dy < -15 else set())
         current_keys = held_keys(page, current_keys, wanted)
         page.wait_for_timeout(200)
@@ -133,6 +161,7 @@ def desktop(browser):
         retry = state(page)
         check(retry['phase'] == 'combat' and retry['room'] == 1 and retry['player']['hp'] == 6 and retry['seed'] != seed, 'desktop: real death screen restarts a fresh run', {'old_seed': seed, 'new_seed': retry['seed'], 'hp': retry['player']['hp']})
     REPORT['desktop'] = {'seed': seed, 'movement': displacement, 'attacked': attacked['stats'], 'outcome': outcome['phase'], 'ending_stats': outcome['stats']}
+    page._qa_closing = True
     context.close()
 
 
@@ -178,6 +207,7 @@ def mobile(browser, width, touch_test):
     else:
         screenshot(page, f'mobile-{width}-controls.png')
     REPORT.setdefault('mobile',[]).append(data)
+    page._qa_closing = True
     context.close()
 
 
@@ -196,6 +226,14 @@ except Exception as error:
     REPORT['failure'] = str(error)
     print('STOP: '+str(error),flush=True)
 REPORT['wall_seconds'] = round(time.perf_counter()-started,2)
+# Chromium may abort a media range fetch on pause/preload changes. Preserve each
+# cancellation separately only after the exact recording's hash and actual
+# post-resume playback have both passed; all other failures remain blocking.
+playback_ok = any(c['name']=='desktop: downloaded music plays after pause and resume' and c['passed'] for c in REPORT['checks'])
+verified = {URL+'/'+h['file'] for h in REPORT.get('public_hashes',[]) if h.get('matches')}
+canceled = [r for r in REPORT['resource_failures'] if playback_ok and r.get('resource_type')=='media' and r['failure']=='net::ERR_ABORTED' and r['url'] in verified]
+REPORT['verified_media_cancellations'] = canceled
+REPORT['resource_failures'] = [r for r in REPORT['resource_failures'] if r not in canceled]
 REPORT['passed'] = not REPORT.get('failure') and all(c['passed'] for c in REPORT['checks']) and not REPORT['page_errors'] and not REPORT['console_errors'] and not REPORT['resource_failures']
 (OUT/'report.json').write_text(json.dumps(REPORT,ensure_ascii=False,indent=2),encoding='utf-8')
 print(json.dumps({'passed':REPORT['passed'],'checks':len(REPORT['checks']),'wall_seconds':REPORT['wall_seconds'],'failure':REPORT.get('failure'),'page_errors':REPORT['page_errors'],'console_errors':REPORT['console_errors'],'resource_failures':REPORT['resource_failures']},ensure_ascii=False),flush=True)

@@ -514,19 +514,33 @@ test('fifteen-room progression has five independently seeded boss choices, stabl
   assert.deepEqual([...bosses].sort(), BOSS_POOLS.flat().sort()); assert.ok(sequences.size >= 10);
 });
 
-test('rotation preserves a sideways surf tell and relocates the Chronarch rewind anchor', () => {
+test('rotation preserves a diagonal surf tell and relocates the Chronarch rewind anchor', () => {
   const s = chamber('leviathan'), e = s.enemies[0]; e.cooldown = 0; s.player.invuln = 100;
   for (let i = 0; i < 3600 && !(e.specialAction === 'leviathan-surf' && e.phase === 'windup'); i++) step(s, {}, DT);
   assert.equal(e.specialAction, 'leviathan-surf'); assert.equal(e.phase, 'windup');
-  assert.ok(Math.abs(Math.abs(e.attackAngleOffset) - Math.PI / 2) < 1e-8);
+  assert.ok(Math.abs(Math.abs(e.attackAngleOffset) - .45) < 1e-8);
   e.rewindX = 400; e.rewindY = 250;
   const sx = (390 - 56) / (s.width - 56), sy = (1000 - 150 - 66) / (s.height - 28 - 66);
   setWorldSize(s, 390, 1000);
   assert.ok(Math.abs(e.rewindX - (28 + (400 - 28) * sx)) < 1e-8);
   assert.ok(Math.abs(e.rewindY - (66 + (250 - 66) * sy)) < 1e-8);
   const targetAngle = Math.atan2(e.attackY - e.y, e.attackX - e.x);
-  assert.ok(Math.abs(Math.cos(e.angle - targetAngle)) < 1e-8);
+  assert.ok(Math.abs(e.angle - targetAngle - e.attackAngleOffset) < 1e-8);
   assert.equal(e.telegraph.angle, e.angle);
+});
+
+test('new map v3 saves roundtrip while explicit v2 and omitted legacy geometry stay pinned', () => {
+  assert.equal(createRun().mapVersion, 3);
+  for (const mapVersion of [1, 2, 3]) {
+    const run = createRun({ seed: 91, mapVersion }), saved = snapshot(run), resumed = restoreRun(saved);
+    assert.ok(resumed); assert.equal(resumed.mapVersion, mapVersion);
+    assert.deepEqual(resumed.obstacles, run.obstacles); assert.deepEqual(snapshot(resumed), saved);
+    assert.equal(Object.hasOwn(saved, 'mapVersion'), mapVersion !== 1);
+    setWorldSize(resumed, 420, 1000); assert.equal(resumed.mapVersion, mapVersion);
+    assert.ok(restoreRun(snapshot(resumed)));
+  }
+  const saved = snapshot(createRun());
+  for (const invalid of [0, 1, 4, '3', null, -1]) assert.equal(restoreRun({ ...saved, mapVersion: invalid }), null);
 });
 
 test('all ten naturally generated bosses expose the boolean HUD marker while ordinary supports do not', () => {

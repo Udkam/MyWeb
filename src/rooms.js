@@ -30,9 +30,41 @@ const ROOMS = [
   { shape:'causeway', blocks:[[.25,.25,.10,.50,'pit'],[.65,.25,.10,.22,'pit']], zones:[[.36,.10,.28,.79,'bridge'],[.65,.49,.26,.37,'court'],[.04,.15,.18,.71,'stone-path']] },
   { shape:'forge', blocks:[[.25,.25,.50,.10,'pit'],[.25,.65,.50,.10,'pit']], zones:[[.26,.37,.48,.25,'grate'],[.04,.16,.18,.69,'stone-path'],[.78,.16,.18,.69,'stone-path'],[.38,.08,.24,.12,'court']] },
 ];
+// Version 2 is immutable: published entrances derive their collision and spawn
+// positions from it. Version 3 corrects the causeway/forge crossings and clips
+// every walkable surface to real floor instead of painting through solid blocks.
+const ROOMS_V3 = ROOMS.map(room => ({ ...room, blocks: room.blocks, zones: room.zones }));
+ROOMS_V3[2] = { ...ROOMS[2],
+  blocks:[[.25,.25,.15,.12,'wall'],[.65,.25,.10,.12,'wall'],[.25,.65,.15,.10,'wall'],[.65,.65,.10,.10,'wall']],
+  zones:[[.40,.12,.25,.76,'stone-path'],[.12,.40,.76,.25,'stone-path']] };
+ROOMS_V3[9] = { ...ROOMS[9], zones:[
+  [.12,.16,.76,.20,'stone-path'],[.12,.64,.76,.20,'stone-path'],
+  [.12,.36,.26,.28,'stone-path'],[.62,.36,.26,.28,'stone-path']] };
+ROOMS_V3[10] = { ...ROOMS[10],
+  blocks:[[.25,.25,.10,.50,'pit'],[.65,.25,.10,.50,'pit']],
+  zones:[[.35,.25,.30,.50,'bridge'],[.35,.10,.30,.15,'stone-path'],[.35,.75,.30,.15,'stone-path'],
+    [.05,.15,.20,.70,'stone-path'],[.75,.15,.20,.70,'stone-path']] };
+ROOMS_V3[11] = { ...ROOMS[11],
+  blocks:[[.25,.25,.10,.12,'pit'],[.65,.25,.10,.12,'pit'],[.25,.63,.10,.12,'pit'],[.65,.63,.10,.12,'pit']],
+  zones:[[.25,.37,.50,.26,'grate'],[.35,.25,.30,.12,'bridge'],[.35,.63,.30,.12,'bridge'],
+    [.35,.10,.30,.15,'stone-path'],[.35,.75,.30,.15,'stone-path'],[.05,.16,.20,.69,'stone-path'],[.75,.16,.20,.69,'stone-path']] };
+
+function subtractSolid(zone, obstacle) {
+  const left=Math.max(zone.x,obstacle.x),right=Math.min(zone.x+zone.w,obstacle.x+obstacle.w);
+  const top=Math.max(zone.y,obstacle.y),bottom=Math.min(zone.y+zone.h,obstacle.y+obstacle.h);
+  if(right<=left||bottom<=top)return[zone];
+  return [
+    {...zone,h:top-zone.y}, {...zone,y:bottom,h:zone.y+zone.h-bottom},
+    {...zone,y:top,w:left-zone.x,h:bottom-top}, {...zone,x:right,y:top,w:zone.x+zone.w-right,h:bottom-top},
+  ].filter(part=>part.w>.01&&part.h>.01);
+}
+function clipFloor(zones,obstacles) {
+  return zones.flatMap(zone=>obstacles.reduce((parts,obstacle)=>parts.flatMap(part=>subtractSolid(part,obstacle)),[zone])
+    .map((part,index)=>({...part,id:`${zone.id}-${index}`})));
+}
 function hash(value) { let n=Math.imul((value^(value>>>16))>>>0,0x21f0aaad);n=Math.imul(n^(n>>>15),0x735a2d97);return(n^(n>>>15))>>>0; }
-export function layoutForRoom(seed, room, mapVersion=2) {
-  const layouts=mapVersion===2?LAYOUTS:LEGACY_LAYOUTS;let previous=-1,selected=0;
+export function layoutForRoom(seed, room, mapVersion=3) {
+  const layouts=mapVersion>=2?LAYOUTS:LEGACY_LAYOUTS;let previous=-1,selected=0;
   for(let cycle=0;cycle<=Math.floor((room-1)/layouts.length);cycle++) {
     const bag=layouts.map((_,index)=>index);let rng=hash(seed^Math.imul(cycle+1,0x9e3779b1));
     for(let i=bag.length-1;i>0;i--){rng=hash(rng+i);const j=rng%(i+1);[bag[i],bag[j]]=[bag[j],bag[i]];}
@@ -41,14 +73,14 @@ export function layoutForRoom(seed, room, mapVersion=2) {
   }
   return selected;
 }
-function variantFor(seed,room,mapVersion){const n=hash(seed^Math.imul(room,0x41c64e6d));return{mirrorX:mapVersion===2&&Boolean(n&1),mirrorY:mapVersion===2&&Boolean(n&2),decoration:n%3};}
+function variantFor(seed,room,mapVersion){const n=hash(seed^Math.imul(room,0x41c64e6d));return{mirrorX:mapVersion>=2&&Boolean(n&1),mirrorY:mapVersion>=2&&Boolean(n&2),decoration:n%3};}
 function rectToWorld(rect,bounds,variant){let[x,y,w,h,kind]=rect;if(variant.mirrorX)x=1-x-w;if(variant.mirrorY)y=1-y-h;return{x:bounds.left+x*(bounds.right-bounds.left),y:bounds.top+y*(bounds.bottom-bounds.top),w:w*(bounds.right-bounds.left),h:h*(bounds.bottom-bounds.top),kind};}
-export function buildRoomGeometry({seed,room,mapVersion=2,bounds,biome='hollow',boss=false}) {
-  const index=layoutForRoom(seed,room,mapVersion),definition=ROOMS[index],variant=variantFor(seed,room,mapVersion);
-  let blocks=mapVersion===2?definition.blocks:LEGACY_BLOCKS[index];
+export function buildRoomGeometry({seed,room,mapVersion=3,bounds,biome='hollow',boss=false}) {
+  const index=layoutForRoom(seed,room,mapVersion),definition=(mapVersion>=3?ROOMS_V3:ROOMS)[index],variant=variantFor(seed,room,mapVersion);
+  let blocks=mapVersion>=2?definition.blocks:LEGACY_BLOCKS[index];
   // Keep an uninterrupted boss arena in the upper centre while retaining the
   // room's architecture on the flanks. An 80 px bypass remains on every edge.
-  if(mapVersion===2&&boss) blocks=blocks.map(([x,y,w,h,kind])=>[x,y,w,Math.min(h,.18),kind]).filter(([x])=>x<.37||x>.61);
+  if(mapVersion>=2&&boss) blocks=blocks.map(([x,y,w,h,kind])=>[x,y,w,Math.min(h,.18),kind]).filter(([x])=>x<.37||x>.61);
   const obstacles=blocks.map(rect=>rectToWorld(rect,bounds,variant));
   const floorZones=definition.zones.map((rect,i)=>({id:`zone-${i}`,...rectToWorld(rect,bounds,variant)}));
   if(boss)floorZones.push({id:'boss-court',...rectToWorld([.24,.12,.52,.55,'rune'],bounds,variant)});
@@ -60,5 +92,9 @@ export function buildRoomGeometry({seed,room,mapVersion=2,bounds,biome='hollow',
     const p=rectToWorld([x,y,0,0,motif],bounds,variant);
     return{id:`landmark-${i}`,kind:motif,x:p.x,y:p.y,r:8+(i%3)*2,variant:(variant.decoration+i)%3};
   }).filter(p=>!obstacles.some(o=>p.x>o.x-24&&p.x<o.x+o.w+24&&p.y>o.y-24&&p.y<o.y+o.h+24));
-  return{layout:(mapVersion===2?LAYOUTS:LEGACY_LAYOUTS)[index],layoutVariant:variant,roomShape:definition.shape,floorZones,landmarks,obstacles};
+  // Boss flanks are shortened to leave room for attacks; a bridge is meaningful
+  // only while it is between the full-length pits. Arena stone is unambiguous.
+  const surfaces=mapVersion>=3&&boss?floorZones.map(z=>z.kind==='bridge'?{...z,kind:'stone-path'}:z):floorZones;
+  return{layout:(mapVersion>=2?LAYOUTS:LEGACY_LAYOUTS)[index],layoutVariant:variant,roomShape:definition.shape,
+    floorZones:mapVersion>=3?clipFloor(surfaces,obstacles):floorZones,landmarks,obstacles};
 }

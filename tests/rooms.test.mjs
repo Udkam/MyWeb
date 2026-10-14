@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { LAYOUTS, LEGACY_LAYOUTS, buildRoomGeometry, layoutForRoom } from '../src/rooms.js';
 import { createRun, enterRoom, setWorldSize, snapshot, restoreRun, describe, step } from '../src/engine.js';
 
@@ -18,8 +19,8 @@ function floorGraph(obstacles,bounds,r=13) {
   }
   return{connected:seen.size===free.filter(Boolean).length,reachable(point){let nearest=-1,d=Infinity;for(let i=0;i<free.length;i++)if(free[i]){const p=pos(i),distance=Math.hypot(p.x-point.x,p.y-point.y);if(distance<d){d=distance;nearest=i;}}return seen.has(nearest);}};
 }
-function roomFixture(room,seed,width=390,height=1000){
-  const s=createRun({seed,width,height});if(room===1)return s;s.room=room-1;s.phase='exit';s.stats.rooms=room-1;s.stats.embers=30;
+function roomFixture(room,seed,width=390,height=1000,mapVersion=3){
+  const s=createRun({seed,width,height,mapVersion});if(room===1)return s;s.room=room-1;s.phase='exit';s.stats.rooms=room-1;s.stats.embers=30;
   let count=room-1;for(const id of ['cold','split','burn','pierce','chain']){if(count)s.relics[id]=Math.min(3,count);count-=Math.min(3,count);}
   enterRoom(s,'hunt');return s;
 }
@@ -70,14 +71,45 @@ test('frozen pre-mapVersion v1 and v2 checkpoints preserve exact old collision, 
   }
 });
 
-test('mapVersion2 snapshots preserve layout variants and derived semantics, invalid versions reject without mutation',()=>{
-  for(let room=1;room<=15;room++){
-    const s=roomFixture(room,41),snap=snapshot(s),restored=restoreRun(snap);assert.equal(snap.mapVersion,2);assert.ok(restored);
+test('mapVersion2 and 3 snapshots preserve layout variants and derived semantics, invalid versions reject without mutation',()=>{
+  for(const mapVersion of [2,3])for(let room=1;room<=15;room++){
+    const s=roomFixture(room,41,390,1000,mapVersion),snap=snapshot(s),restored=restoreRun(snap);assert.equal(snap.mapVersion,mapVersion);assert.ok(restored);
     for(const key of ['layout','layoutVariant','roomShape','floorZones','landmarks','obstacles'])assert.deepEqual(restored[key],s[key],key);
-    assert.deepEqual(restored.enemies,s.enemies);assert.equal(describe(s).mapVersion,2);
-    for(const value of [1,0,3,'2',null,{},true])assert.equal(restoreRun({...snap,mapVersion:value}),null);
-    assert.equal(s.mapVersion,2);
+    assert.deepEqual(restored.enemies,s.enemies);assert.equal(describe(s).mapVersion,mapVersion);
+    for(const value of [1,0,4,'2',null,{},true])assert.equal(restoreRun({...snap,mapVersion:value}),null);
+    assert.equal(s.mapVersion,mapVersion);
   }
+});
+
+test('published mapVersion2 geometry remains byte-for-byte frozen across all layouts, acts, boss transformations and mirrors',()=>{
+  // Captured before this repair, over 360 outputs: this protects collision AND
+  // all derived visuals, without using new generation code as its own oracle.
+  const prior=[];
+  for(let seed=1;seed<=12;seed++)for(let room=1;room<=15;room++)for(const boss of [false,true])prior.push(buildRoomGeometry({
+    seed,room,mapVersion:2,boss,bounds:{left:28,right:1072,top:66,bottom:692},biome:['hollow','mire','cinder','storm','void'][Math.floor((room-1)/3)],
+  }));
+  assert.equal(createHash('sha256').update(JSON.stringify(prior)).digest('hex'),'13c4e960b40409bf2cb9a74142bfcaa6643acbd670f295ddd09ab180f61cf943');
+});
+
+test('version3 walkable materials never cover solid terrain and bridges join actual split chasms',()=>{
+  const overlaps=(a,b)=>Math.min(a.x+a.w,b.x+b.w)-Math.max(a.x,b.x)>1e-6&&Math.min(a.y+a.h,b.y+b.h)-Math.max(a.y,b.y)>1e-6;
+  const seen=new Set();
+  for(let seed=1;seed<=12;seed++)for(let room=1;room<=12;room++)for(const boss of [false,true]){
+    const g=buildRoomGeometry({seed,room,mapVersion:3,boss,bounds:boundsFor(380,560),biome:['hollow','mire','cinder','storm','void'][room%5]});
+    for(const z of g.floorZones){
+      assert.ok(g.obstacles.every(o=>!overlaps(z,o)),`${g.layout} ${z.kind} over solid terrain`);
+      if(z.kind==='bridge'){
+        seen.add(g.layout);
+        const joins=g.obstacles.filter(o=>o.kind==='pit'&&Math.min(o.y+o.h,z.y+z.h)>Math.max(o.y,z.y)+1&&
+          (Math.abs(o.x+o.w-z.x)<.001||Math.abs(z.x+z.w-o.x)<.001));
+        assert.equal(joins.length,2,`${g.layout}: bridge must connect the floor strip between two pit edges`);
+        assert.ok(z.w>=80,`${g.layout}: crossing too narrow`);
+      }
+    }
+    if(boss)assert.equal(g.floorZones.some(z=>z.kind==='bridge'),false,'boss arena must not imply shortened pit needs a long bridge');
+    if(g.layout==='chasm-loop')assert.equal(g.floorZones.some(z=>z.kind==='bridge'),false,'ring path goes around the chasm on stone');
+  }
+  assert.deepEqual([...seen].sort(),['broken-causeway','sunken-forge']);
 });
 
 test('pit geometry blocks movement and shots, while all floor-zone materials remain non-damaging and walkable',()=>{

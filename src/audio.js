@@ -10,13 +10,14 @@ export const MUSIC_SCENES = Object.freeze({
   void: 'whispers', rift: 'whispers', fight: 'boss',
 });
 
-export function createAudio(onUnavailable = () => {}) {
+export function createAudio(onUnavailable = () => {}, onStateChange = () => {}) {
   let context, master, music = false, sfx = false, loaded = false, pending;
   let warned = false, activeVoices = 0, lastShot = 0;
   let suspended = false, musicRevision = 0, desiredTrack = 'dungeon', currentTrack = null;
-  let desiredCue = 'whispers', activeDeck = null;
+  let desiredCue = 'whispers', activeDeck = null, blocked = false;
   const decks = [], buffers = new Map(), FADE_SECONDS = 1.1;
-  const unavailable = () => { if (!warned) { onUnavailable(); warned = true; } };
+  const notify = () => onStateChange();
+  const unavailable = () => { if (!warned) { onUnavailable(); warned = true; } notify(); };
 
   async function unlock() {
     try {
@@ -29,6 +30,7 @@ export function createAudio(onUnavailable = () => {}) {
         buffers.set(name, await context.decodeAudioData(await response.arrayBuffer()));
       })).then(() => { loaded = true; });
       await pending;
+      notify();
     } catch { unavailable(); }
   }
 
@@ -89,6 +91,7 @@ export function createAudio(onUnavailable = () => {}) {
       }
       const outgoing = activeDeck;
       activeDeck = incoming; currentTrack = track;
+      blocked = false;
       // Shared cues retain position; different cues overlap without a silent gap.
       ramp(incoming, MUSIC_CUES[cue].gain, outgoing === incoming ? .18 : FADE_SECONDS);
       if (outgoing && outgoing !== incoming) {
@@ -97,15 +100,18 @@ export function createAudio(onUnavailable = () => {}) {
         outgoing.timer = setTimeout(() => {
           if (outgoing !== activeDeck && outgoing.generation === outgoingGeneration) outgoing.media.pause();
           outgoing.timer = null;
+          notify();
         }, (FADE_SECONDS + .08) * 1000);
       }
-    } catch (error) { if (error?.name !== 'AbortError' && revision === musicRevision) unavailable(); }
+      notify();
+    } catch (error) { if (error?.name !== 'AbortError' && revision === musicRevision) { blocked = error?.name === 'NotAllowedError'; unavailable(); } }
   }
 
   async function setMusic(enabled) {
     music = enabled;
     if (music) await startMusic();
     else { musicRevision++; pauseDecks(); }
+    notify();
   }
 
   return {
@@ -117,13 +123,18 @@ export function createAudio(onUnavailable = () => {}) {
       desiredTrack = next; desiredCue = cue;
       void startMusic();
     },
-    async configure(settings) { sfx = !!settings.sfx; if (sfx || settings.music) await unlock(); await setMusic(!!settings.music); },
-    suspend() { suspended = true; musicRevision++; pauseDecks(); context?.suspend().catch(() => {}); },
-    async resume() { suspended = false; if (sfx || music) await unlock(); if (music) await setMusic(true); },
+    async configure(settings) {
+      sfx = !!settings.sfx;
+      // Start media inside the user gesture; effects decode independently.
+      const effects = sfx || settings.music ? unlock() : Promise.resolve();
+      await setMusic(!!settings.music); await effects; notify();
+    },
+    suspend() { suspended = true; musicRevision++; pauseDecks(); context?.suspend().catch(() => {}); notify(); },
+    async resume() { suspended = false; const effects = sfx || music ? unlock() : Promise.resolve(); if (music) await setMusic(true); await effects; notify(); },
     status() {
       return {
-        enabled: music || sfx, music, sfx, effectsReady: loaded, context: context?.state || 'idle',
-        musicPlaying: decks.some(deck => !deck.media.paused) && context?.state === 'running' && !suspended,
+        enabled: music || sfx, music, sfx, blocked, effectsReady: loaded, context: context?.state || 'idle',
+        musicPlaying: !!activeDeck && decks.some(deck => !deck.media.paused) && context?.state === 'running' && !suspended,
         track: currentTrack, desiredTrack, cue: activeDeck?.cue || null, desiredCue,
         position: activeDeck ? +activeDeck.media.currentTime.toFixed(3) : 0,
         recording: activeDeck ? MUSIC_CUES[activeDeck.cue].title : null,

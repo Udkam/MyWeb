@@ -4,6 +4,10 @@
 
 **Public site:** https://foreseer-focus-desk.fresh-ape-5596.chatgpt.site
 
+本轮主入口迁移至既有 Vercel 项目的 `https://foreseer.site/cinder-below/`；公开验证状态记录在 `.qa/release.json`。ChatGPT Sites 地址作为公开备用。全部游戏资源随静态发布，不依赖外部字体、素材 CDN 或 ChatGPT 登录。
+
+不同域名的浏览器本地存档不能自动互通。已有玩家可在旧入口“设置 → 导出存档”，再在新首页“导入存档”；导入会显示确认，取消保留原进度。
+
 **Canonical editable source:** `E:\Proj\Active\MyWeb\cinder-below`
 
 The existing public ChatGPT Sites project and stable URL are retained. The old Focus Desk / Mosslight Post URL slug is not the game's title. This game replaces Mosslight Post; its complete earlier source remains in Git at `fb20b88e4e7c564eb9912d390c69678d52bdd5af`.
@@ -81,4 +85,4 @@ ChatGPT Sites project: `appgprj_6accfe11a0ec8191ab683ddd3e52de07`. `.openai/host
 - [532-page research ledger and limitations](docs/research/README.md)
 - [Downloaded art and audio licenses / hashes](ASSET-CREDITS.md)
 
-Research and diagnostic screenshots stay outside `src` and the deployed artifact. `.qa` is ignored and retains acceptance evidence locally. Art and sound effects are original CC0 Ninja Adventure assets; music is existing CC0 work by Juhani Junkala. No art or music from The Binding of Isaac or Darkest Dungeon is used. See [map design](MAP-DESIGN.md), [art direction](ART-DIRECTION.md) and [music sources / processing](MUSIC-DIRECTION.md). New runs use mapVersion 2; existing checkpoints without this field retain their original six-layout geometry.
+Research and diagnostic screenshots stay outside `src` and the deployed artifact. `.qa` is ignored and retains acceptance evidence locally. Art and sound effects are original CC0 Ninja Adventure assets; music is existing CC0 work by Juhani Junkala. No art or music from The Binding of Isaac or Darkest Dungeon is used. See [map design](MAP-DESIGN.md), [art direction](ART-DIRECTION.md) and [music sources / processing](MUSIC-DIRECTION.md). New runs use mapVersion 3; existing explicit mapVersion 2 and checkpoints without that field retain their exact original geometry.

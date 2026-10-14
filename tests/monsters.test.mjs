@@ -344,7 +344,7 @@ test('real briar plants safe bounded solid posts, changes planting at half healt
   h.advance(6); assert.equal(h.state.obstacles.filter((o) => o.kind === 'thorn').length, 0);
 });
 
-test('real leviathan stage two overlaps returning tides with a pair of sideways surfing charges', () => {
+test('real leviathan stage two overlaps returning tides with a pair of diagonal surfing charges', () => {
   const h = engineFixture('leviathan'); const actions = new Set();
   h.advance(12, () => actions.add(h.enemy.specialAction));
   assert.ok(actions.has('leviathan-tide') && actions.has('leviathan-surf'));
@@ -488,8 +488,8 @@ test('chronarch phase two replaces its second aimed thrust with a separately tol
     assert.ok(tells[0].duration >= .8 && tells[1].duration >= .5, 'Each thrust preserves its own readable body tell');
     assert.ok(Math.abs(charges[0].relative) < 1e-8);
     assert.ok(Math.abs(charges[1].relative - (stage === 2 ? Math.PI / 2 : 0)) < 1e-8);
-    assert.equal(charges[0].duration, .3);
-    assert.equal(charges[1].duration, stage === 2 ? .22 : .3);
+    assert.equal(charges[0].duration, .62);
+    assert.equal(charges[1].duration, stage === 2 ? .44 : .62);
   }
 });
 
@@ -509,13 +509,13 @@ test('real engine exercises every boss health phase with finite state, bounded b
   }
 });
 
-test('resizing keeps sideways surf orientation and transforms the chronarch rewind anchor', () => {
+test('resizing keeps diagonal surf orientation and transforms the chronarch rewind anchor', () => {
   const surf = engineFixture('leviathan'); surf.enemy.pattern = 1;
   surf.advance(1 / 120); assert.equal(surf.enemy.specialAction, 'leviathan-surf');
-  assert.ok(Math.abs(surf.enemy.attackAngleOffset - Math.PI / 2) < 1e-8);
+  assert.ok(Math.abs(surf.enemy.attackAngleOffset - .45) < 1e-8);
   setWorldSize(surf.state, 420, 1000);
   const targetAngle = Math.atan2(surf.enemy.attackY - surf.enemy.y, surf.enemy.attackX - surf.enemy.x);
-  assert.ok(Math.abs(surf.enemy.angle - targetAngle - Math.PI / 2) < 1e-8);
+  assert.ok(Math.abs(surf.enemy.angle - targetAngle - .45) < 1e-8);
   const rewind = engineFixture('chronarch'); rewind.enemy.pattern = 1;
   rewind.advance(1 / 120); assert.equal(rewind.enemy.specialAction, 'chronarch-charge');
   const expectedX = 28 + (rewind.enemy.rewindX - 28) * ((420 - 56) / (1100 - 56));

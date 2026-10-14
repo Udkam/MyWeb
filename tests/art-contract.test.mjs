@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { createRun } from '../src/engine.js';
-import { loadArt, render, assetStatus, directionColumn, BOSS_ANIMATIONS, AUDIO } from '../src/renderer.js';
+import { loadArt, render, assetStatus, directionColumn, BOSS_ANIMATIONS, AUDIO, pixelFrame } from '../src/renderer.js';
 
 // Pixel dimensions are read from the actual PNG headers. This catches bad source
 // rectangles and atlas substitutions; it is not a replacement for browser QA.
@@ -35,6 +35,14 @@ test('20 ordinary creatures and 10 dedicated bosses use distinct original images
 });
 test('sprite directions map to source columns, not animation rows', () => {
   assert.deepEqual([Math.PI / 2, -Math.PI / 2, Math.PI, 0].map(directionColumn), [0, 1, 2, 3]);
+});
+test('actor source texels use integer CSS pixels without enlarging mobile creatures',()=>{
+  for(const scale of [.56,.73,.84,1,1.163636,1.309091,1.6])for(const [w,h,size]of[[16,16,40],[68,68,138],[76,79,152],[96,48,176]]){
+    const frame=pixelFrame(w,h,size,scale,scale);
+    assert.equal(Number.isInteger(frame.factor),true);assert.ok(frame.factor>=1);
+    assert.ok(Math.abs(frame.w*scale/w-frame.factor)<1e-8);assert.ok(Math.abs(frame.h*scale/h-frame.factor)<1e-8);
+    if(w===16)assert.ok(Math.abs(frame.w*scale-size*scale)<=8,'normal creatures stay within half a source-cell scale step of their original screen size');
+  }
 });
 test('every actor phase uses valid rectangles and title never mutates the run', async () => {
   const oldImage = globalThis.Image, oldDocument = globalThis.document;
@@ -74,6 +82,7 @@ test('every actor phase uses valid rectangles and title never mutates the run', 
     state.enemies = [...ordinaryTypes,'tiny',...Object.keys(BOSS_ANIMATIONS)].map((type,index) => ({ id:index,type,boss:Boolean(BOSS_ANIMATIONS[type]),x:100+index%8*110,y:170+Math.floor(index/8)*110,r:BOSS_ANIMATIONS[type]?29:14,hp:50,maxHp:60,vx:10,vy:0,angle:.7,stage:2,burnTime:1,coldTime:1,coreOpen:true,coreAngle:.7 }));
     state.effects = ['nova','lightning','meteor-impact','lightning-impact','leech','heal','rewind','death','discovery'].map((type,index) => ({type,x:150+index*80,y:350,x2:220+index*70,y2:360,radius:44,life:.3,maxLife:.5}));
     state.hazards=[{kind:'meteor',x:180,y:220,radius:44,remaining:.2,maxTime:1},{kind:'lightning',x:450,y:300,radius:36,remaining:.5,maxTime:1},{kind:'mine',x:600,y:320,armTime:0,radius:14}];
+    state.bullets=['flame','prism','dark-orb','frost','weave','boomerang','pause'].map((style,index)=>({id:1000+index,owner:'enemy',style,motion:style,paused:style==='pause',slowDuration:style==='frost'?1:0,x:110+index*110,y:410,r:5,vx:120,vy:90}));
     state.interactables=['traveler','lamp','offering','cracked-wall','chest','ghost'].map((kind,index)=>({kind,x:80+index*135,y:500,r:18,status:kind==='cracked-wall'?'sealed':'ready',order:2,hits:2}));
     state.obstacles.push({x:500,y:230,w:40,h:40,kind:'thorn'});
     state.obstacles.push({x:330,y:350,w:65,h:70,kind:'pit'});
@@ -99,11 +108,17 @@ test('every actor phase uses valid rectangles and title never mutates the run', 
     state.enemies[0].telegraph={kind:'line',visible:true,angle:.2,range:400,width:60};
     geometry=[]; render(context,state,{width:1440,height:900}); assert.equal(JSON.stringify(geometry),without,'ordinary telegraphs must not create ground geometry');
     state.enemies.forEach(e => e.hitFlash = .06); render(context, state, { width: 1440, height: 900 });
+    state.enemies=[{id:9,type:'chronarch',boss:true,x:500,y:350,r:29,hp:900,maxHp:1150,phase:'burst',hitFlash:.06}];
+    geometry=[];render(context,state,{width:1440,height:900});
+    const spiritSources=geometry.filter(command=>command[0]==='drawImage').map(command=>command[1]);
+    assert.ok(spiritSources.some(source=>source.endsWith('/chronarch-idle.png')),'time spirit keeps its blue-white body while hurt');
+    assert.ok(!spiritSources.some(source=>source.endsWith('/chronarch-hit.png')),'orange hurt frames must not disguise the time spirit as Kiln');
+    assert.ok(spiritSources.some(source=>source.endsWith('/impact.png')),'hits retain their separate impact feedback');
     const before = JSON.stringify(state); render(context, state, { width: 1440, height: 900, title: true });
     assert.equal(JSON.stringify(state), before); assert.ok(checked > 1000);
     for(const [width,height] of [[1440,900],[390,844],[844,390]]) {
-      for(const titleWeapon of ['cinder','scatter','needle']) {
-        const options={width,height,title:true,titleWeapon};
+      for(const titleWeapon of ['cinder','scatter','needle'])for(const titleAct of [1,2,3,4,5]) {
+        const options={width,height,title:true,titleWeapon,titleAct};
         render(context,state,options);const cached=backdropCount;
         state.time=1;geometry=[];render(context,state,options);const moving=JSON.stringify(geometry);
         const titleBefore=JSON.stringify(state);render(context,state,options);assert.equal(JSON.stringify(state),titleBefore,'title must never mutate a real run');

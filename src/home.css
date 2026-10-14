@@ -6,6 +6,23 @@ body[data-mode=title] #shade{background:linear-gradient(90deg,#0c0c15e8 0%,#1010
 #title-screen .eyebrow{font-size:11px;letter-spacing:.16em;margin-bottom:18px}
 #title-screen h1{font-size:clamp(86px,8.7vw,132px);margin:0 0 21px;line-height:.88;letter-spacing:.015em;text-shadow:0 5px #432a30,0 10px 32px #0006}
 #title-screen .title-copy{font-size:15px;line-height:1.65;margin:0;max-width:420px;color:#e2d2c3}
+.home-facts{display:flex;flex-wrap:wrap;gap:9px;margin:15px 0 0;font-size:11px;color:#d9baa0}
+.home-facts span{padding:4px 9px;border:1px solid #c9966740;background:#201b235c;border-radius:2px}
+.home-preview-controls{position:absolute;top:108px;right:7vw;width:min(660px,43vw);z-index:1}
+.preview-label{font-size:10px;letter-spacing:.18em;color:#d9b99a}
+#act-preview-options{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:11px 0}
+#act-preview-options button{background:#14151fbd;border:1px solid #68627870;padding:10px 7px;min-height:58px;text-align:center;transition:background .2s,border-color .2s,transform .2s}
+#act-preview-options button span{display:block;font-size:10px;color:#b19b89;margin-bottom:5px;letter-spacing:.14em}
+#act-preview-options button strong{font-size:12px;font-weight:600;color:#e6d7c9}
+#act-preview-options button[aria-pressed=true]{border-color:#ffcd9a;background:#543b35bd;box-shadow:inset 0 0 0 1px #ffbf7030}
+#act-preview-options button:hover{transform:translateY(-2px);border-color:#e5d1b0}
+#act-preview-detail{font-size:12px;color:#d6c7c2;line-height:1.6;max-width:440px;margin:0}
+.home-audio{position:absolute;right:7vw;bottom:82px;display:flex;align-items:center;gap:12px;z-index:2;max-width:43vw}
+#music-start{min-height:44px;background:#181720e8;border:1px solid #d8bb7e90;border-radius:3px;display:flex;align-items:center;gap:8px;padding:9px 13px;font-size:12px;color:#f2d6b1}
+#music-start>span:first-child{font-size:18px}
+#music-start[data-playing=true]{border-color:#8ed2b787;color:#b8e9ce}
+#music-state{font-size:10px;line-height:1.5;color:#bcb2ad}
+#title-screen .title-save-note{display:none}
 #title-screen .loadout-label{font-size:11px;letter-spacing:.07em;margin-bottom:10px;max-width:none}
 #title-screen .weapon-options{max-width:none;gap:9px;margin-bottom:9px}
 #title-screen .weapon-choice{font-size:13px;min-height:58px;padding:11px 12px;transition:transform .18s,border-color .18s,background .18s}
@@ -86,6 +103,17 @@ dialog[open]{animation:mode-arrive .2s both}
   body[data-mode=title] #shade{background:linear-gradient(90deg,#0c0c15ed,#10101aa8 65%,#10101922),linear-gradient(0deg,#111019fa 30%,transparent 74%)}
   #first-run-guide{top:112px;left:14px;width:250px;padding:10px 40px 13px 12px}
   #guide-action{font-size:15px}#guide-detail{font-size:12px}
+  .home-facts{font-size:10px;margin-top:10px;gap:6px}.home-facts span{padding:3px 6px}
+  .home-preview-controls{position:static;align-self:center;width:min(460px,100%);margin:0}
+  .preview-label{font-size:9px;letter-spacing:.1em}
+  #act-preview-options{gap:5px;margin:8px 0}
+  #act-preview-options button{min-height:44px;padding:7px 2px}
+  #act-preview-options button span{font-size:9px;margin-bottom:3px}
+  #act-preview-options button strong{font-size:10px}
+  #act-preview-detail{font-size:11px}
+  .home-audio{position:static;align-self:center;width:min(460px,100%);max-width:none;gap:10px}
+  #music-start{font-size:11px;padding:8px 11px}#music-state{font-size:10px}
+  #title-screen .title-foot{gap:20px;flex-wrap:wrap}
 }
 @media(pointer:coarse){.home-loop .desktop-hint{display:none}.home-loop .touch-hint{display:block}}
 @media(min-width:801px) and (max-height:800px){
@@ -127,6 +155,30 @@ dialog[open]{animation:mode-arrive .2s both}
   #title-screen .title-stats{display:none}
   #first-run-guide{top:82px;left:14px;width:230px}
   #guide-action{font-size:14px}
+  .home-facts{font-size:9px;margin-top:9px;gap:5px}.home-facts span{padding:3px 5px}
+  .home-preview-controls{position:static;width:42%;align-self:flex-start;margin:0}
+  #act-preview-options{margin:0;gap:5px}
+  #act-preview-options button{min-height:44px;padding:5px 2px}
+  #act-preview-options button span{display:none}
+  #act-preview-options button strong{font-size:10px}
+  #act-preview-detail,.preview-label{display:none}
+  .home-audio{position:static;align-self:flex-start;width:auto;margin:0;max-width:none}
+  #music-state{display:none}
+  #title-screen .title-foot{margin-top:0}
+  .home-facts{display:none}
+  .home-preview-controls{position:absolute;top:auto;left:5vw;right:auto;bottom:60px;width:38%;margin:0}
+  .home-audio{position:absolute;right:5vw;bottom:7px;margin:0}
+  #title-screen .title-foot{position:absolute;left:5vw;bottom:7px;width:auto;gap:18px}
+  #title-screen:has(#resume-run:not([hidden])) .home-loop{display:none}
+}
+@media(min-width:1600px) and (min-height:850px){
+  #title-screen .title-content{width:min(620px,38vw)}
+  #title-screen h1{font-size:clamp(140px,8.4vw,185px)}
+  #title-screen .title-copy{font-size:17px;max-width:540px}
+  #title-screen .weapon-choice{min-height:66px;font-size:15px}
+  #title-screen .title-actions .primary-button{min-height:61px;font-size:20px}
+  #weapon-detail{font-size:13px}
+  .home-loop strong{font-size:15px}.home-loop span{font-size:12px}
 }
 /* User and OS preferences both disable CSS and Canvas decoration. */
 body[data-reduce-motion=true] *,body[data-reduce-motion=true] *::before,body[data-reduce-motion=true] *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}

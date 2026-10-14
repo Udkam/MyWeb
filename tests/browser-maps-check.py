@@ -30,7 +30,7 @@ def advance(page, ms):
 def fixture():
     source = """import {createRun,snapshot} from './src/engine.js';
 import {createDefaultSave,exportSave} from './src/storage.js';
-let s;for(let seed=1;seed<1000;seed++){const c=createRun({seed});if(c.layout==='chasm-loop'){s=c;break;}}
+let s;for(let seed=1;seed<1000;seed++){const c=createRun({seed,mapVersion:2});if(c.layout==='chasm-loop'){s=c;break;}}
 const save=createDefaultSave();save.stats.runs=1;save.stats.bestRoom=1;save.checkpoint=snapshot(s);console.log(exportSave(save));"""
     data = json.loads(subprocess.check_output(['node', '--input-type=module', '-e', source], cwd=ROOT, text=True, encoding='utf-8'))
     (OUT / 'room-one-entry-fixture.json').write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding='utf-8')
