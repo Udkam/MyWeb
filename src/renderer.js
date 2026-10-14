@@ -1,6 +1,8 @@
 // Original CC0 Ninja Adventure sprites; manifest.json records exact source files.
 // Renderer owns no clocks, input, network during rendering, or gameplay state.
 import { t } from './i18n.js';
+import { discoveryInfo } from './discovery.js';
+import { MUSIC_CUES } from './audio.js';
 const FILES = {
   playerIdle: 'player-idle.png', playerWalk: 'player-walk.png', playerAttack: 'player-attack.png', playerDead: 'player-dead.png',
   slime: 'slime.png', shooter: 'shooter.png', charger: 'charger.png', caster: 'caster.png',
@@ -31,12 +33,12 @@ for(const [type,poses] of Object.entries(BOSS_ANIMATIONS)) for(const pose of Obj
   if(FILES[oldKey]) delete FILES[oldKey];
   FILES[`${type}_${pose}`]=`${type}-${pose}.png`;
 }
-Object.assign(FILES,{outdoorFloor:'outdoor-floor.png',water:'water.png',nature:'nature.png',floorDetail:'floor-detail.png',hole:'hole.png',thunder:'thunder.png',purpleRipples:'purple-ripples.png'});
+Object.assign(FILES,{outdoorFloor:'outdoor-floor.png',water:'water.png',nature:'nature.png',floorDetail:'floor-detail.png',hole:'hole.png',thunder:'thunder.png',purpleRipples:'purple-ripples.png',relief:'relief.png',pipes:'pipes.png',ruins:'ruins.png',field:'field.png'});
 const art = Object.create(null);
 let promise;
 let backgroundCache;
 export const assetStatus = { ready: false, failed: [], loaded: 0, total: Object.keys(FILES).length };
-export const AUDIO = Object.freeze(Object.fromEntries(Object.entries({ music: 'music-fight.ogg', dungeon: 'music-dungeon.ogg', mire: 'music-aquatic.ogg', cinder: 'music-dark-castle.ogg', storm: 'music-tension.ogg', void: 'music-final-area.ogg', rift: 'music-dream.ogg', shot: 'shot.wav', dash: 'dash.wav', hit: 'hit.wav', death: 'death.wav', relic: 'relic.wav' }).map(([key, name]) => [key, new URL(`./assets/${name}`, import.meta.url).href])));
+export const AUDIO = Object.freeze(Object.fromEntries(Object.entries({ ...Object.fromEntries(Object.entries(MUSIC_CUES).map(([key,cue])=>[key,cue.file])), shot: 'shot.wav', dash: 'dash.wav', hit: 'hit.wav', death: 'death.wav', relic: 'relic.wav' }).map(([key, name]) => [key, new URL(`./assets/${name}`, import.meta.url).href])));
 
 export async function loadArt() {
   if (promise) return promise;
@@ -87,100 +89,148 @@ function nineSlice(ctx, x, y, w, h, green = false) {
   }
 }
 
-function makeBackdrop(state) {
-  const width = Math.ceil(state.width), height = Math.ceil(state.height), biome = state.biome || 'hollow', warm = biome === 'cinder';
-  const layout = state.layout || 'pillar-court';
-  const key = `${width}:${height}:${state.room}:${state.seed}:${layout}:${biome}`;
-  if (backgroundCache?.key === key) return backgroundCache.canvas;
-  const canvas = document.createElement('canvas'); canvas.width = width; canvas.height = height;
-  const ctx = canvas.getContext('2d'); ctx.imageSmoothingEnabled = false;
-  ctx.fillStyle = '#10151b'; ctx.fillRect(0, 0, width, height);
-  const unit = 32, inset = 24, cx = width / 2, cy = height * .48;
-  ctx.save(); ctx.beginPath(); ctx.rect(inset, inset, width - inset * 2, height - inset * 2); ctx.clip();
-  for (let y = 16; y < height; y += unit) for (let x = 16; x < width; x += unit) {
-    let hash = Math.imul(Math.floor(x / unit) + 71, 374761393) ^ Math.imul(Math.floor(y / unit) + (state.room || 1) * 13, 668265263);
-    hash = Math.imul(hash ^ (hash >>> 13), 1274126177) >>> 0;
-    // Interior cells only: edge/corner tiles must never repeat through the walking surface.
-    if (biome === 'mire') sprite(ctx, 'outdoorFloor',16,128,16,16,x,y,unit,unit);
-    else if (biome === 'storm') sprite(ctx,'outdoorFloor',16,352,16,16,x,y,unit,unit);
-    else if (biome === 'rift') sprite(ctx,'water',224,112,16,16,x,y,unit,unit);
-    else sprite(ctx, 'floor', [256,272][hash % 2],208,16,16,x,y,unit,unit);
-  }
-  // All floor motifs are original atlas crops. They are decorative, not collision or attack areas.
-  ctx.fillStyle = {hollow:'rgba(12,26,31,.13)',mire:'rgba(10,27,24,.42)',cinder:'rgba(36,14,19,.16)',storm:'rgba(14,32,60,.55)',void:'rgba(24,13,42,.27)',rift:'rgba(29,12,43,.49)'}[biome] || 'rgba(12,26,31,.13)'; ctx.fillRect(0, 0, width, height);
-  const slab = (x, y, size = 80) => {
-    ctx.save(); ctx.globalAlpha = warm ? .22 : .32;
-    sprite(ctx, 'floor', 176, warm ? 0 : 96, 48, 48, x - size / 2, y - size / 2, size, size); ctx.restore();
-  };
-  const runner = (x, y, length, vertical = false) => {
-    ctx.save(); ctx.globalAlpha = warm ? .20 : .28;
-    for (let d = 0; d < length; d += 32) sprite(ctx, 'floor', vertical ? 224 : 192, (warm ? 0 : 96) + (vertical ? 16 : 48), 16, 16, x + (vertical ? 0 : d), y + (vertical ? d : 0), vertical ? 32 : Math.min(32, length - d), vertical ? Math.min(32, length - d) : 32);
-    ctx.restore();
-  };
-  if (layout === 'side-cloisters') {
-    runner(width * .21, 70, height - 126, true); runner(width * .73, 70, height - 126, true);
-    slab(cx, cy, Math.min(132, width * .3));
-  } else if (layout === 'crossroads') {
-    runner(52, cy - 16, width - 104); runner(cx - 16, 70, height - 126, true); slab(cx, cy, 104);
-  } else if (layout === 'broken-hall') {
-    for (const [x,y,size] of [[.26,.26,68],[.51,.47,90],[.76,.70,68]]) slab(width*x,height*y,size);
-    runner(width * .16, height * .69, width * .3); runner(width * .58, height * .26, width * .26);
-  } else if (layout === 'altar-ring') {
-    ctx.save(); ctx.globalAlpha = .28;
-    const size = Math.min(204, width * .47); sprite(ctx, 'floor', 240, warm ? 0 : 96, 64, 64, cx - size / 2, cy - size / 2, size, size); ctx.restore();
-    for (const [x,y] of [[.24,.26],[.76,.26],[.24,.72],[.76,.72]]) slab(width*x,height*y,64);
-  } else if (layout === 'twin-halls') {
-    runner(width * .25, 80, height - 148, true); runner(width * .69, 80, height - 148, true);
-    slab(width * .29, height * .28, 76); slab(width * .73, height * .69, 76);
+// Ground layers use original atlas cells. These surfaces never imply damage;
+// only state.obstacles determines solid ground or blocked chasms.
+function tiledRegion(ctx,key,sx,sy,sw,sh,x,y,w,h,unit=32) {
+  if(w<=0||h<=0)return;
+  ctx.save();ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();
+  for(let yy=y;yy<y+h;yy+=unit)for(let xx=x;xx<x+w;xx+=unit) sprite(ctx,key,sx,sy,sw,sh,xx,yy,unit,unit);
+  ctx.restore();
+}
+function drawFloorZone(ctx,z,biome) {
+  const {x,y,w,h}=z;
+  ctx.save();
+  if(z.kind==='bridge') {
+    // Cross-grain planks distinguish the safe crossing from the solid pit edges.
+    tiledRegion(ctx,'water',32,208,16,16,x,y,w,h,32);
+    for(let yy=y+46;yy<y+h-16;yy+=78)tiledRegion(ctx,'water',16,240,16,16,x,yy,w,10,20);
+    ctx.fillStyle='rgba(15,24,29,.66)';ctx.fillRect(x,y,w,h);
+    ctx.strokeStyle='#686b65';ctx.lineWidth=2;ctx.strokeRect(x+1,y+1,w-2,h-2);
+  } else if(z.kind==='mud') {
+    tiledRegion(ctx,'outdoorFloor',240,128,16,16,x,y,w,h,32);
+    ctx.fillStyle='rgba(15,26,19,.30)';ctx.fillRect(x,y,w,h);
+  } else if(z.kind==='grate') {
+    tiledRegion(ctx,'floor',224,224,16,16,x,y,w,h,32);
+    ctx.fillStyle='rgba(13,13,18,.26)';ctx.fillRect(x,y,w,h);
+    ctx.globalAlpha=.7;
+    for(let xx=x;xx<x+w;xx+=32)sprite(ctx,'pipes',16,0,16,16,xx,y-4,Math.min(32,x+w-xx),20);
+  } else if(z.kind==='rune'||z.kind==='court') {
+    tiledRegion(ctx,'floor',256,208,16,16,x,y,w,h,32);
+    ctx.fillStyle=biome==='void'||biome==='rift'?'rgba(84,68,110,.10)':'rgba(131,150,108,.08)';ctx.fillRect(x,y,w,h);
+    ctx.globalAlpha=z.kind==='rune'?.40:.27;
+    const size=Math.min(w,h,176);
+    sprite(ctx,'floor',240,96,64,64,x+(w-size)/2,y+(h-size)/2,size,size);
+    // Broken masonry edging avoids a flat rectangular carpet pasted on stone.
+    ctx.globalAlpha=.34;
+    for(let offset=0;offset<w-12;offset+=32)if(Math.floor(offset/32)%3!==1)for(const yy of [y,y+h-8])sprite(ctx,'floor',272,192,16,8,x+offset,yy,Math.min(26,w-offset),8);
+    for(let offset=12;offset<h-12;offset+=36)if(Math.floor(offset/36)%3!==2)for(const xx of [x,x+w-8])sprite(ctx,'floor',240,208,8,16,xx,y+offset,8,Math.min(28,h-offset));
   } else {
-    runner(52, height * .28, width - 104); runner(52, height * .69, width - 104); slab(cx, cy, Math.min(136, width * .32));
-  }
-  // Small original rubble and wall niches make the six rooms feel inhabited without filling combat lanes.
-  for (let i = 0; i < 12; i++) {
-    const hash = ((state.seed || 1) + i * 173 + (state.room || 1) * 91) >>> 0;
-    const side = i % 2, x = side ? width - 45 - hash % 22 : 34 + hash % 22, y = 92 + (hash * 7 % Math.max(1, height - 182));
-    ctx.globalAlpha = .52; whole(ctx, 'rock', x, y, 17 + i % 3 * 3, 17 + i % 3 * 3); ctx.globalAlpha = 1;
-  }
-  if (biome === 'mire') {
-    for (const [x,y] of [[34,110],[width-84,height*.53],[36,height*.73]]) sprite(ctx,'nature',64,0,32,32,x,y,60,60);
-    for (const [x,y] of [[42,height*.34],[width-66,height*.78]]) sprite(ctx,'floorDetail',16,32,16,16,x,y,30,30);
-  } else if (biome === 'storm') {
-    for (const [x,y] of [[30,110],[width-72,height*.57],[30,height*.76]]) sprite(ctx,'nature',32,192,32,32,x,y,48,48);
-    for (const [x,y] of [[40,height*.44],[width-62,height*.24]]) sprite(ctx,'nature',64,192,16,16,x,y,28,28);
-  } else if (biome === 'void') {
-    for (const [x,y] of [[44,height*.44],[width-64,height*.28]]) sprite(ctx,'floorDetail',192,0,32,16,x,y,38,19);
-  } else if (biome === 'rift') {
-    for (const [x,y] of [[38,105],[width-77,height*.58],[36,height*.76]]) sprite(ctx,'nature',32,224,16,16,x,y,35,35);
-    for (const [x,y] of [[width*.32,height*.30],[width*.68,height*.65]]) { ctx.globalAlpha=.19;sprite(ctx,'purpleRipples',0,0,16,16,x,y,50,50);ctx.globalAlpha=1; }
+    tiledRegion(ctx,'floor',256,224,16,16,x,y,w,h,32);
+    ctx.fillStyle='rgba(39,43,37,.13)';ctx.fillRect(x,y,w,h);
+    ctx.strokeStyle='rgba(146,145,114,.26)';ctx.lineWidth=1;ctx.strokeRect(x+.5,y+.5,w-1,h-1);
   }
   ctx.restore();
-  const wallX = biome === 'hollow' || biome === 'mire' ? 80 : 0;
-  for (let x = 24; x < width - 24; x += 32) {
-    sprite(ctx, 'walls', wallX + 16, 96, 16, 16, x, 8, 32, 32);
-    sprite(ctx, 'walls', wallX + 16, 160, 16, 16, x, height - 34, 32, 32);
+}
+function drawLandmark(ctx,l,biome) {
+  const size=Math.max(24,Math.min(40,(l.r||10)*3)),x=l.x-size/2,y=l.y-size*.75;
+  ctx.save();ctx.globalAlpha=.76;
+  if(l.kind==='brazier') {
+    sprite(ctx,'props',biome==='cinder'?96:32,32,16,16,x,y,size,size);
+    halo(ctx,l.x,l.y-10,46,biome==='cinder'?'rgba(253,144,63,.13)':'rgba(182,217,180,.09)');
+  } else if(l.kind==='roots') {
+    sprite(ctx,'nature',64,0,32,32,x-5,y-5,size+10,size+10);
+  } else if(l.kind==='chain') {
+    sprite(ctx,'pipes',80,0,16,48,l.x-7,l.y-28,14,42);
+  } else if(l.kind==='obelisk') {
+    sprite(ctx,'nature',256,224,32,32,x,y,size,size);
+  } else if(l.kind==='broken-column') {
+    sprite(ctx,'ruins',16+((l.variant||0)%2)*16,48,16,48,l.x-10,l.y-30,20,50);
+  } else {
+    sprite(ctx,'ruins',128,0,48,32,x-8,y-5,size+16,size);
   }
-  for (let y = 36; y < height - 32; y += 32) {
-    sprite(ctx, 'walls', wallX, 112, 16, 16, 8, y, 24, 32);
-    sprite(ctx, 'walls', wallX + 64, 112, 16, 16, width - 32, y, 24, 32);
+  ctx.restore();
+}
+function makeBackdrop(state) {
+  const width=Math.ceil(state.width),height=Math.ceil(state.height),biome=state.biome||'hollow';
+  const geometryKey=JSON.stringify([state.mapVersion,state.layoutVariant,state.roomShape,state.floorZones,state.landmarks]);
+  const key=`${width}:${height}:${state.room}:${state.seed}:${state.layout}:${biome}:${geometryKey}`;
+  if(backgroundCache?.key===key)return backgroundCache.canvas;
+  const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;
+  const ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=false;
+  const palettes={hollow:['#10191a','rgba(7,18,18,.17)'],mire:['#0c1c1a','rgba(9,29,25,.58)'],cinder:['#241716','rgba(36,16,18,.20)'],storm:['#111d29','rgba(15,28,44,.30)'],void:['#171320','rgba(27,15,39,.26)'],rift:['#211327','rgba(31,15,46,.33)']};
+  const palette=palettes[biome]||palettes.hollow;
+  ctx.fillStyle=palette[0];ctx.fillRect(0,0,width,height);
+  ctx.save();ctx.beginPath();ctx.rect(24,24,width-48,height-48);ctx.clip();
+  for(let y=16;y<height;y+=32)for(let x=16;x<width;x+=32) {
+    const hash=(Math.imul(Math.floor(x/32)+71,374761393)^Math.imul(Math.floor(y/32)+(state.room||1)*13,668265263))>>>0;
+    if(biome==='mire')sprite(ctx,'field',16,112,16,16,x,y,32,32);
+    else if(biome==='storm')sprite(ctx,'outdoorFloor',256,240,16,16,x,y,32,32);
+    else if(biome==='void'||biome==='rift')sprite(ctx,'floor',256+(hash%2)*16,208,16,16,x,y,32,32);
+    else sprite(ctx,'floor',256+(hash%2)*16,208,16,16,x,y,32,32);
   }
-  for (const [sx,sy,x,y] of [[0,96,8,8],[64,96,width-40,8],[0,160,8,height-40],[64,160,width-40,height-40]]) sprite(ctx,'walls',wallX+sx,sy,16,16,x,y,32,32);
-  const insetX = Math.min(124, width * .22);
-  for (const x of [insetX, width - insetX]) {
-    sprite(ctx, 'props', 32, 32, 16, 16, x - 12, 21, 24, 24);
-    halo(ctx, x, 66, 150, warm ? 'rgba(252,145,71,.25)' : 'rgba(162,196,135,.19)');
+  ctx.fillStyle=palette[1];ctx.fillRect(0,0,width,height);
+  // The shoreline/furnace/chasm stays at the room margin. Main combat surfaces
+  // remain neutral so bright projectiles and actual falling-attack warnings read.
+  if(biome==='mire') {
+    for(const x of [24,width-48]){tiledRegion(ctx,'water',16,112,16,16,x,40,24,height-80,24);ctx.fillStyle='rgba(15,42,35,.48)';ctx.fillRect(x,40,24,height-80);}
+    for(const x of [29,width-61])for(let y=112;y<height-96;y+=136)sprite(ctx,'floorDetail',16,32,16,16,x,y,30,30);
+  } else if(biome==='cinder') {
+    for(const x of [27,width-43])tiledRegion(ctx,'pipes',0,16,16,16,x,56,16,height-108,24);
+    for(const y of [height*.27,height*.71])for(const x of [32,width-40])halo(ctx,x,y,88,'rgba(228,75,34,.14)');
+  } else if(biome==='storm') {
+    for(let y=70;y<height-80;y+=96)for(const x of [25,width-43])sprite(ctx,'relief',112,0,16,48,x,y,18,80);
+  } else if(biome==='void'||biome==='rift') {
+    for(let y=64;y<height-64;y+=64)for(const x of [25,width-39]){ctx.globalAlpha=.5;sprite(ctx,'hole',32,16,16,48,x,y,14,64);ctx.globalAlpha=1;}
   }
-  for (const y of [height * .30, height * .68]) {
-    sprite(ctx,'interior',warm ? 80 : 208,176,16,16,12,y,25,25);
-    sprite(ctx,'interior',warm ? 80 : 208,176,16,16,width-37,y,25,25);
+  const zones=state.floorZones?.length?state.floorZones:[{kind:'stone-path',x:width*.16,y:height*.25,w:width*.68,h:36},{kind:'court',x:width*.37,y:height*.39,w:width*.26,h:height*.24}];
+  for(const z of zones)drawFloorZone(ctx,z,biome);
+  for(const l of state.landmarks||[])drawLandmark(ctx,l,biome);
+  // Sparse edge-only debris supports the architecture instead of covering lanes.
+  for(let i=0;i<8;i++) {
+    const hash=((state.seed||1)+i*173+(state.room||1)*91)>>>0;
+    const x=i%2?width-53-hash%10:33+hash%10,y=105+(hash*7%Math.max(1,height-212));
+    ctx.globalAlpha=.55;whole(ctx,'rock',x,y,13+i%3*3,13+i%3*3);ctx.globalAlpha=1;
   }
-  const shade = ctx.createRadialGradient(cx, cy, Math.min(width,height) * .22, cx, cy, Math.max(width,height) * .7);
-  shade.addColorStop(0,'rgba(0,0,0,0)'); shade.addColorStop(1,'rgba(4,7,16,.31)');
-  ctx.fillStyle=shade;ctx.fillRect(0,0,width,height);
-  backgroundCache={key,canvas}; return canvas;
+  ctx.restore();
+  const green=biome==='hollow'||biome==='mire',wallX=green?80:0;
+  for(let x=24;x<width-24;x+=32){
+    sprite(ctx,'walls',wallX+16,96,16,16,x,8,Math.min(32,width-24-x),32);
+    sprite(ctx,'walls',wallX+16,160,16,16,x,height-34,Math.min(32,width-24-x),32);
+  }
+  for(let y=36;y<height-32;y+=32){
+    sprite(ctx,'walls',wallX,112,16,16,8,y,24,Math.min(32,height-32-y));
+    sprite(ctx,'walls',wallX+64,112,16,16,width-32,y,24,Math.min(32,height-32-y));
+  }
+  for(const [sx,sy,x,y] of [[0,96,8,8],[64,96,width-40,8],[0,160,8,height-40],[64,160,width-40,height-40]])sprite(ctx,'walls',wallX+sx,sy,16,16,x,y,32,32);
+  for(const x of [Math.min(124,width*.22),width-Math.min(124,width*.22)]){
+    sprite(ctx,'props',32,32,16,16,x-12,21,24,24);
+    halo(ctx,x,61,100,biome==='cinder'?'rgba(255,144,61,.23)':'rgba(176,213,159,.17)');
+  }
+  const shade=ctx.createRadialGradient(width/2,height*.48,Math.min(width,height)*.30,width/2,height*.48,Math.max(width,height)*.76);
+  shade.addColorStop(0,'rgba(0,0,0,0)');shade.addColorStop(1,'rgba(4,7,15,.22)');ctx.fillStyle=shade;ctx.fillRect(0,0,width,height);
+  backgroundCache={key,canvas};return canvas;
 }
 
-function drawObstacle(ctx, o, warm) {
-  const { x,y,w,h }=o, green=!warm;
+function drawObstacle(ctx, o, biome) {
+  const { x,y,w,h }=o, warm=biome==='cinder', green=!warm;
+  if(o.kind==='pit') {
+    const edge=Math.min(12,w/3,h/3);
+    ctx.fillStyle=warm?'#27171a':biome==='mire'?'#092521':'#090c15';ctx.fillRect(x,y,w,h);
+    tiledRegion(ctx,'hole',16,0,16,16,x,y,w,edge,edge);
+    tiledRegion(ctx,'hole',16,48,16,16,x,y+h-edge,w,edge,edge);
+    tiledRegion(ctx,'hole',0,16,16,16,x,y,edge,h,edge);
+    tiledRegion(ctx,'hole',48,16,16,16,x+w-edge,y,edge,h,edge);
+    ctx.strokeStyle=warm?'#98664c':biome==='mire'?'#578374':'#797886';ctx.lineWidth=1.5;ctx.strokeRect(x+.75,y+.75,w-1.5,h-1.5);
+    ctx.save();ctx.beginPath();ctx.rect(x+edge,y+edge,w-edge*2,h-edge*2);ctx.clip();
+    if(w>35&&h>30){ctx.globalAlpha=.40;tiledRegion(ctx,'relief',64,16,16,32,x+edge,y+edge,w-edge*2,Math.min(27,h-edge*2),22);ctx.globalAlpha=1;}
+    // Original rock fragments sit inside the exact solid footprint. Staggered
+    // breaks in the rim give depth without promising a non-existent crossing.
+    ctx.globalAlpha=.55;
+    for(let offset=10;offset<w-edge*2;offset+=73)whole(ctx,'rock',x+edge+offset,y+edge-6,13,16);
+    for(let offset=22;offset<h-edge*2;offset+=89)whole(ctx,'rock',x+w-edge-10,y+edge+offset,12,15);
+    ctx.restore();
+    return;
+  }
   // The visible solid footprint stays exactly aligned with the engine rectangle.
   ctx.fillStyle='rgba(2,5,10,.48)';ctx.fillRect(x+7,y+9,w,h);
   ctx.fillStyle=warm?'#39313b':'#323f36';ctx.fillRect(x,y,w,h);
@@ -237,34 +287,64 @@ function drawHazard(ctx,h,time,reduceMotion) {
   ctx.restore();
 }
 function drawInteractable(ctx,o,state,reduceMotion) {
-  const done=o.status==='done', ready=o.status==='ready', size=38;
-  if(done&&o.kind==='ghost')return;
-  const near=Math.hypot(state.player.x-o.x,state.player.y-o.y)<75;
-  shadow(ctx,o.x,o.y+7,17,6,.43);
-  if((ready||o.status==='lit')&&o.kind!=='cracked-wall') halo(ctx,o.x,o.y-8,near?51:34,'rgba(121,227,177,.15)');
+  const info=discoveryInfo(state,o),done=info.complete,size=48;
+  const color=info.tone==='violet'?'#d5b3ff':info.tone==='mint'?'#a4eed5':'#f5d18c';
+  shadow(ctx,o.x,o.y+9,22,8,.56);
+  if(!done) {
+    halo(ctx,o.x,o.y-8,info.near?62:45,info.tone==='violet'?'rgba(178,118,255,.21)':info.tone==='mint'?'rgba(119,231,193,.20)':'rgba(254,190,87,.20)');
+    // A vertical glint marks discoveries without adding floor attack geometry.
+    ctx.fillStyle=color;ctx.globalAlpha=.6;
+    for(let i=0;i<3;i++) {const rise=reduceMotion?i*10:(state.time*13+i*11)%34;ctx.fillRect(o.x-2+(i%2?7:-7),o.y-28-rise,3,3);}
+    ctx.globalAlpha=1;
+  }
   ctx.save();if(done)ctx.globalAlpha=.6;
   if(o.kind==='traveler'||o.kind==='ghost') {
     actor(ctx,o.kind,{...o,angle:Math.PI/2},state.time,size,o.kind==='ghost',reduceMotion);
   } else if(o.kind==='lamp') {
-    sprite(ctx,'props',o.status==='ready'?48:64,48,16,16,o.x-18,o.y-24,36,36);
-    if(o.status==='lit'||done) sprite(ctx,'flame',(reduceMotion?2:2+Math.floor(state.time*7)%3)*25,0,25,30,o.x-10,o.y-32,20,24);
+    sprite(ctx,'props',o.status==='ready'?48:64,48,16,16,o.x-22,o.y-30,44,44);
+    if(o.status==='lit'||done)sprite(ctx,'flame',(reduceMotion?2:2+Math.floor(state.time*7)%3)*25,0,25,30,o.x-13,o.y-41,26,31);
   } else if(o.kind==='offering') {
-    sprite(ctx,'props',32,32,16,16,o.x-20,o.y-26,40,40);whole(ctx,'book',o.x-10,o.y-24,20,20);
+    sprite(ctx,'props',32,32,16,16,o.x-26,o.y-35,52,52);whole(ctx,'book',o.x-14,o.y-35,28,28);
   } else if(o.kind==='cracked-wall') {
-    sprite(ctx,'props',128,48,16,16,o.x-21,o.y-27,42,42);whole(ctx,'rock',o.x-16,o.y-8,26,26);
-    ctx.strokeStyle='#171823';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(o.x+2,o.y-22);ctx.lineTo(o.x-5,o.y-12);ctx.lineTo(o.x+2,o.y-5);ctx.lineTo(o.x-5,o.y+8);ctx.stroke();
-    for(let i=0;i<(o.hits||0);i++)whole(ctx,'rock',o.x-24+i*17,o.y+9,12,12);
+    sprite(ctx,'props',128,48,16,16,o.x-27,o.y-36,54,54);whole(ctx,'rock',o.x-18,o.y-5,32,32);
+    ctx.lineJoin='round';ctx.strokeStyle='#10121a';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(o.x+5,o.y-32);ctx.lineTo(o.x-6,o.y-18);ctx.lineTo(o.x+4,o.y-7);ctx.lineTo(o.x-8,o.y+11);ctx.stroke();
+    ctx.strokeStyle='#f3ce8b';ctx.lineWidth=1.5;ctx.stroke();
+    for(let i=0;i<(o.hits||0);i++)whole(ctx,'rock',o.x-27+i*19,o.y+13,14,14);
   } else if(o.kind==='chest') {
-    sprite(ctx,'decor',112,done?0:16,16,16,o.x-21,o.y-25,42,42);
+    sprite(ctx,'decor',112,done?0:16,16,16,o.x-27,o.y-33,54,54);
   }
   ctx.restore();
-  // Labels are world-local and compact; the actual action is an accessible HTML button.
-  if(o.kind==='lamp'||ready&&o.kind!=='cracked-wall') {
-    const label=o.kind==='lamp'?String(o.order):o.kind==='traveler'?'!':o.kind==='ghost'?'✦':o.kind==='chest'?'◆':'+';
-    const y=o.y-45;ctx.fillStyle='#111e22';ctx.fillRect(o.x-9,y-1,18,19);
-    ctx.font='700 12px system-ui, "Microsoft YaHei", sans-serif';ctx.textAlign='center';ctx.textBaseline='top';ctx.fillStyle=done||o.status==='lit'?'#ffd290':'#b2efcc';ctx.fillText(label,o.x,y+2);
+}
+function labelRectOverlap(a,b) {return a.x<b.x+b.w+4&&a.x+a.w+4>b.x&&a.y<b.y+b.h+4&&a.y+a.h+4>b.y;}
+function drawDiscoveryLabels(ctx,state,scaleX,scaleY) {
+  const placed=[],items=(state.interactables||[]).map(item=>({item,info:discoveryInfo(state,item)}));
+  items.sort((a,b)=>Number(b.info.inRange)-Number(a.info.inRange)||Number(a.info.complete)-Number(b.info.complete)||Math.hypot(state.player.x-a.item.x,state.player.y-a.item.y)-Math.hypot(state.player.x-b.item.x,state.player.y-b.item.y));
+  const font=14/scaleY,line=19/scaleY,pad=8/scaleX,edge=10/scaleX;
+  for(const {item:o,info} of items) {
+    const color=info.complete?'#bec2ba':info.tone==='violet'?'#d8b8ff':info.tone==='mint'?'#b8f5df':'#ffe0a0';
+    const title=`${info.marker}  ${info.title}`;
+    const action=info.statusLabel||(info.near&&!info.complete?info.action:'');
+    ctx.font=`600 ${font}px system-ui, "Microsoft YaHei", "PingFang SC", sans-serif`;
+    const maxWidth=Math.max(90/scaleX,Math.min(200/scaleX,state.width*.56));
+    const shorten=text=>{let result=text||'';while(ctx.measureText(result).width>maxWidth&&result.length>2)result=result.slice(0,-2)+'…';return result;};
+    const lines=[shorten(title)];if(action)lines.push(shorten(action));
+    const w=Math.max(...lines.map(text=>ctx.measureText(text).width))+pad*2,h=line*lines.length+8/scaleY;
+    const minY=68/scaleY,maxY=state.height-h-22/scaleY;
+    const initial={x:Math.max(edge,Math.min(state.width-w-edge,o.x-w/2)),y:Math.max(minY,Math.min(maxY,o.y-52-h)),w,h};
+    const candidates=[initial,{...initial,y:Math.min(maxY,initial.y-h-8/scaleY)},{...initial,y:Math.min(maxY,o.y+24)},{...initial,x:Math.max(edge,Math.min(state.width-w-edge,o.x+34))},{...initial,x:Math.max(edge,Math.min(state.width-w-edge,o.x-w-34))}];
+    const box=candidates.find(candidate=>!placed.some(other=>labelRectOverlap(candidate,other)))||initial;
+    placed.push(box);
+    ctx.save();ctx.globalAlpha=info.complete?.78:1;
+    ctx.fillStyle='rgba(7,14,20,.95)';ctx.fillRect(box.x,box.y,box.w,box.h);
+    ctx.strokeStyle=info.inRange?color:'rgba(126,144,151,.60)';ctx.lineWidth=(info.inRange?1.5:1)/scaleX;ctx.strokeRect(box.x,box.y,box.w,box.h);
+    ctx.fillStyle=color;ctx.fillRect(box.x,box.y,3/scaleX,box.h);
+    ctx.textAlign='center';ctx.textBaseline='top';
+    for(let index=0;index<lines.length;index++) {ctx.fillStyle=index?'#f3f1df':color;ctx.fillText(lines[index],box.x+box.w/2,box.y+5/scaleY+index*line);}
+    if(Math.abs(box.x+box.w/2-o.x)>w*.25||Math.abs(box.y+h-(o.y-52))>h){ctx.strokeStyle=color;ctx.globalAlpha=.42;ctx.lineWidth=1/scaleX;ctx.beginPath();ctx.moveTo(Math.max(box.x,Math.min(box.x+box.w,o.x)),box.y+box.h);ctx.lineTo(o.x,o.y-32);ctx.stroke();}
+    ctx.restore();
   }
 }
+
 function drawBoss(ctx,e,time,size,reduceMotion) {
   const poses=BOSS_ANIMATIONS[e.type]; if(!poses)return;
   let pose='idle';
@@ -405,7 +485,7 @@ function drawEffect(ctx, e, reduceMotion) {
   }
   ctx.restore();
 }
-function drawGates(ctx, state, reduceMotion) {
+function drawGates(ctx, state, reduceMotion, scaleY=1) {
   if (state.phase !== 'exit') return;
   for (const gate of state.gates || []) {
     const refuge = gate.route === 'refuge', rift = gate.route === 'rift', color = rift ? '#ddbbff' : refuge ? '#8ad7c3' : '#eda477';
@@ -414,11 +494,11 @@ function drawGates(ctx, state, reduceMotion) {
     ctx.beginPath(); ctx.ellipse(gate.x, gate.y, gate.r + 6, gate.r * .55 + 4, 0, 0, Math.PI * 2); ctx.stroke();
     if(rift) strip(ctx,'energyBig',24,4,reduceMotion?1:state.time*7,gate.x,gate.y-13,49);
     else sprite(ctx, 'props', refuge ? 112 : 96, 32, 16, 16, gate.x - 18, gate.y - 28, 36, 36);
-    ctx.font = `600 ${state.width < 480 ? 11 : 13}px system-ui, "Microsoft YaHei", "PingFang SC", sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.font = `600 ${14/scaleY}px system-ui, "Microsoft YaHei", "PingFang SC", sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
     const riftKeys={echo:'RIFT · ECHO',surge:'RIFT · SURGE',glass:'RIFT · GLASS'};
     const label = rift ? t(riftKeys[gate.riftRule] || riftKeys.echo) : refuge ? t('REFUGE +1 HP') : t('HUNT +EMBERS'); const tw = ctx.measureText(label).width;
-    ctx.fillStyle = 'rgba(13,16,25,.9)'; ctx.fillRect(gate.x - tw / 2 - 8, gate.y + 21, tw + 16, 23);
-    ctx.fillStyle = color; ctx.fillText(label, gate.x, gate.y + 25);
+    ctx.fillStyle = 'rgba(13,16,25,.95)'; ctx.fillRect(gate.x - tw / 2 - 6/scaleY, gate.y + 21, tw + 12/scaleY, 23/scaleY);
+    ctx.fillStyle = color; ctx.fillText(label, gate.x, gate.y + 21 + 4/scaleY);
   }
 }
 
@@ -460,7 +540,7 @@ export function render(ctx, state, { width, height, dpr = 1, reduceMotion = fals
     const frame = reduceMotion ? 2 : 2 + Math.floor(state.time * 7 + x) % 3;
     sprite(ctx, 'flame', frame * 25, 0, 25, 30, x - 15, 19, 30, 36);
   }
-  drawGates(ctx, state, reduceMotion);
+  drawGates(ctx, state, reduceMotion, height/state.height);
   for (const pickup of state.pickups || []) {
     const bob = reduceMotion ? 0 : Math.sin(state.time * 4 + pickup.x) * 2;
     shadow(ctx, pickup.x, pickup.y + 4, 6, 2, .3);
@@ -473,13 +553,14 @@ export function render(ctx, state, { width, height, dpr = 1, reduceMotion = fals
   layers.push({ y: state.player.y, player: state.player });
   layers.sort((a, b) => a.y - b.y);
   for (const layer of layers) {
-    if (layer.obstacle) drawObstacle(ctx, layer.obstacle, state.biome === 'cinder');
+    if (layer.obstacle) drawObstacle(ctx, layer.obstacle, state.biome);
     else if (layer.interactable) drawInteractable(ctx, layer.interactable, state, reduceMotion);
     else if (layer.enemy) drawEnemy(ctx, layer.enemy, state.time, reduceMotion);
     else drawPlayer(ctx, layer.player, state, reduceMotion);
   }
   for (const b of state.bullets || []) drawBullet(ctx, b, state.time, reduceMotion);
   for (const e of state.effects || []) drawEffect(ctx, e, reduceMotion);
+  if(!title)drawDiscoveryLabels(ctx,state,width/state.width,height/state.height);
   ctx.restore();
 }
 

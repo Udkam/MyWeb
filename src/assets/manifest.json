@@ -1,9 +1,10 @@
 {
-  "title": "Cinder Below curated Ninja Adventure assets",
+  "title": "Cinder Below curated original artwork, music and sounds",
   "source_url": "https://pixel-boy.itch.io/ninja-adventure-asset-pack",
   "authors": [
     "Pixel-boy",
-    "AAA"
+    "AAA",
+    "Juhani Junkala (SubspaceAudio)"
   ],
   "license": "CC0-1.0",
   "archive_sha256": "95a06f4fdcfd1882f061a45ff313b7c905dbe2de1e8512b281d7937df62a7b15",
@@ -349,32 +350,6 @@
         7,
         7
       ]
-    },
-    {
-      "file": "music-fight.ogg",
-      "original": "Ninja Adventure - Asset Pack/Audio/Musics/17 - Fight.ogg",
-      "bytes": 780630,
-      "sha256": "137f9a19a043c23c02179d722b14e9014bc3d73546db722a91640bd6181f1089",
-      "modified": false,
-      "audio": {
-        "sample_rate": 44100,
-        "channels": 2,
-        "duration_seconds": 32.0,
-        "loop_seam_auditioned": false
-      }
-    },
-    {
-      "file": "music-dungeon.ogg",
-      "original": "Ninja Adventure - Asset Pack/Audio/Musics/21 - Dungeon.ogg",
-      "bytes": 1460020,
-      "sha256": "c5f1d954bb5be95f893e3e848d0baabf3fbf7c22db7ad480e58ce910a14e68dc",
-      "modified": false,
-      "audio": {
-        "sample_rate": 44100,
-        "channels": 2,
-        "duration_seconds": 60.0,
-        "loop_seam_auditioned": false
-      }
     },
     {
       "file": "shot.wav",
@@ -1225,52 +1200,95 @@
       "frames": 4
     },
     {
-      "file": "music-aquatic.ogg",
-      "original": "Ninja Adventure - Asset Pack/Audio/Musics/18 - Aquatic.ogg",
-      "bytes": 904691,
-      "sha256": "6b3b8218c8781c4df242fa35da94112c1187d763e37d8be5610e6ce0a8bc49d0",
+      "file": "relief.png",
+      "original": "Ninja Adventure - Asset Pack/Backgrounds/Tilesets/TilesetRelief.png",
+      "bytes": 4568,
+      "sha256": "9f4156d97efe449e161ec9065edd48f296e977cfd77f7e60474f2ddaae34c2e9",
       "modified": false,
-      "seconds": 37.091,
-      "sample_rate": 44100
+      "dimensions": [
+        320,
+        192
+      ]
     },
     {
-      "file": "music-dark-castle.ogg",
-      "original": "Ninja Adventure - Asset Pack/Audio/Musics/10 - Dark Castle.ogg",
-      "bytes": 676245,
-      "sha256": "41fa5596c4fa928aed2f4b6ee96ea38b3270008fea852285ffc55e1e77aef427",
+      "file": "pipes.png",
+      "original": "Ninja Adventure - Asset Pack/Backgrounds/Tilesets/Pipes.png",
+      "bytes": 3323,
+      "sha256": "86f5bd248537f239b30f3f5b64774878c9a11c69b35d1be1619624941772db38",
       "modified": false,
-      "seconds": 33.231,
-      "sample_rate": 44100
+      "dimensions": [
+        240,
+        48
+      ]
     },
     {
-      "file": "music-tension.ogg",
-      "original": "Ninja Adventure - Asset Pack/Audio/Musics/28 - Tension.ogg",
-      "bytes": 649105,
-      "sha256": "37f6260be41d2f10315acabafed4157343fa6f2eecadfba852e8a8def52448f4",
+      "file": "ruins.png",
+      "original": "Ninja Adventure - Asset Pack/Backgrounds/Tilesets/TilesetVillageAbandoned.png",
+      "bytes": 31779,
+      "sha256": "6787c6e22a4d44ceee4f158309b2519707bdb70c59aca00b3d49006cadcca06e",
       "modified": false,
-      "seconds": 26.571,
-      "sample_rate": 44100
+      "dimensions": [
+        320,
+        192
+      ]
     },
     {
-      "file": "music-final-area.ogg",
-      "original": "Ninja Adventure - Asset Pack/Audio/Musics/24 - Final Area.ogg",
-      "bytes": 1543478,
-      "sha256": "7af5cbbca397fcf3ad7426d0734085095a7eb67eea9a78bfb16205eee5453c1a",
+      "file": "field.png",
+      "original": "Ninja Adventure - Asset Pack/Backgrounds/Tilesets/TilesetField.png",
+      "bytes": 3331,
+      "sha256": "a519353dfdb4dfe8d2a1c67061be063056bbf0275eafa87ff711614e278c7261",
       "modified": false,
-      "seconds": 63.429,
-      "sample_rate": 44100
+      "dimensions": [
+        80,
+        240
+      ]
     },
     {
-      "file": "music-dream.ogg",
-      "original": "Ninja Adventure - Asset Pack/Audio/Musics/22 - Dream.ogg",
-      "bytes": 2333929,
-      "sha256": "a3baf1b0a7da883334caf20ba9b09f72e65d6459b6888b2905cdf1905034ced9",
+      "file": "music/catacombs.ogg",
+      "original": "Evil2 - Catacombs.ogg",
+      "bytes": 2608203,
+      "sha256": "44d618737d133c62712411cec22e7d03cfb945da4910b829c6754efcd145973b",
       "modified": false,
-      "seconds": 96.0,
-      "sample_rate": 44100
+      "source_url": "https://opengameart.org/content/jrpg-pack-3-evil",
+      "author": "Juhani Junkala (SubspaceAudio)",
+      "license": "CC0-1.0",
+      "processing": "Original OGG bytes unchanged"
+    },
+    {
+      "file": "music/ancient-evil.ogg",
+      "original": "Evil1 - Ancient Evil Awakens.ogg",
+      "bytes": 2891164,
+      "sha256": "5e43125b1f10a6ee311c47dfb84f5e75d8e2202bfbe4d6fefd6806b19b5a1c05",
+      "modified": false,
+      "source_url": "https://opengameart.org/content/jrpg-pack-3-evil",
+      "author": "Juhani Junkala (SubspaceAudio)",
+      "license": "CC0-1.0",
+      "processing": "Original OGG bytes unchanged"
+    },
+    {
+      "file": "music/whispers.ogg",
+      "original": "Evil5 - Whispers From Beyond.ogg",
+      "bytes": 2239184,
+      "sha256": "82606350206f883598e6bc273e7ac6aa8d33b05f81513f8fef6abc8cd03f7194",
+      "modified": false,
+      "source_url": "https://opengameart.org/content/jrpg-pack-3-evil",
+      "author": "Juhani Junkala (SubspaceAudio)",
+      "license": "CC0-1.0",
+      "processing": "Original OGG bytes unchanged"
+    },
+    {
+      "file": "music/epic-boss.ogg",
+      "original": "epic-boss-original.wav",
+      "bytes": 2510915,
+      "sha256": "af720554b2e4ac8ac846dc091c5cbcfe1c46eb0abd2d355171c7e2025f44d588",
+      "modified": true,
+      "source_url": "https://opengameart.org/content/boss-battle-music",
+      "author": "Juhani Junkala (SubspaceAudio)",
+      "license": "CC0-1.0",
+      "processing": "WAV to OGG Vorbis q5; 3 ms fade at each boundary to reduce loop click; no musical trimming; encoder adds 2.903 ms padding; no synthesis, rearrangement, pitch or tempo changes"
     }
   ],
-  "total_bytes": 2742833,
+  "total_bytes": 11058395,
   "frame_conventions": {
     "player": "16x16; columns down/up/left/right; walk rows 0..3 in temporal sequence. Idle and attack are one pose per direction.",
     "monsters": "16x16; columns down/up/left/right; rows 0..3 temporal sequence.",
@@ -1278,7 +1296,7 @@
     "warden": "idle68x68 six frames; hit68x68 eight frames; walk82x82 ten frames; attack82x82 fifteen frames; single facing.",
     "effects": "fireball/energy 16x16 four frames; energy-big24x24 four; impact40x40 nine; smoke32x32 six; slash32x32 four; flame25x30 eight (visually checked)."
   },
-  "audio_scope": "Files decoded through container headers/PCM metadata only; musical fit and loop seams have not been auditioned.",
+  "audio_scope": "Four existing Juhani Junkala CC0 music recordings plus five original Ninja Adventure effects. Music sources, original hashes, decode/loudness evidence, gain and exact processing are in music-manifest.json. Human listening verification is not claimed.",
   "runtime_roles": {
     "sniper": "Owl2 red-eyed flying sniper",
     "orbiter": "LanternRed",
@@ -1581,13 +1599,14 @@
     }
   },
   "music_scenes": {
-    "hollow": "music-dungeon.ogg",
-    "mire": "music-aquatic.ogg",
-    "cinder": "music-dark-castle.ogg",
-    "storm": "music-tension.ogg",
-    "void": "music-final-area.ogg",
-    "rift": "music-dream.ogg",
-    "boss": "music-fight.ogg"
+    "title": "music/whispers.ogg",
+    "hollow": "music/catacombs.ogg",
+    "mire": "music/catacombs.ogg",
+    "cinder": "music/ancient-evil.ogg",
+    "storm": "music/ancient-evil.ogg",
+    "void": "music/whispers.ogg",
+    "rift": "music/whispers.ogg",
+    "boss": "music/epic-boss.ogg"
   },
   "biome_floor_crops": {
     "hollow": {
@@ -1608,11 +1627,11 @@
       ]
     },
     "mire": {
-      "file": "outdoor-floor.png",
+      "file": "field.png",
       "rects": [
         [
           16,
-          128,
+          112,
           16,
           16
         ]
@@ -1639,8 +1658,8 @@
       "file": "outdoor-floor.png",
       "rects": [
         [
-          16,
-          352,
+          256,
+          240,
           16,
           16
         ]
@@ -1664,15 +1683,34 @@
       ]
     },
     "rift": {
-      "file": "water.png",
+      "file": "floor.png",
       "rects": [
         [
-          224,
-          112,
+          256,
+          208,
+          16,
+          16
+        ],
+        [
+          272,
+          208,
           16,
           16
         ]
       ]
     }
-  }
+  },
+  "source_collections": [
+    {
+      "kind": "artwork and effects",
+      "url": "https://pixel-boy.itch.io/ninja-adventure-asset-pack",
+      "license": "CC0-1.0"
+    },
+    {
+      "kind": "music",
+      "manifest": "music-manifest.json",
+      "author": "Juhani Junkala (SubspaceAudio)",
+      "license": "CC0-1.0"
+    }
+  ]
 }

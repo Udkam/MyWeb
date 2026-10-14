@@ -1,10 +1,10 @@
 # Cinder Below — asset provenance
 
-The game uses original **Ninja Adventure** assets by **Pixel-boy and AAA**, downloaded from the [author's pack page](https://pixel-boy.itch.io/ninja-adventure-asset-pack). The included README explicitly covers all package assets, including commercial games, under **CC0 1.0**. Attribution is appreciated but not required. We preserve the original [license](src/assets/LICENSE-Ninja-Adventure.txt) and [README](src/assets/README-Ninja-Adventure.md).
+The game uses original **Ninja Adventure** artwork and sound effects by **Pixel-boy and AAA**, downloaded from the [author's pack page](https://pixel-boy.itch.io/ninja-adventure-asset-pack). The included README explicitly covers package assets, including commercial games, under **CC0 1.0**. We preserve the original [license](src/assets/LICENSE-Ninja-Adventure.txt) and [README](src/assets/README-Ninja-Adventure.md). Music is existing CC0 work by **Juhani Junkala / SubspaceAudio**, documented separately below.
 
-Source archive: `Ninja Adventure - Asset Pack.zip`, read without modifying the preserved original. Its SHA-256, byte size, every selected original ZIP entry, local alias, image dimension and individual SHA-256 are in [the manifest](src/assets/manifest.json). Selected files are byte-for-byte original. Canvas uses source rectangles, integer scaling, ordinary transforms, and gameplay indicators; no generated or redrawn raster art is included.
+Source archive: `Ninja Adventure - Asset Pack.zip`, read without modifying the preserved original. Its SHA-256, byte size, selected original ZIP entries, local aliases, image dimensions and individual SHA-256 are in [the manifest](src/assets/manifest.json). Selected Ninja Adventure files are byte-for-byte original. Canvas uses source rectangles, integer scaling, ordinary transforms, and gameplay indicators; no generated or redrawn raster art is included.
 
-The subset contains 91 PNG images, 7 OGG music files, 5 WAV effects and the 2 original license/readme files: **9,114,026 bytes** before the manifest. The full source archive is not part of the public runtime.
+The subset contains **95 PNG images, 4 OGG music files, 5 WAV effects and 2 original license/readme files: 11,058,395 bytes** before manifests. Original source archives and licensing-page snapshots remain in local acceptance evidence and are excluded from the public runtime.
 
 | Runtime role | Original asset | Verified frame layout |
 |---|---|---|
@@ -16,7 +16,20 @@ The subset contains 91 PNG images, 7 OGG music files, 5 WAV effects and the 2 or
 | Props | `TilesetDungeon.png`, `TilesetElement.png` | Original props. Dungeon sheet is mainly mechanisms/objects and does not itself contain a full dungeon wall/floor set. |
 | Shots / impact | `FX/Projectile`, `FX/Elemental`, `FX/Smoke`, `FX/Attack` | Fireball/Energy: 4×16px; BigEnergy: 4×24px; Explosion: 9×40px; Smoke: 6×32px; CircularSlash: 4×32px. Flame has eight 25×30 frames. |
 
-Audio remains the author's original recordings. `music-fight.ogg` is **17 - Fight** (32 s); `music-dungeon.ogg` is **21 - Dungeon** (60 s). Effects map `shot` to Launch, `dash` to Whoosh, `hit` to Hit1, `death` to Explosion2, `relic` to PowerUp1. Durations/sample rates were verified from the original OGG/PCM headers; listening quality, mixing and loop seam suitability require audition and are not implied by file names. Playback is owned by the app and begins after a user gesture.
+Original Ninja Adventure effects map `shot` to Launch, `dash` to Whoosh, `hit` to Hit1, `death` to Explosion2, `relic` to PowerUp1. Playback is owned by the app and begins after a user gesture.
+
+## Existing dark fantasy music
+
+All four tracks are composed by **Juhani Junkala / SubspaceAudio** and released under CC0. Author-page evidence, the original pack INFO, original ZIP/WAV, exact download URLs, hashes and conversion details are retained in `.qa/atmosphere/music-source`; the shipped [music manifest](src/assets/music-manifest.json) and [selection notes](MUSIC-DIRECTION.md) record provenance.
+
+| Recording | Scene | Author release |
+|---|---|---|
+| Catacombs | Hollow and mire | [JRPG Pack 3 — Evil](https://opengameart.org/content/jrpg-pack-3-evil) |
+| Ancient Evil Awakens! | Cinder and storm | [JRPG Pack 3 — Evil](https://opengameart.org/content/jrpg-pack-3-evil) |
+| Whispers From Beyond | Title, void and rift | [JRPG Pack 3 — Evil](https://opengameart.org/content/jrpg-pack-3-evil) |
+| Epic Boss Battle | All bosses | [Boss Battle Music](https://opengameart.org/content/boss-battle-music) |
+
+The first three OGG files retain exact original bytes. Epic Boss Battle is converted from the original WAV to Vorbis q5 with 3 ms edge fades to reduce loop clicks; no composition, synthesis, pitch/tempo change or arrangement is performed. Encoding introduces 2.903 ms of padding, documented in the music manifest. Playback gains normalize the ordinary tracks near -22 LUFS and Boss near -19 LUFS before the shared master gain. Technical decoding, loop-boundary playback and transition checks are verified; these measurements are not a subjective listening acceptance.
 
 Research-only original contact sheets and the 532-page study stay outside this runtime. 0x72 DungeonTileset II was examined as an alternative; no art from that pack or another game's screenshots is included here.
 
@@ -24,4 +37,4 @@ Research-only original contact sheets and the 532-page study stay outside this r
 
 The campaign uses 20 distinct ordinary monster sheets (tiny Larva2 children excluded) and ten dedicated Boss families: GiantFrog, GiantBamboo, SquidGreen, GiantSlime, TenguBlue, GiantFlam, GiantBlueSamurai, DemonCyclop, GiantRacoonGold and GiantSpirit. The manifest records every source entry and all ten animation families, including rectangular 96×48 Samurai idle/walk/hit cells. No enemy is counted twice through a renamed copy. Some families have no dedicated attack strip; gameplay windups use existing original energy effects.
 
-Added original tracks: **18 - Aquatic** (mire), **10 - Dark Castle** (cinder), **28 - Tension** (storm), **24 - Final Area** (void), and **22 - Dream** (rift). The exact files, original bytes and SHA-256 values are in the manifest, together with the scene mapping. All five additions passed full FFmpeg decoding; they remain untranscoded. The five campaign biomes and purple rift use original interior/outdoor floor, nature, water, debris and FX crops. Palette/lighting adjustments happen in Canvas; no new raster assets are synthesized.
+The five campaign biomes and purple rift use original interior/outdoor floor, nature, water, debris and FX crops. Four additional unmodified atlases (Relief, Pipes, VillageAbandoned and Field) supply cliff walls, furnace details, ruined columns and muddy ground. Palette/lighting adjustments happen in Canvas. Old runtime music has been replaced and removed; the original Ninja Adventure archive and previous published Git revisions preserve its provenance.

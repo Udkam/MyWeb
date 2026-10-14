@@ -110,6 +110,8 @@ def run_lamps(browser):
     context,page=open_case(browser,'lamp-sequence',3)
     lamps=sorted([i for i in state(page)['interactables'] if i['kind']=='lamp'],key=lambda i:i['order'])
     check(len(lamps)==3,'three lamps exist as actual room objects')
+    check(page.locator('#discovery-panel').is_visible() and '1 → 2 → 3' in page.locator('#discovery-detail').inner_text(),'discovery card explains the actual lamp order before interaction')
+    capture(page,'lamps-instructions.png')
     move_to(page,lamps[1]['id']);page.keyboard.press('q');s=advance(page)
     check(all(i['status']=='ready' for i in s['interactables'] if i['kind']=='lamp'),'wrong visible lamp order resets the puzzle')
     before=s['stats']['embers']
@@ -122,6 +124,10 @@ def run_traveler(browser):
     traveler=next(i for i in state(page)['interactables'] if i['kind']=='traveler')
     before=state(page)['stats']['embers'];move_to(page,traveler['id'])
     button=page.locator('#interact-button');check(button.is_visible(),'nearby traveler exposes mobile interaction button')
+    check('被困旅人' in page.locator('#discovery-title').inner_text() and '下一房' in page.locator('#discovery-detail').inner_text(),'mobile discovery card explains the traveler and delayed reward')
+    sizes=page.evaluate("['discovery-title','discovery-detail','interact-button'].map(id=>parseFloat(getComputedStyle(document.getElementById(id)).fontSize))")
+    check(min(sizes)>=13,'mobile discovery instructions and interaction label remain legible',sizes)
+    capture(page,'traveler-mobile-before.png')
     box=button.bounding_box();check(box['width']>=44 and box['height']>=44,'mobile interaction touch target is at least 44px',box)
     button.tap();s=advance(page)
     check(s['adventure']['escort']=={'fromRoom':2,'dueRoom':3} and s['stats']['embers']==before,'real mobile tap starts escort without prematurely awarding next-room reward')
@@ -130,7 +136,10 @@ def run_traveler(browser):
 def run_offering(browser):
     context,page=open_case(browser,'offering',1)
     offering=next(i for i in state(page)['interactables'] if i['kind']=='offering')
-    move_to(page,offering['id']);before=state(page);page.keyboard.press('q');s=advance(page)
+    move_to(page,offering['id']);before=state(page)
+    check('10' in page.locator('#discovery-detail').inner_text() and 'Q' in page.locator('#discovery-hint').inner_text(),'nearby shrine makes cost and keyboard action explicit')
+    capture(page,'offering-before.png')
+    page.keyboard.press('q');s=advance(page)
     check(s['adventure']['spent']==10 and s['wallet']==before['wallet']-10 and s['stats']['embers']==before['stats']['embers'],'offering subtracts spendable balance while preserving bankable gross income')
     check(s['player']['hp']>=before['player']['hp'] and s['player']['novaCharge']==100,'offering actually restores hearts and fills nova')
     check(page.locator('#ember-count').inner_text()==str(s['wallet']),'top HUD displays remaining spendable embers')
@@ -154,13 +163,32 @@ def run_wall(browser):
     page.keyboard.press('q');check(advance(page)['stats']['embers']==s['stats']['embers'],'claimed chest cannot pay twice')
     context.close()
 
+def run_responsive(browser):
+    for width,height,english in [(320,844,False),(844,390,False),(390,844,True)]:
+        context,page=open_case(browser,'responsive-discovery',1,True)
+        page.set_viewport_size({'width':width,'height':height});s=advance(page)
+        if english:
+            page.locator('#language-toggle').tap();s=advance(page)
+        shrine=next(i for i in s['interactables'] if i['kind']=='offering')
+        move_to(page,shrine['id'])
+        boxes=page.evaluate("""() => ['#discovery-panel','#interact-button','#move-stick','#aim-stick','#dash','#nova'].map(selector=>{
+          const n=document.querySelector(selector),r=n.getBoundingClientRect();
+          return {selector,x:r.x,y:r.y,w:r.width,h:r.height,inside:r.x>=0&&r.y>=0&&r.right<=innerWidth+.5&&r.bottom<=innerHeight+.5}
+        })""")
+        overlap=lambda a,b:a['x']<b['x']+b['w'] and a['x']+a['w']>b['x'] and a['y']<b['y']+b['h'] and a['y']+a['h']>b['y']
+        check(all(b['inside'] for b in boxes),f'{width}x{height}: discovery and controls fit the viewport',boxes)
+        check(not any(overlap(boxes[1],b) for b in boxes[2:]),f'{width}x{height}: interaction button avoids sticks and abilities')
+        check(page.evaluate('document.documentElement.scrollWidth<=innerWidth'),f'{width}x{height}: discovery text creates no horizontal overflow')
+        capture(page,f'discovery-{width}x{height}-{"en" if english else "zh"}.png')
+        context.close()
+
 def main():
     OUT.mkdir(parents=True,exist_ok=True);started=time.perf_counter()
     try:
         with sync_playwright() as p:
             browser=p.chromium.launch(headless=True);REPORT['browser']=browser.version
             try:
-                for scenario in [run_lamps,run_traveler,run_offering,run_wall]:scenario(browser)
+                for scenario in [run_lamps,run_traveler,run_offering,run_wall,run_responsive]:scenario(browser)
             finally:browser.close()
     except Exception as error:REPORT['failure']=str(error);print('STOP '+str(error),flush=True)
     REPORT['wall_seconds']=round(time.perf_counter()-started,2);REPORT['passed']=not REPORT.get('failure') and not REPORT['errors'] and not REPORT['console_errors'] and all(i['passed'] for i in REPORT['checks'])

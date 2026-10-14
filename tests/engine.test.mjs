@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createRun, step, chooseRelic, enterRoom, setWorldSize, snapshot, restoreRun, describe, interact, nearestInteractable, availableEmbers, getRiftRule, isBossRoom, BOSS_POOLS, LAYOUTS, RELICS, WEAPONS } from '../src/engine.js';
+import { createRun, step, chooseRelic, enterRoom, setWorldSize, snapshot, restoreRun, describe, interact, nearestInteractable, availableEmbers, getRiftRule, isBossRoom, BOSS_POOLS, LAYOUTS, LEGACY_LAYOUTS, RELICS, WEAPONS } from '../src/engine.js';
 
 const DT = 1 / 120;
 function advance(s, seconds, input = {}) {
@@ -360,7 +360,7 @@ test('six physical layouts keep entrance, both exits and every discovery reachab
       for(const entity of [s.player,...s.enemies,...s.interactables]) for(const o of s.obstacles) assert.ok(Math.hypot(entity.x-Math.max(o.x,Math.min(o.x+o.w,entity.x)),entity.y-Math.max(o.y,Math.min(o.y+o.h,entity.y)))>=entity.r-.001);
     }
   }
-  assert.deepEqual([...layouts].sort(),[...LAYOUTS].sort());assert.ok(shapes.size>=6);
+  assert.deepEqual([...layouts].sort(),[...LEGACY_LAYOUTS].sort());assert.ok(shapes.size>=6);
 });
 
 test('lamp order is a genuine resettable puzzle, nearby-only, and pays exactly once', () => {

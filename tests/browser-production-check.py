@@ -13,7 +13,7 @@ import sys
 from playwright.sync_api import sync_playwright
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-OUT = ROOT / '.qa' / 'production-v4'
+OUT = ROOT / '.qa' / 'production-v5'
 OUT.mkdir(parents=True, exist_ok=True)
 URL = sys.argv[1] if len(sys.argv)>1 else 'https://foreseer-focus-desk.fresh-ape-5596.chatgpt.site'
 REPORT = {'url': URL, 'date': '2026-10-14', 'expected_source_commit': sys.argv[2] if len(sys.argv)>2 else None, 'method': 'Anonymous browser contexts, normal RAF and mouse/keyboard/native multitouch; render_game_to_text read only', 'checks': [], 'page_errors': [], 'console_errors': [], 'resource_failures': [], 'screenshots': []}
@@ -66,7 +66,8 @@ def desktop(browser):
     context = browser.new_context(viewport={'width': 1440, 'height': 960}, device_scale_factor=1)
     page = open_game(context, 'desktop')
     screenshot(page, 'desktop-title.png')
-    files = ['engine.js','monsters.js','app.js','renderer.js','input.js','storage.js','styles.css','i18n.js','field-guide.js','audio.js']
+    files = ['engine.js','monsters.js','app.js','renderer.js','input.js','storage.js','styles.css','i18n.js','field-guide.js','audio.js','rooms.js','discovery.js']
+    files += [str(path.relative_to(DIST)).replace(chr(92),'/') for path in (DIST/'assets'/'music').glob('*.ogg')]
     files += [str(path.relative_to(DIST)).replace('\\','/') for path in DIST.rglob('*.json') if 'manifest' in path.name or 'asset-map' in path.name]
     REPORT['public_hashes'] = []
     for name in files:

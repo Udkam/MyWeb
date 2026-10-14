@@ -31,7 +31,7 @@ test('20 ordinary creatures and 10 dedicated bosses use distinct original images
     const row = manifest.files.find(item => item.file === `${type}-${pose}.png`);
     assert.deepEqual(row.dimensions, [w * count, h], `${type}/${pose} must use its actual rectangular cells`);
   }
-  assert.equal(Object.values(AUDIO).filter(url => url.endsWith('.ogg')).length, 7);
+  assert.equal(Object.values(AUDIO).filter(url => url.endsWith('.ogg')).length, 4);
 });
 test('sprite directions map to source columns, not animation rows', () => {
   assert.deepEqual([Math.PI / 2, -Math.PI / 2, Math.PI, 0].map(directionColumn), [0, 1, 2, 3]);
@@ -73,6 +73,9 @@ test('every actor phase uses valid rectangles and title never mutates the run', 
     state.hazards=[{kind:'meteor',x:180,y:220,radius:44,remaining:.2,maxTime:1},{kind:'lightning',x:450,y:300,radius:36,remaining:.5,maxTime:1},{kind:'mine',x:600,y:320,armTime:0,radius:14}];
     state.interactables=['traveler','lamp','offering','cracked-wall','chest','ghost'].map((kind,index)=>({kind,x:80+index*135,y:500,r:18,status:kind==='cracked-wall'?'sealed':'ready',order:2,hits:2}));
     state.obstacles.push({x:500,y:230,w:40,h:40,kind:'thorn'});
+    state.obstacles.push({x:330,y:350,w:65,h:70,kind:'pit'});
+    state.floorZones=['stone-path','court','mud','grate','bridge','rune'].map((kind,index)=>({id:`zone-${index}`,kind,x:55+index*125,y:145,w:104,h:72}));
+    state.landmarks=['arch','brazier','roots','chain','obelisk','broken-column'].map((kind,index)=>({id:`mark-${index}`,kind,x:60+index*130,y:100,r:12,variant:index%3}));
     for (const phase of ['spawn','chase','windup','charge','recover','burst','blink']) {
       for (const e of state.enemies) Object.assign(e, { phase, windup: .4, windupMax: .8, telegraph: { kind: e.id % 2 ? 'line' : 'fan', angle: .7, range: 180, width: 30, spread: .8 } });
       for (const time of [0, .11, .42, .93, 1.77, 4.1]) {
@@ -83,6 +86,9 @@ test('every actor phase uses valid rectangles and title never mutates the run', 
     const beforeBiomes = backdropCount; state.room++;
     for (const biome of ['hollow','mire','cinder','storm','void','rift']) { state.biome=biome; render(context,state,{width:1440,height:900}); }
     assert.equal(backdropCount - beforeBiomes, 6, 'each distinct biome needs its own backdrop cache entry');
+    const beforeGeometry=backdropCount;
+    state.floorZones[0].x+=5;render(context,state,{width:1440,height:900});
+    assert.equal(backdropCount-beforeGeometry,1,'changed map geometry must invalidate the floor cache without a room change');
     state.phase='exit'; state.gates=[{route:'refuge',x:180,y:170,r:28},{route:'hunt',x:500,y:170,r:28},{route:'rift',riftRule:'glass',x:780,y:170,r:28}]; render(context,state,{width:390,height:844});
     state.enemies=[{id:1,type:'shooter',x:300,y:280,r:14,hp:30,maxHp:30,phase:'windup',windup:.4,windupMax:.8,angle:.2}];
     render(context,state,{width:1440,height:900}); // Populate the backdrop cache before comparing commands.

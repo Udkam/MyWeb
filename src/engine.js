@@ -4,6 +4,8 @@
  * spread/remaining. chargeX/Y is the locked destination, never a hidden retarget.
  */
 import * as monsters from './monsters.js';
+import { LAYOUTS, LEGACY_LAYOUTS, buildRoomGeometry } from './rooms.js';
+export { LAYOUTS, LEGACY_LAYOUTS };
 const { SPECIAL_ENEMIES, updateSpecialEnemy, adjustIncomingDamage } = monsters;
 export const WEAPONS = [
   { id: 'cinder', name: 'Cinderbolt', description: 'Steady single firebolts.', unlockRooms: 0 },
@@ -41,28 +43,8 @@ function selectedBoss(s) {
   n = Math.imul(n ^ (n >>> 16), 0x21f0aaad); n ^= n >>> 15;
   return BOSS_POOLS[s.act - 1][n & 1];
 }
-export const LAYOUTS = ['pillar-court', 'side-cloisters', 'crossroads', 'broken-hall', 'altar-ring', 'twin-halls'];
 function hash(value) { let n = Math.imul((value ^ (value >>> 16)) >>> 0, 0x21f0aaad); n = Math.imul(n ^ (n >>> 15), 0x735a2d97); return (n ^ (n >>> 15)) >>> 0; }
 export function getRiftRule(seed, room) { return ['echo', 'surge', 'glass'][hash((seed >>> 0) ^ Math.imul(room, 0x51ed270b)) % 3]; }
-function layoutForRoom(seed, room) {
-  let previous = -1, selected = 0;
-  // Each six-room bag is shuffled independently; its boundary never repeats a layout.
-  for (let cycle = 0; cycle <= Math.floor((room - 1) / LAYOUTS.length); cycle++) {
-    const bag = LAYOUTS.map((_, index) => index); let rng = hash(seed ^ Math.imul(cycle + 1, 0x9e3779b1));
-    for (let i = bag.length - 1; i > 0; i--) { rng = hash(rng + i); const j = rng % (i + 1); [bag[i], bag[j]] = [bag[j], bag[i]]; }
-    if (bag[0] === previous) [bag[0], bag[1]] = [bag[1], bag[0]];
-    previous = bag.at(-1); selected = bag[(room - 1) % LAYOUTS.length];
-  }
-  return selected;
-}
-const LAYOUT_BLOCKS = [
-  [[.17,.27,.12,.13,'pillar'],[.71,.27,.12,.13,'pillar'],[.17,.60,.12,.13,'pillar'],[.71,.60,.12,.13,'pillar']],
-  [[.22,.25,.09,.44,'wall'],[.69,.25,.09,.44,'wall']],
-  [[.12,.24,.27,.18,'wall'],[.61,.24,.27,.18,'wall'],[.12,.59,.27,.18,'wall'],[.61,.59,.27,.18,'wall']],
-  [[.15,.25,.13,.10,'rubble'],[.68,.34,.15,.09,'rubble'],[.23,.62,.13,.13,'rubble'],[.64,.66,.16,.09,'rubble'],[.46,.43,.09,.10,'rubble']],
-  [[.40,.39,.20,.16,'altar'],[.15,.27,.10,.12,'pillar'],[.75,.27,.10,.12,'pillar'],[.15,.63,.10,.12,'pillar'],[.75,.63,.10,.12,'pillar']],
-  [[.46,.23,.08,.24,'wall'],[.46,.63,.08,.15,'wall'],[.16,.47,.12,.09,'rubble'],[.72,.47,.12,.09,'rubble']],
-];
 function newAdventure() { return { version: 1, spent: 0, claims: [], escort: null, cleanRooms: 0, roomDamage: 0 }; }
 export function availableEmbers(s) { return Math.max(0, s.stats.embers - s.adventure.spent); }
 const clone = (value) => JSON.parse(JSON.stringify(value));
@@ -257,22 +239,22 @@ function makeRoom(s, capture = true) {
   s.phase = 'combat'; s.enemies = []; s.bullets = []; s.pickups = []; s.effects = []; s.choices = []; s.gates = []; s.hazards = []; s.interactables = [];
   s.hitStop = 0; s.shake = 0; s.inputLatch = { dash: false, nova: false };
   s.rng = (s.seed ^ Math.imul(s.room, 0x9e3779b1) ^ (s.route === 'refuge' ? 0x71a53d09 : s.route === 'rift' ? 0x3948329d : 0)) >>> 0;
-  const b = roomBounds(s), w = b.right - b.left, h = b.bottom - b.top;
+  const b = roomBounds(s);
   s.act = s.campaign === 'legacy' ? Math.ceil(s.room / 4) : Math.ceil(s.room / 3);
   s.baseBiome = s.campaign === 'legacy' ? (s.room < 5 ? 'hollow' : 'cinder') : BIOMES[s.act - 1];
   s.actName = s.campaign === 'legacy' ? (s.room < 5 ? ACT_NAMES[0] : ACT_NAMES[2]) : ACT_NAMES[s.act - 1];
   const boss = isBossRoom(s); s.bossId = selectedBoss(s);
   s.wave = 1; s.waveTotal = s.room === 1 || boss ? 1 : 2; s.waveDelay = 0.9;
-  const layoutIndex = layoutForRoom(s.seed, s.room);
-  s.layout = LAYOUTS[layoutIndex]; s.biome = s.route === 'rift' ? 'rift' : s.baseBiome;
+  s.biome = s.route === 'rift' ? 'rift' : s.baseBiome;
   s.riftRule = s.route === 'rift' ? getRiftRule(s.seed, s.room) : null;
-  s.obstacles = LAYOUT_BLOCKS[layoutIndex].map(([x, y, width, height, kind]) => ({ x: b.left + x * w, y: b.top + y * h, w: width * w, h: height * h, kind }));
+  Object.assign(s, buildRoomGeometry({ ...s, bounds: b, boss }));
   s.player.x = s.width / 2; s.player.y = b.bottom - 46; s.player.vx = 0; s.player.vy = 0;
   s.player.invuln = 1.1; s.player.dashTime = 0; s.player.dashCooldown = 0; s.player.fireCooldown = 0; s.player.recoil = 0;
   s.player.slowTime = 0; s.player.slowFactor = 1;
   s.player.angle = -Math.PI / 2;
   s.adventure.roomDamage = s.stats.damageTaken;
   makeInteractables(s);
+  s.landmarks = s.landmarks.filter(p => !s.interactables.some(item => distance(p, item) < 45));
   if (boss) {
     const point = freeSpawn(s, 0.5, 0.24, 29);
     s.enemies.push(enemy(s, s.bossId, point.x, point.y));
@@ -281,15 +263,15 @@ function makeRoom(s, capture = true) {
   if (capture) s.entrance = entranceData(s);
 }
 function entranceData(s) {
-  return { kind: 'cinder-below-run', version: s.campaign === 'legacy' ? 1 : 2, ...(s.campaign === 'legacy' ? {} : { totalRooms: MAX_ROOMS }), seed: s.seed, width: s.width, height: s.height,
+  return { kind: 'cinder-below-run', version: s.campaign === 'legacy' ? 1 : 2, ...(s.campaign === 'legacy' ? {} : { totalRooms: MAX_ROOMS }), ...(s.mapVersion === 2 ? { mapVersion: 2 } : {}), seed: s.seed, width: s.width, height: s.height,
     room: s.room, route: s.route, weapon: s.player.weapon, relics: clone(s.relics), hp: s.player.hp,
     novaCharge: s.player.novaCharge, stats: clone(s.stats), time: s.time, nextId: s.nextId, adventure: clone(s.adventure) };
 }
-export function createRun({ seed = 20261014, width = 1100, height = 720, weapon = 'cinder', meta = {}, campaign = 'five-acts' } = {}) {
+export function createRun({ seed = 20261014, width = 1100, height = 720, weapon = 'cinder', meta = {}, campaign = 'five-acts', mapVersion = campaign === 'legacy' ? 1 : 2 } = {}) {
   void meta;
   const s = { width: clamp(finite(width) ? width : 1100, 380, 4000), height: clamp(finite(height) ? height : 720, 560, 4000),
     time: 0, seed: (Number(seed) >>> 0) || 1, rng: 1, room: 1, route: 'hunt', phase: 'combat', nextId: 1,
-    campaign: campaign === 'legacy' ? 'legacy' : 'five-acts', totalRooms: campaign === 'legacy' ? 8 : MAX_ROOMS,
+    mapVersion: mapVersion === 2 ? 2 : 1, campaign: campaign === 'legacy' ? 'legacy' : 'five-acts', totalRooms: campaign === 'legacy' ? 8 : MAX_ROOMS,
     player: { x: 0, y: 0, r: 13, hp: 6, maxHp: 6, angle: -Math.PI / 2, vx: 0, vy: 0, invuln: 0,
       dashTime: 0, dashCooldown: 0, dashVX: 0, dashVY: 0, fireCooldown: 0, novaCharge: 100, novaMax: 100,
       recoil: 0, slowTime: 0, slowFactor: 1, weapon: WEAPONS.some(w => w.id === weapon) ? weapon : 'cinder' },
@@ -744,8 +726,13 @@ export function setWorldSize(s, width, height) {
     if (e.telegraph?.kind === 'impact' && finite(e.telegraph.x)) point(e.telegraph);
   }
   for (const o of s.obstacles) { point(o); o.w *= sx; o.h *= sy; }
+  // Rebuild seeded visual semantics on rotation; legacy collision scaling is exact.
+  const geometry = buildRoomGeometry({ ...s, bounds: next, boss: isBossRoom(s) });
+  s.floorZones = geometry.floorZones; s.landmarks = geometry.landmarks;
+  if (s.mapVersion === 2) s.obstacles = [...geometry.obstacles, ...s.obstacles.filter(o => o.temporary)];
   resolveBody(s, s.player);
   for (const item of s.interactables) resolveBody(s, item);
+  s.landmarks = s.landmarks.filter(p => !s.interactables.some(item => distance(p, item) < 45));
   for (const e of s.enemies) {
     resolveBody(s, e);
     if (e.specialAction && finite(e.attackX)) { e.angle = Math.atan2(e.attackY - e.y, e.attackX - e.x) + (e.attackAngleOffset || 0); if (e.telegraph) e.telegraph.angle = e.angle; }
@@ -780,7 +767,8 @@ export function restoreRun(data) {
     if (!data || typeof data !== 'object' || Array.isArray(data) || data.kind !== 'cinder-below-run' || ![1, 2].includes(data.version)) return null;
     const allowed = ['kind', 'version', 'seed', 'width', 'height', 'room', 'route', 'weapon', 'relics', 'hp', 'novaCharge', 'stats', 'time', 'nextId'];
     if (data.version === 2) allowed.push('totalRooms');
-    if (Object.keys(data).some(k => !allowed.includes(k) && k !== 'adventure') || allowed.some(k => !Object.hasOwn(data, k))) return null;
+    if (Object.keys(data).some(k => !allowed.includes(k) && k !== 'adventure' && k !== 'mapVersion') || allowed.some(k => !Object.hasOwn(data, k))) return null;
+    if (Object.hasOwn(data, 'mapVersion') && data.mapVersion !== 2) return null;
     const maxRooms = data.version === 1 ? 8 : MAX_ROOMS;
     if (data.version === 2 && data.totalRooms !== MAX_ROOMS) return null;
     if (!Number.isInteger(data.seed) || data.seed < 1 || data.seed > 4294967295 || !Number.isInteger(data.room) || data.room < 1 || data.room > maxRooms || !['hunt', 'refuge', ...(data.version === 2 ? ['rift'] : [])].includes(data.route) || !WEAPONS.some(w => w.id === data.weapon)) return null;
@@ -794,7 +782,7 @@ export function restoreRun(data) {
     if (!data.stats || Object.keys(data.stats).length !== keys.length || keys.some(k => !finite(data.stats[k]) || data.stats[k] < 0 || data.stats[k] > 1e9) || data.stats.rooms !== data.room - 1 || Math.abs(data.stats.elapsed - data.time) > 1e-7) return null;
     if (keys.filter(k => k !== 'elapsed').some(k => !Number.isInteger(data.stats[k]))) return null;
     if (Object.hasOwn(data, 'adventure') && !validAdventure(data.adventure, data)) return null;
-    const s = createRun({ ...data, campaign: data.version === 1 ? 'legacy' : 'five-acts' });
+    const s = createRun({ ...data, mapVersion: data.mapVersion ?? 1, campaign: data.version === 1 ? 'legacy' : 'five-acts' });
     s.room = data.room; s.route = data.route; s.relics = clone(data.relics); s.player.maxHp = maxHp; s.player.hp = data.hp; s.player.novaCharge = data.novaCharge;
     s.time = data.time; s.stats = clone(data.stats); s.nextId = Math.max(1, data.nextId - initialEnemyCount(s));
     s.adventure = Object.hasOwn(data, 'adventure') ? clone(data.adventure) : newAdventure();
@@ -805,6 +793,7 @@ export function describe(s) {
   const round = n => Math.round(n * 100) / 100;
   return { title: 'Cinder Below', coordinates: 'World coordinates; origin top-left; x right, y down. Aim uses absolute world position.',
     width: s.width, height: s.height, seed: s.seed, time: round(s.time), room: s.room, totalRooms: s.totalRooms, campaign: s.campaign, route: s.route, phase: s.phase,
+    mapVersion: s.mapVersion, roomShape: s.roomShape, layoutVariant: clone(s.layoutVariant), floorZones: clone(s.floorZones), landmarks: clone(s.landmarks),
     wave: s.wave, waveTotal: s.waveTotal, waveDelay: round(s.waveDelay), layout: s.layout, biome: s.biome, baseBiome: s.baseBiome, act: s.act, actName: s.actName, bossId: s.bossId, riftRule: s.riftRule,
     player: Object.fromEntries(Object.entries(s.player).filter(([k]) => !['fireCooldown', 'dashVX', 'dashVY'].includes(k)).map(([k, v]) => [k, typeof v === 'number' ? round(v) : v])),
     enemies: s.enemies.map(e => ({ id: e.id, type: e.type, boss: e.boss, x: round(e.x), y: round(e.y), r: e.r, hp: round(e.hp), maxHp: e.maxHp, phase: e.phase, stage: e.stage, windup: round(e.windup), telegraph: e.telegraph ? { ...e.telegraph } : null, burnTime: round(e.burnTime), coldTime: round(e.coldTime) })),

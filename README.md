@@ -27,9 +27,11 @@ The interface defaults to Simplified Chinese while the game title stays **Cinder
 
 Phones have two independent sticks and separate Dash / Nova buttons. The game fills the browser viewport even where the Fullscreen API is unavailable. Portrait and landscape are supported; small screens can use landscape for more horizontal aiming space.
 
-第一房用单波介绍操作，后续普通房有两波遭遇。每段两场普通战斗后，从该段两位首领中随机选一位；首领拥有独立招式循环和阶段机制。六种碰撞布局采用种子洗牌，五段环境及异界使用不同地貌、装饰和原版配乐。普通攻击只用敌人自身蓄力动作提示，落石／落雷才显示圆形落点。
+第一房用单波介绍操作，后续普通房有两波遭遇。每段两场普通战斗后，从该段两位首领中随机选一位；首领拥有独立招式循环和阶段机制。十二种碰撞布局采用种子洗牌并组合镜像，包含错层回廊、双庭院、环行裂隙与断桥。五段环境及异界采用不同铺层、遗迹、边缘和光色；普通攻击只用敌人自身蓄力动作提示，落石／落雷才显示圆形落点。
 
 每次清房获得三选一遗物：分裂、弹射、穿透、追踪、连锁、灼烧、减速、爆炸、环刃、冲刺火迹、星爆和生命换伤害可叠加组合。救援旅人、三灯谜题、供奉、破墙宝箱和无伤幽灵均为可跳过的探索；详情放在暂停菜单“怪物与奇遇”。
+
+房内奇遇有放大精灵、描边标记和清晰文字；侧边卡片说明触发条件、顺序、花费或奖励，靠近后显示 Q／触屏操作。手机横竖屏均为独立交互按钮，不与双摇杆重叠。配乐采用 Juhani Junkala 的四首现成 CC0 暗黑幻想录音，普通房低频紧张，Boss 使用独立战斗曲；换曲交叉淡化，同曲跨房及暂停后保留播放位置。
 
 猎途每波增加敌人并获得更多余烬；庇所敌人较少，入场恢复一颗心。段间可选异界裂隙，下一房具有种子决定的临时法则：回声让双方子弹额外反弹；过载使星爆快速充能但敌弹加速；玻璃提高射击伤害但敌弹命中损失两颗心。出口会预告法则，离开异界后恢复普通规则。
 
@@ -76,4 +78,4 @@ ChatGPT Sites project: `appgprj_6accfe11a0ec8191ab683ddd3e52de07`. `.openai/host
 - [532-page research ledger and limitations](docs/research/README.md)
 - [Downloaded art and audio licenses / hashes](ASSET-CREDITS.md)
 
-Research and diagnostic screenshots stay outside `src` and the deployed artifact. `.qa` is ignored and retains acceptance evidence locally. Game art and all audio are credited original CC0 Ninja Adventure assets; no art or music from The Binding of Isaac is used.
+Research and diagnostic screenshots stay outside `src` and the deployed artifact. `.qa` is ignored and retains acceptance evidence locally. Art and sound effects are original CC0 Ninja Adventure assets; music is existing CC0 work by Juhani Junkala. No art or music from The Binding of Isaac or Darkest Dungeon is used. See [map design](MAP-DESIGN.md), [art direction](ART-DIRECTION.md) and [music sources / processing](MUSIC-DIRECTION.md). New runs use mapVersion 2; existing checkpoints without this field retain their original six-layout geometry.

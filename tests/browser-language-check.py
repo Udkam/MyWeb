@@ -13,6 +13,7 @@ import sys
 import time
 
 from playwright.sync_api import sync_playwright
+from browser_navigation import waypoint_to, die_from_real_damage
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 OUT = ROOT / '.qa' / 'language'
@@ -129,9 +130,19 @@ def clear_first_room(page):
         target = min(visible or s['enemies'], key=lambda e: math.hypot(e['x']-p['x'],e['y']-p['y']))
         distance = math.hypot(target['x']-p['x'],target['y']-p['y'])
         desired = set()
-        if not visible: desired = {'d'} if p['x'] < s['width'] * .55 else {'w'}
-        elif distance < 110:
-            desired = ({'a'} if target['x'] > p['x'] else {'d'}) | ({'w'} if target['y'] > p['y'] else {'s'})
+        if not visible:
+            waypoint = waypoint_to(s, (target['x'], target['y']))
+            dx, dy = waypoint[0] - p['x'], waypoint[1] - p['y']
+            desired = ({'d'} if dx > 6 else {'a'} if dx < -6 else set()) | ({'s'} if dy > 6 else {'w'} if dy < -6 else set())
+        elif distance < 130:
+            # Try short, genuinely clear retreat steps; do not hold a key into cover.
+            bottom = s['height'] - (150 if s['height'] > s['width'] else 28)
+            candidates = [(dx,dy) for dx,dy in [(-1,0),(1,0),(0,-1),(0,1),(-1,-1),(-1,1),(1,-1),(1,1)]
+                if 44 <= p['x']+dx*42 <= s['width']-44 and 82 <= p['y']+dy*42 <= bottom-16
+                and unobstructed(s, origin, (p['x']+dx*42,p['y']+dy*42))]
+            if candidates:
+                dx,dy = max(candidates,key=lambda d: math.hypot(p['x']+d[0]*42-target['x'],p['y']+d[1]*42-target['y']))
+                desired = ({'d'} if dx > 0 else {'a'} if dx < 0 else set()) | ({'s'} if dy > 0 else {'w'} if dy < 0 else set())
         held = set_keys(page, held, desired)
         box = page.locator('#world').bounding_box()
         page.mouse.move(box['x']+target['x']/s['width']*box['width'],box['y']+target['y']/s['height']*box['height'])
@@ -201,16 +212,9 @@ def live_flow(browser):
     toggle(page,'zh')
     # A short normal loss path exercises the localized finish screen, not a complete run.
     page.locator('#pause-button').click(); page.locator('#abandon').click(); page.locator('#play').click()
-    held = set()
-    for _ in range(160):
-        s = read(page)
-        if s['phase'] == 'dead': break
-        target = min(s['enemies'],key=lambda e:math.hypot(e['x']-s['player']['x'],e['y']-s['player']['y']))
-        dx,dy=target['x']-s['player']['x'],target['y']-s['player']['y']
-        desired=({'d'} if dx>12 else {'a'} if dx<-12 else set())|({'s'} if dy>12 else {'w'} if dy<-12 else set())
-        held=set_keys(page,held,desired);page.evaluate('(ms)=>window.advanceTime(ms)',250)
-    set_keys(page,held,set()); end=read(page)
-    check(end['phase']=='dead','normal enemy damage reaches actual end screen',end['stats'])
+    death_evidence = die_from_real_damage(page)
+    end = read(page)
+    check(end['phase']=='dead','normal enemy damage reaches actual end screen',{'stats':end['stats'],'damage':death_evidence})
     check(all(HAN.search(page.locator(selector).inner_text()) for selector in ['#end-title','#end-copy','#retry']), 'end title, explanation and retry control are Chinese')
     stable_end=core(end);toggle(page,'en');check(core(read(page))==stable_end,'end-screen language switch does not bank a second result')
     toggle(page,'zh'); capture(page,'zh-death.png')

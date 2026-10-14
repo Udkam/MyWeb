@@ -18,6 +18,7 @@
     "kind": "cinder-below-run",
     "version": 2,
     "totalRooms": 15,
+    "mapVersion": 2,
     "seed": 424242,
     "width": 1100,
     "height": 720,

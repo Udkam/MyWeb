@@ -1,5 +1,6 @@
 """Exercise the shipped UI and deterministic simulation through real browser input."""
 import argparse, json, math
+from browser_navigation import die_from_real_damage
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
@@ -62,10 +63,9 @@ with sync_playwright() as pw:
     page.keyboard.down('d'); advance(page, 100); page.evaluate('window.dispatchEvent(new Event("blur"))')
     check('blur pauses and clears keys', state(page)['ui']['paused'] and not state(page)['ui']['input']['keys'])
     page.keyboard.up('d'); page.locator('#continue').click(); screenshot(page, 'desktop-combat')
-    for _ in range(180):
-        advance(page, 500)
-        if state(page)['phase'] == 'dead': break
-    check('actual enemy damage reaches loss screen', state(page)['phase'] == 'dead' and page.locator('#end-screen').is_visible())
+    damage_evidence = die_from_real_damage(page)
+    check('actual enemy damage reaches loss screen', state(page)['phase'] == 'dead' and page.locator('#end-screen').is_visible()
+        and state(page)['stats']['damageTaken'] > damage_evidence['initial_damage'], damage_evidence)
     screenshot(page, 'death')
     runs_before = state(page)['ui']['lifetime']['runs']; page.locator('#retry').click(); advance(page, 100)
     check('one click retry starts a fresh healthy run', state(page)['phase'] == 'combat' and state(page)['player']['hp'] == 6 and state(page)['ui']['lifetime']['runs'] == runs_before + 1)

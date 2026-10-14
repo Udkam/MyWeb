@@ -133,24 +133,24 @@ def audio_module(browser):
     }""")
     page.locator('#release-audio-unlock').click()
     page.wait_for_function("document.querySelector('#release-audio-unlock').dataset.ready==='true'")
-    tracks = [('dungeon', {'title': True}, 'music-dungeon.ogg'), ('fight', {'boss': True}, 'music-fight.ogg'),
-              ('mire', {'biome': 'mire'}, 'music-aquatic.ogg'), ('cinder', {'biome': 'cinder'}, 'music-dark-castle.ogg'),
-              ('storm', {'biome': 'storm'}, 'music-tension.ogg'), ('void', {'biome': 'void'}, 'music-final-area.ogg'),
-              ('rift', {'biome': 'rift'}, 'music-dream.ogg')]
+    tracks = [('dungeon', {'title': True}, 'whispers.ogg'), ('fight', {'boss': True}, 'epic-boss.ogg'),
+              ('mire', {'biome': 'mire'}, 'catacombs.ogg'), ('cinder', {'biome': 'cinder'}, 'ancient-evil.ogg'),
+              ('storm', {'biome': 'storm'}, 'ancient-evil.ogg'), ('void', {'biome': 'void'}, 'whispers.ogg'),
+              ('rift', {'biome': 'rift'}, 'whispers.ogg')]
     REPORT['audio_module'] = {'evidence': 'Separate createAudio instance with real AudioContext, downloaded media playback, no mocks; not normal gameplay coverage.', 'tracks': []}
     for track, scene, filename in tracks:
         page.evaluate('(scene)=>window.__releaseAudio.setScene(scene)', scene)
-        page.wait_for_function("([track,file])=>{const s=window.__releaseAudio.status(),m=window.__releaseMedia[0];return s.track===track&&s.musicPlaying&&m.currentSrc.endsWith(file)&&m.readyState>=2&&Number.isFinite(m.duration)&&m.duration>0}", arg=[track, filename], timeout=12000)
-        start = page.evaluate('window.__releaseMedia[0].currentTime')
+        page.wait_for_function("([track,file])=>{const s=window.__releaseAudio.status(),m=window.__releaseMedia.find(m=>m.currentSrc.endsWith(file)&&!m.paused);return s.track===track&&s.musicPlaying&&m?.readyState>=2&&Number.isFinite(m.duration)&&m.duration>0}", arg=[track, filename], timeout=12000)
+        start = page.evaluate('(file)=>window.__releaseMedia.find(m=>m.currentSrc.endsWith(file)&&!m.paused).currentTime', filename)
         page.wait_for_timeout(180)
-        media = page.evaluate('({status:window.__releaseAudio.status(),src:window.__releaseMedia[0].currentSrc,duration:window.__releaseMedia[0].duration,time:window.__releaseMedia[0].currentTime,readyState:window.__releaseMedia[0].readyState})')
+        media = page.evaluate('(file)=>{const m=window.__releaseMedia.find(m=>m.currentSrc.endsWith(file)&&!m.paused);return {status:window.__releaseAudio.status(),src:m.currentSrc,duration:m.duration,time:m.currentTime,readyState:m.readyState}}', filename)
         check(media['time'] > start, f'audio setScene {track} maps to and actually plays {filename}', media)
         REPORT['audio_module']['tracks'].append(media)
     page.evaluate("window.__releaseAudio.setScene({biome:'mire'});window.__releaseAudio.suspend()")
-    page.wait_for_timeout(700)
-    stopped = page.evaluate('({status:window.__releaseAudio.status(),paused:window.__releaseMedia[0].paused,time:window.__releaseMedia[0].currentTime})')
+    page.wait_for_timeout(1300)
+    stopped = page.evaluate('({status:window.__releaseAudio.status(),paused:window.__releaseMedia.every(m=>m.paused),time:window.__releaseMedia.reduce((n,m)=>n+m.currentTime,0)})')
     page.wait_for_timeout(250)
-    after = page.evaluate('({status:window.__releaseAudio.status(),paused:window.__releaseMedia[0].paused,time:window.__releaseMedia[0].currentTime})')
+    after = page.evaluate('({status:window.__releaseAudio.status(),paused:window.__releaseMedia.every(m=>m.paused),time:window.__releaseMedia.reduce((n,m)=>n+m.currentTime,0)})')
     check(stopped['paused'] and after['paused'] and not after['status']['musicPlaying'] and after['status']['context'] == 'suspended' and abs(after['time'] - stopped['time']) < .02, 'suspend during delayed track fade stays stopped after all pending fades resolve', after)
     check(page.evaluate('window.__releaseAudioWarnings.length') == 0, 'real audio fixture reports no unavailable recordings')
     REPORT['audio_module']['suspended'] = after

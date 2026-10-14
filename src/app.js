@@ -5,6 +5,8 @@ import { createAudio } from './audio.js';
 import { loadSave, createDefaultSave, saveSave, parseImport, exportSave } from './storage.js';
 import { getLanguage, setLanguage, t, translateMessage, localizeWeapon, localizeRelic, applyTranslations } from './i18n.js';
 import { fieldGuide } from './field-guide.js';
+import { discoveryInfo, focusedDiscovery } from './discovery.js';
+import { ROOM_TITLES } from './rooms.js';
 
 const $ = (id) => document.getElementById(id);
 const canvas = $('world'), ctx = canvas.getContext('2d', { alpha: false }), menu = $('menu');
@@ -134,8 +136,7 @@ function roomBanner() {
   else if (state.biome === 'rift') setBanner(({ echo: 'RIFT · ECHO', surge: 'RIFT · SURGE', glass: 'RIFT · GLASS' })[state.riftRule] || 'THE OTHER SIDE', {}, 4.2);
   else if (state.totalRooms === 15 && state.room % 3 === 1) setBanner('ACT {act} · {name}', { act: state.act, actKey: state.actName });
   else {
-    const names = { 'pillar-court': 'PILLAR COURT', 'side-cloisters': 'SIDE CLOISTERS', crossroads: 'CROSSROADS', 'broken-hall': 'BROKEN HALL', 'altar-ring': 'ALTAR RING', 'twin-halls': 'TWIN HALLS' };
-    setBanner('{layout} · {room}', { layout: names[state.layout], room: String(state.room).padStart(2, '0') });
+    setBanner('{layout} · {room}', { layout: ROOM_TITLES[state.layout] || state.layout, room: String(state.room).padStart(2, '0') });
   }
 }
 function riftDescription(rule) {
@@ -226,14 +227,28 @@ function interactLabel(target) {
 }
 function updateAdventure() {
   const target = mode === 'playing' && !paused ? nearestInteractable(state) : null;
+  const focused = mode === 'playing' && !paused ? focusedDiscovery(state) : null;
+  const panel = $('discovery-panel');
+  panel.hidden = !focused;
+  if (focused) {
+    const { item, info } = focused;
+    const write = (id, value) => { if ($(id).textContent !== value) $(id).textContent = value; };
+    if (panel.dataset.tone !== info.tone) panel.dataset.tone = info.tone;
+    if (panel.dataset.near !== String(info.near)) panel.dataset.near = String(info.near);
+    write('discovery-kicker', t('Optional discovery'));
+    write('discovery-title', `${info.marker}  ${info.title}`);
+    write('discovery-detail', info.detail);
+    write('discovery-hint', item.kind === 'cracked-wall' ? info.action : target?.id === item.id
+      ? t(matchMedia('(pointer:coarse)').matches ? 'Tap to interact' : 'Press Q to interact') : t('Move toward the marker'));
+  }
   $('interact-button').hidden = !target;
   if (target) {
-    const label = interactLabel(target);
+    const label = discoveryInfo(state, target).action || interactLabel(target);
     if ($('interact-label').textContent !== label) $('interact-label').textContent = label;
     $('interact-button').setAttribute('aria-label', `${label} · Q`);
   }
   const escort = state.adventure?.escort;
-  const status = escort ? t('Traveler: clear room {room}', { room: escort.dueRoom }) : '';
+  const status = escort ? t('Escort: clear room {room}', { room: escort.dueRoom }) : '';
   if ($('quest-status').textContent !== status) $('quest-status').textContent = status;
 }
 function useNearby() {
@@ -284,7 +299,7 @@ function journalMarkup() {
   return `<p class="menu-prose">${t('Twenty enemy species and ten bosses across five acts. Each seed changes the encounters. Larvae do not count as a species.')}</p><p class="menu-prose">${t('Side paths are optional. Rescue a traveler and clear the next room; light lamps in order 1, 2, 3; or offer 10 embers for healing and a full nova.')}</p><p class="menu-prose">${t('Look for cracked masonry and watch what changes after three untouched rooms.')}</p>${[false, true].map(boss => `<h3>${t(boss ? 'Bosses' : 'Enemies')}</h3>${entries.filter(e => e.boss === boss).map(e => `<p><strong>${escapeHTML(e.name)}</strong><br>${escapeHTML(e.description)}</p>`).join('')}`).join('')}`;
 }
 function settingsMarkup() {
-  return `<div class="setting-row"><label for="setting-music">${t('Music')}<small>${t('Original Ninja Adventure soundtrack')}</small></label><input id="setting-music" type="checkbox" ${data.settings.music ? 'checked' : ''}></div><div class="setting-row"><label for="setting-sfx">${t('Sound effects')}</label><input id="setting-sfx" type="checkbox" ${data.settings.sfx ? 'checked' : ''}></div><div class="setting-row"><label for="setting-motion">${t('Reduce effects')}<small>${t('No camera shake or cosmetic flashes')}${motionQuery.matches ? ` · ${t('system preference active')}` : ''}</small></label><input id="setting-motion" type="checkbox" ${data.settings.reduceMotion ? 'checked' : ''}></div><div class="save-actions"><button id="export-save">${t('Export save')}</button><button id="import-save">${t('Import save')}</button></div><p class="save-status">${escapeHTML(translateMessage(saveMessage || 'Saved in this browser. No account or cloud sync.'))}</p><p class="menu-prose">${t('A continued run restarts at its last room entrance. Export a backup to move your progress to another browser.')}</p>${conflicted ? `<div class="warning-box">${t('Another tab changed this save. This tab has stopped saving.')}<button id="reload-save">${t('Load the latest save')}</button></div>` : ''}<button id="menu-help" class="text-button">${t('Controls & rules')}</button>`;
+  return `<div class="setting-row"><label for="setting-music">${t('Music')}<small>${t('Dark fantasy music · Juhani Junkala')}</small></label><input id="setting-music" type="checkbox" ${data.settings.music ? 'checked' : ''}></div><div class="setting-row"><label for="setting-sfx">${t('Sound effects')}</label><input id="setting-sfx" type="checkbox" ${data.settings.sfx ? 'checked' : ''}></div><div class="setting-row"><label for="setting-motion">${t('Reduce effects')}<small>${t('No camera shake or cosmetic flashes')}${motionQuery.matches ? ` · ${t('system preference active')}` : ''}</small></label><input id="setting-motion" type="checkbox" ${data.settings.reduceMotion ? 'checked' : ''}></div><div class="save-actions"><button id="export-save">${t('Export save')}</button><button id="import-save">${t('Import save')}</button></div><p class="save-status">${escapeHTML(translateMessage(saveMessage || 'Saved in this browser. No account or cloud sync.'))}</p><p class="menu-prose">${t('A continued run restarts at its last room entrance. Export a backup to move your progress to another browser.')}</p>${conflicted ? `<div class="warning-box">${t('Another tab changed this save. This tab has stopped saving.')}<button id="reload-save">${t('Load the latest save')}</button></div>` : ''}<button id="menu-help" class="text-button">${t('Controls & rules')}</button>`;
 }
 function openMenu(section = 'settings') {
   if (menu.open) return;
@@ -299,7 +314,7 @@ function renderMenu() {
   if (pendingImport) { renderImportConfirmation(); return; }
   if (section === 'help') $('menu-body').innerHTML = controlsMarkup();
   else if (section === 'journal') $('menu-body').innerHTML = journalMarkup();
-  else if (section === 'credits') $('menu-body').innerHTML = `<p>${t('Cinder Below · a five-act browser action roguelite by 4c.')}</p><ul class="credits-links"><li>${t('Pixel art, soundtrack and sound effects:')} <a href="https://pixel-boy.itch.io/ninja-adventure-asset-pack" target="_blank" rel="noopener">Ninja Adventure — Pixel-boy &amp; AAA</a>, CC0.</li><li>${t('Game code and design created for this site. No assets from The Binding of Isaac are used.')}</li></ul><p class="menu-prose">${t('Audio uses original downloaded recordings. Asset source paths, hashes and licenses are preserved with the editable source.')}</p>`;
+  else if (section === 'credits') $('menu-body').innerHTML = `<p>${t('Cinder Below · a five-act browser action roguelite by 4c.')}</p><ul class="credits-links"><li>${t('Pixel art and sound effects:')} <a href="https://pixel-boy.itch.io/ninja-adventure-asset-pack" target="_blank" rel="noopener">Ninja Adventure — Pixel-boy &amp; AAA</a>, CC0.</li><li>${t('Music:')} <a href="https://opengameart.org/content/jrpg-pack-3-evil" target="_blank" rel="noopener">Juhani Junkala — JRPG Pack 3: Evil</a> / <a href="https://opengameart.org/content/boss-battle-music" target="_blank" rel="noopener">Epic Boss Battle</a>, CC0.</li><li>${t('Game code and design created for this site. No assets from The Binding of Isaac are used.')}</li></ul><p class="menu-prose">${t('Audio uses original downloaded recordings. Asset source paths, hashes and licenses are preserved with the editable source.')}</p>`;
   else if (section === 'build') $('menu-body').innerHTML = Object.entries(state.relics).map(([id, level]) => { const relic = localizeRelic(RELICS.find((r) => r.id === id)); return `<p><strong style="color:${relic.color}">${escapeHTML(relic.name)} · ${level}</strong><br>${escapeHTML(relic.description)}</p>`; }).join('') || `<p>${t('Your first relic waits after the first chamber.')}</p>`;
   else $('menu-body').innerHTML = settingsMarkup();
   if (section === 'settings' || section === 'help') $('menu-body').insertAdjacentHTML('beforeend', `<button id="menu-journal" class="text-button">${t('Field guide & discoveries')}</button>`);
@@ -325,7 +340,7 @@ function closeMenu() {
   if (titleBeforeMenu instanceof HTMLElement && titleBeforeMenu.isConnected) titleBeforeMenu.focus({ preventScroll: true });
   else if (mode === 'playing') canvas.focus({ preventScroll: true });
 }
-function toTitle() { if (state && !['won', 'dead'].includes(state.phase)) checkpoint(); menu.close(); pendingImport = null; paused = false; state = null; setMode('title'); syncTitle(); $('play').focus(); }
+function toTitle() { if (state && !['won', 'dead'].includes(state.phase)) checkpoint(); menu.close(); pendingImport = null; paused = false; state = null; setMode('title'); void audio.resume(); syncTitle(); $('play').focus(); }
 function pauseForConflict() { if (!menu.open) openMenu(); else { menuSection = 'settings'; renderMenu(); } toast('Another tab updated your save. Load its latest version or export this one.'); }
 function exportProgress() {
   if (state && !['dead', 'won'].includes(state.phase)) { bankProgress(); data.checkpoint = snapshot(state); }

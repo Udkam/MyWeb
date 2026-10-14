@@ -169,9 +169,9 @@ function translationCallKeys(source) {
 const readSource = (file) => readFile(new URL(`../src/${file}`, import.meta.url), 'utf8');
 
 test('all current HTML translation attributes and literal app/renderer translation calls have Chinese entries', async () => {
-  const [html, app, renderer] = await Promise.all(['index.html', 'app.js', 'renderer.js'].map(readSource));
+  const [html, app, renderer, discovery] = await Promise.all(['index.html', 'app.js', 'renderer.js', 'discovery.js'].map(readSource));
   const htmlKeys = [...html.matchAll(/data-i18n(?:-aria-label|-title|-content)?="([^"]*)"/g)].map((match) => match[1].replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'"));
-  const keys = new Set([...htmlKeys, ...translationCallKeys(app), ...translationCallKeys(renderer)]);
+  const keys = new Set([...htmlKeys, ...translationCallKeys(app), ...translationCallKeys(renderer), ...translationCallKeys(discovery)]);
   assert.ok(htmlKeys.length >= 45, 'The real HTML attributes must be inspected');
   assert.ok(keys.size >= 90, 'The real app translation calls must be inspected');
   await withModule(memoryStorage(), ({ t, setLanguage }) => {
