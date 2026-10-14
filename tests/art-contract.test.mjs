@@ -45,8 +45,10 @@ test('every actor phase uses valid rectangles and title never mutates the run', 
     fillRect(...args) { geometry.push(['fillRect', ...args]); },
     strokeRect(...args) { geometry.push(['strokeRect', ...args]); },
     arc(...args) { geometry.push(['arc', ...args]); },
+    ellipse(...args) { geometry.push(['ellipse', ...args]); },
     drawImage(image, ...args) {
       assert.ok(args.every(Number.isFinite), `non-finite drawImage ${image.src || 'canvas'}`);
+      geometry.push(['drawImage',image.src||'cached-scene',...args]);
       if (args.length === 8 && image.src) {
         const [x, y, w, h] = args;
         assert.ok(x >= 0 && y >= 0 && w > 0 && h > 0 && x + w <= image.width && y + h <= image.height, `out-of-range ${image.src}: ${args}`);
@@ -54,6 +56,7 @@ test('every actor phase uses valid rectangles and title never mutates the run', 
       }
     },
     createRadialGradient() { return { addColorStop() {} }; },
+    createLinearGradient() { return { addColorStop() {} }; },
     measureText(text) { return { width: text.length * 7 }; },
   }, { get(target, key) { return target[key] ?? (() => {}); }, set(target, key, value) { target[key] = value; return true; } });
   globalThis.Image = class {
@@ -98,5 +101,18 @@ test('every actor phase uses valid rectangles and title never mutates the run', 
     state.enemies.forEach(e => e.hitFlash = .06); render(context, state, { width: 1440, height: 900 });
     const before = JSON.stringify(state); render(context, state, { width: 1440, height: 900, title: true });
     assert.equal(JSON.stringify(state), before); assert.ok(checked > 1000);
+    for(const [width,height] of [[1440,900],[390,844],[844,390]]) {
+      for(const titleWeapon of ['cinder','scatter','needle']) {
+        const options={width,height,title:true,titleWeapon};
+        render(context,state,options);const cached=backdropCount;
+        state.time=1;geometry=[];render(context,state,options);const moving=JSON.stringify(geometry);
+        const titleBefore=JSON.stringify(state);render(context,state,options);assert.equal(JSON.stringify(state),titleBefore,'title must never mutate a real run');
+        state.time=8;geometry=[];render(context,state,options);assert.notEqual(JSON.stringify(geometry),moving,'title uses the supplied clock for animation');
+        assert.equal(backdropCount,cached,'title cannot allocate a large background canvas per animation frame');
+        state.time=1;geometry=[];render(context,state,{...options,reduceMotion:true});const frozen=JSON.stringify(geometry);
+        assert.ok(geometry.filter(command=>command[0]==='fillRect').length<=28,'title has at most 24 particles plus three fill/halo operations');
+        state.time=90;geometry=[];render(context,state,{...options,reduceMotion:true});assert.equal(JSON.stringify(geometry),frozen,'reduced motion freezes every title decoration and sprite');
+      }
+    }
   } finally { globalThis.Image = oldImage; globalThis.document = oldDocument; }
 });

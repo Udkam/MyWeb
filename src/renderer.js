@@ -37,6 +37,7 @@ Object.assign(FILES,{outdoorFloor:'outdoor-floor.png',water:'water.png',nature:'
 const art = Object.create(null);
 let promise;
 let backgroundCache;
+let titleBackdropCache;
 export const assetStatus = { ready: false, failed: [], loaded: 0, total: Object.keys(FILES).length };
 export const AUDIO = Object.freeze(Object.fromEntries(Object.entries({ ...Object.fromEntries(Object.entries(MUSIC_CUES).map(([key,cue])=>[key,cue.file])), shot: 'shot.wav', dash: 'dash.wav', hit: 'hit.wav', death: 'death.wav', relic: 'relic.wav' }).map(([key, name]) => [key, new URL(`./assets/${name}`, import.meta.url).href])));
 
@@ -502,40 +503,100 @@ function drawGates(ctx, state, reduceMotion, scaleY=1) {
   }
 }
 
-export function render(ctx, state, { width, height, dpr = 1, reduceMotion = false, title = false } = {}) {
+// The title has a separate presentation stage: no live-room entities, camera
+// mutation, collision, or independent clock. Its only motion input is run time.
+function makeTitleBackdrop(width,height) {
+  const key=`${Math.ceil(width)}:${Math.ceil(height)}`;
+  if(titleBackdropCache?.key===key)return titleBackdropCache.canvas;
+  const canvas=document.createElement('canvas');canvas.width=Math.ceil(width);canvas.height=Math.ceil(height);
+  const ctx=canvas.getContext('2d'),portrait=height>width,compact=!portrait&&height<=500;ctx.imageSmoothingEnabled=false;
+  ctx.fillStyle='#080e16';ctx.fillRect(0,0,width,height);
+  const px=width*(portrait?.86:compact?.43:.80),py=height*(portrait?.16:.43);
+  halo(ctx,px,py,Math.min(width*.47,height*.58),'rgba(55,91,113,.20)');
+  halo(ctx,width*.91,height*.82,Math.min(width*.45,height*.62),'rgba(116,61,44,.10)');
+  // Original stone tiles on a receding plinth, surrounded by open darkness.
+  const platform=portrait?[[width*.66,height*.08],[width*.96,height*.08],[width*1.16,height*.45],[width*.70,height*.45]]:compact?[[width*.38,height*.30],[width*.48,height*.30],[width*.51,height*.93],[width*.32,height*.93]]:[[width*.70,height*.39],[width*.91,height*.39],[width*1.08,height*.94],[width*.52,height*.94]];
+  const polygon=(offset=0)=>{ctx.beginPath();platform.forEach(([x,y],i)=>i?ctx.lineTo(x,y+offset):ctx.moveTo(x,y+offset));ctx.closePath();};
+  polygon(18);ctx.fillStyle='#070a10';ctx.fill();
+  ctx.save();polygon();ctx.clip();
+  const floorLeft=Math.min(...platform.map(point=>point[0])),floorTop=Math.min(...platform.map(point=>point[1]));
+  tiledRegion(ctx,'floor',256,208,16,16,floorLeft,floorTop,Math.max(...platform.map(point=>point[0]))-floorLeft,height*.94-floorTop,portrait||compact?32:48);
+  ctx.fillStyle='rgba(5,14,24,.51)';ctx.fillRect(0,0,width,height);
+  const line=portrait?width*.80:compact?width*.40:width*.76;
+  ctx.globalAlpha=.21;
+  tiledRegion(ctx,'floor',272,224,16,16,line,height*.35,portrait||compact?42:64,height*.61,32);
+  ctx.globalAlpha=.20;const emblem=portrait||compact?78:Math.min(185,height*.27);
+  sprite(ctx,'floor',240,96,64,64,px-emblem/2,py-emblem*.06,emblem,emblem*.64);
+  ctx.restore();
+  ctx.strokeStyle='rgba(128,149,156,.17)';ctx.lineWidth=2;polygon();ctx.stroke();
+  if(!portrait&&!compact) {
+    for(const [x,y,size] of [[.635,.67,55],[.94,.63,70],[.585,.84,78],[.97,.84,96]]) {
+      ctx.globalAlpha=.40;sprite(ctx,'ruins',16,48,16,48,width*x,height*y-size*.8,size*.36,size);ctx.globalAlpha=1;
+    }
+  }
+  // A broad quiet area is reserved for the real HTML title, actions and guide.
+  const veil=ctx.createLinearGradient(0,0,width,0);
+  veil.addColorStop(0,'rgba(8,14,22,.99)');veil.addColorStop(portrait?.57:compact?.29:.43,'rgba(8,14,22,.96)');veil.addColorStop(portrait?.84:compact?.39:.66,'rgba(8,14,22,.12)');veil.addColorStop(1,'rgba(8,14,22,0)');
+  ctx.fillStyle=veil;ctx.fillRect(0,0,width,height);
+  if(portrait){const fade=ctx.createLinearGradient(0,height*.30,0,height*.58);fade.addColorStop(0,'rgba(8,14,22,0)');fade.addColorStop(1,'rgba(8,14,22,1)');ctx.fillStyle=fade;ctx.fillRect(0,height*.30,width,height*.70);}
+  titleBackdropCache={key,canvas};return canvas;
+}
+function drawTitleScene(ctx,state,width,height,reduceMotion,titleWeapon) {
+  const portrait=height>width,compact=!portrait&&height<=500,time=reduceMotion?0:state.time;
+  const palette=titleWeapon==='scatter'?['#d4b6f0','rgba(147,94,180,.14)']:titleWeapon==='needle'?['#a2e9df','rgba(70,163,168,.15)']:['#f1b489','rgba(231,120,58,.15)'];
+  ctx.drawImage(makeTitleBackdrop(width,height),0,0);
+  const bossX=width*(portrait?.86:compact?.43:.80),bossY=height*(portrait?.17:compact?.47:.47),playerX=width*(portrait?.85:compact?.36:.69),playerY=height*(portrait?.32:compact?.81:.81);
+  const bossSize=portrait?Math.min(110,width*.27):compact?Math.min(94,width*.11,height*.25):Math.min(300,height*.39,width*.25),playerSize=portrait?48:compact?42:Math.max(48,Math.min(96,height*.14));
+  const portalY=bossY-bossSize*.43,ringR=bossSize*.45;
+  ctx.save();if(portrait)ctx.globalAlpha=.95;else if(compact)ctx.globalAlpha=.78;
+  halo(ctx,bossX,portalY,ringR*2,'rgba(128,130,218,.15)');
+  for(let i=0;i<2;i++) {
+    const angle=time*.095*(i?-1:1)+i*1.1;
+    ctx.strokeStyle=i?'rgba(116,160,168,.30)':'rgba(171,162,212,.34)';ctx.lineWidth=portrait?1:1.5;
+    ctx.beginPath();ctx.ellipse(bossX,portalY,ringR*(1+i*.16),ringR*(1.20+i*.18),0,angle,angle+Math.PI*1.54);ctx.stroke();
+  }
+  const orbitAngle=time*.13+.4;
+  for(let i=0;i<3;i++){const a=orbitAngle+i*Math.PI*2/3;strip(ctx,'energyBig',24,4,reduceMotion?1:time*4+i,bossX+Math.cos(a)*ringR*1.12,portalY+Math.sin(a)*ringR*1.30,portrait?12:21);}
+  shadow(ctx,bossX,bossY+bossSize*.12,bossSize*.37,bossSize*.13,.56);
+  const bob=reduceMotion?0:Math.sin(time*.8)*Math.min(3,bossSize*.018);
+  drawBoss(ctx,{type:'warden',x:bossX,y:bossY+bob,r:29,phase:'chase'},time,bossSize,reduceMotion);
+  halo(ctx,playerX,playerY-14,playerSize*1.12,palette[1]);
+  shadow(ctx,playerX,playerY+playerSize*.22,playerSize*.32,playerSize*.09,.6);
+  actor(ctx,'playerIdle',{x:playerX,y:playerY,angle:Math.atan2(bossY-playerY,bossX-playerX)},time,playerSize,false,true);
+  const staffAngle=Math.atan2(bossY-playerY,bossX-playerX);
+  ctx.save();ctx.translate(playerX+playerSize*.19,playerY-playerSize*.19);ctx.rotate(staffAngle+Math.PI/2);whole(ctx,'staff',-playerSize*.06,-playerSize*.28,playerSize*.12,playerSize*.38);ctx.restore();
+  // Slow, spaced projectiles establish the duel without flashing or rapid fire.
+  const count=titleWeapon==='scatter'?3:2;
+  for(let i=0;i<count;i++) {
+    const progress=((time*.085+i/count+.12)%1),spread=titleWeapon==='scatter'?(i-1)*.15:0;
+    const x=playerX+(bossX-playerX)*progress+Math.sin(progress*Math.PI)*(14+spread*100),y=playerY-30+(bossY-playerY)*progress;
+    ctx.globalAlpha=(portrait?.80:compact?.62:1)*Math.sin(progress*Math.PI)*.78;
+    strip(ctx,titleWeapon==='cinder'?'fireball':'energy',16,4,reduceMotion?1:time*5+i,x,y,titleWeapon==='needle'?20:portrait?12:18);
+  }
+  ctx.globalAlpha=portrait?.48:.65;
+  // Fixed deterministic particles, independent of RNG and bounded to 24/12.
+  const particles=portrait?12:compact?8:24;
+  for(let i=0;i<particles;i++) {
+    const phase=((i*.6180339887+time*.018)%1),drift=Math.sin(i*2.31+time*.16)*9;
+    const x=width*(portrait?.72:compact?.33:.56)+(i*73%100)/100*width*(portrait?.26:compact?.16:.39)+drift,y=height*(portrait?.40:.92)-phase*height*(portrait?.36:.69);
+    ctx.fillStyle=i%4===0?'#9baec0':palette[0];ctx.globalAlpha=(portrait?.32:.48)*(1-Math.abs(phase-.5)*1.4);
+    const size=i%5===0?3:2;ctx.fillRect(Math.round(x),Math.round(y),size,size);
+  }
+  ctx.restore();
+}
+
+export function render(ctx, state, { width, height, dpr = 1, reduceMotion = false, title = false, titleWeapon = 'cinder' } = {}) {
   if (!state || !ctx) return;
   width ||= state.width; height ||= state.height;
-  // Promotional title tableau uses only original sprites. It is a render-only
-  // composition, not a fake live encounter or mutation of the dormant run.
-  const titleTableau = title && width >= height;
-  if (titleTableau) {
-    const scale = width / state.width;
-    state = { ...state,
-      player: { ...state.player, x: state.width * .76, y: state.height * .73, r: (Math.round(96 / scale / 16) * 16) / 2.7, angle: -1.36, vx: 0, vy: 0, fireCooldown: 1, invuln: 0 },
-      enemies: [{ id: 'title-warden', type: 'warden', x: state.width * .80, y: state.height * .38, r: 260 / scale / 2.7, hp: 1, maxHp: 1, angle: 1.6, phase: 'chase', decorative: true }],
-      bullets: [], effects: [], pickups: [],
-    };
-  }
   ctx.save(); ctx.imageSmoothingEnabled = false;
   ctx.fillStyle = '#111019'; ctx.fillRect(0, 0, width, height);
   if (!assetStatus.ready) { ctx.restore(); return; }
+  if(title){drawTitleScene(ctx,state,width,height,reduceMotion,titleWeapon);ctx.restore();return;}
   ctx.scale(width / state.width, height / state.height);
   if (!reduceMotion && !title && state.shake > 0) {
     const n = Math.min(4, state.shake * 5); ctx.translate(Math.sin(state.time * 73) * n, Math.cos(state.time * 91) * n);
   }
   ctx.drawImage(makeBackdrop(state), 0, 0);
-  if (titleTableau) {
-    halo(ctx, state.width * .80, state.height * .40, 210, 'rgba(119,101,197,.22)');
-    halo(ctx, state.player.x, state.player.y, 150, 'rgba(255,152,78,.22)');
-    ctx.strokeStyle = 'rgba(143,180,194,.30)'; ctx.lineWidth = 2;
-    for (const radius of [78, 95]) { ctx.beginPath(); ctx.ellipse(state.width * .80, state.height * .46, radius, radius * .35, 0, 0, Math.PI * 2); ctx.stroke(); }
-    for (let i = 0; i < 3; i += 1) {
-      const x = state.player.x + i * 15, y = state.player.y - 100 - i * 64;
-      strip(ctx, 'fireball', 16, 4, reduceMotion ? 1 : state.time * 8 + i, x, y, 27);
-    }
-    strip(ctx, 'energyBig', 24, 4, reduceMotion ? 1 : state.time * 7, state.width * .91, state.height * .48, 38);
-    strip(ctx, 'energyBig', 24, 4, reduceMotion ? 1 : state.time * 7 + 2, state.width * .67, state.height * .41, 32);
-  }
   for (const x of [Math.min(124, state.width * .22), state.width - Math.min(124, state.width * .22)]) {
     const frame = reduceMotion ? 2 : 2 + Math.floor(state.time * 7 + x) % 3;
     sprite(ctx, 'flame', frame * 25, 0, 25, 30, x - 15, 19, 30, 36);

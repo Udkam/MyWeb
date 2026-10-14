@@ -8,6 +8,7 @@
     <title>Cinder Below</title>
     <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./home.css" />
   </head>
   <body>
     <main id="game" aria-label="Cinder Below 游戏" data-i18n-aria-label="Cinder Below game">
@@ -28,22 +29,35 @@
       </header>
       <section id="title-screen" class="screen title-screen" aria-labelledby="game-title">
         <div class="title-content">
-          <div class="eyebrow"><span class="eyebrow-rule" aria-hidden="true"></span><span data-i18n="A SHORT DESCENT INTO CHAOS">潜入地牢，点燃混乱</span></div>
-          <h1 id="game-title">CINDER<br /><span>BELOW</span></h1>
-          <p class="title-copy"><span data-i18n="Five acts. A different descent.">五段深渊，每轮不同。</span><br /><span data-i18n="Make it out. Come back different.">闯出去，再带着新打法归来。</span></p>
-          <div class="loadout-label"><span data-i18n="STARTING WEAPON">初始武器</span><span id="unlocks-caption"></span></div>
-          <div id="weapon-options" class="weapon-options" aria-label="初始武器" data-i18n-aria-label="Starting weapon"></div>
-          <button id="play" class="primary-button" disabled><span data-i18n="Preparing the vault…">正在准备地牢…</span><span aria-hidden="true">↗</span></button>
-          <button id="resume-run" class="secondary-button" hidden><span data-i18n="Continue descent">继续下潜</span><span aria-hidden="true">↗</span></button>
-          <p id="load-message" role="status" data-i18n="Loading the dungeon.">正在加载地牢。</p>
-          <div class="title-stats" id="title-stats"></div>
+          <div class="title-heading">
+            <div class="eyebrow"><span class="eyebrow-rule" aria-hidden="true"></span><span data-i18n="PIXEL ACTION · FIVE RANDOMIZED ACTS">像素动作 · 五段随机冒险</span></div>
+            <h1 id="game-title">CINDER<br /><span>BELOW</span></h1>
+            <p class="title-copy" data-i18n="Clear rooms. Stack relics. Descend with a different build.">清房、叠遗物，带着新打法闯过深渊。</p>
+          </div>
+          <div class="title-play">
+            <div class="loadout-label"><span data-i18n="CHOOSE YOUR FIRST SPARK">选择你的初始火种</span><span id="unlocks-caption"></span></div>
+            <div id="weapon-options" class="weapon-options" aria-label="初始武器" aria-describedby="weapon-detail" data-i18n-aria-label="Starting weapon"></div>
+            <p id="weapon-detail"></p>
+            <div class="title-actions">
+              <button id="resume-run" class="primary-button" hidden><span data-i18n="Continue descent">继续下潜</span><span aria-hidden="true">↗</span></button>
+              <button id="play" class="primary-button" disabled><span data-i18n="Preparing the vault…">正在准备地牢…</span><span aria-hidden="true">↗</span></button>
+            </div>
+            <p id="load-message" role="status" data-i18n="Loading the dungeon.">正在加载地牢。</p>
+            <div class="home-loop" aria-label="三步了解玩法" data-i18n-aria-label="The three-step game loop">
+              <div><b aria-hidden="true">01</b><strong data-i18n="Move & shoot">移动射击</strong><span class="desktop-hint" data-i18n="WASD + hold mouse">WASD＋按住鼠标</span><span class="touch-hint" data-i18n="Left move · right aim">左移 · 右瞄准射击</span></div>
+              <div><b aria-hidden="true">02</b><strong data-i18n="Choose a relic">清房选遗物</strong><span data-i18n="Pick one. Grow stronger.">三选一，叠加变强</span></div>
+              <div><b aria-hidden="true">03</b><strong data-i18n="Take a new path">选路战首领</strong><span data-i18n="Hunt, refuge or rift.">猎途、庇所或异界</span></div>
+            </div>
+            <div class="title-stats" id="title-stats"></div>
+          </div>
         </div>
-        <div class="title-foot"><span><span data-i18n="WASD MOVE">WASD 移动</span><b>·</b><span data-i18n="MOUSE AIM / FIRE">鼠标瞄准／射击</span><b>·</b><span data-i18n="SPACE DASH">空格冲刺</span></span><button id="how-to-play" class="text-button" data-i18n="How to play">玩法说明</button><button id="credits-button" class="text-button" data-i18n="Credits">制作名单</button></div>
+        <div class="title-foot"><button id="how-to-play" class="text-button"><span class="help-key" aria-hidden="true">?</span><span data-i18n="Controls & rules">操作与规则</span></button><button id="credits-button" class="text-button" data-i18n="Credits">制作名单</button><span class="title-save-note" data-i18n="PLAY INSTANTLY · SAVED ON THIS DEVICE">即开即玩 · 本机保存</span></div>
       </section>
       <div id="combat-ui" hidden>
         <div id="room-banner" class="room-banner" aria-live="polite"></div>
         <div id="boss-hud" hidden><span id="boss-name"></span><div class="boss-track"><div id="boss-fill"></div></div></div>
         <div id="objective" class="objective"></div>
+        <aside id="first-run-guide" hidden aria-label="新手指引" data-i18n-aria-label="First-run guide"><div class="guide-copy" role="status" aria-live="polite"><span id="guide-step"></span><strong id="guide-action"></strong><p id="guide-detail"></p></div><button id="dismiss-guide" type="button" aria-label="关闭新手指引" data-i18n-aria-label="Dismiss the guide">×</button><div class="guide-progress" aria-hidden="true"><i></i><i></i><i></i></div></aside>
         <aside id="discovery-panel" hidden aria-label="房内奇遇" data-i18n-aria-label="Optional discovery"><span id="discovery-kicker"></span><strong id="discovery-title"></strong><p id="discovery-detail"></p><small id="discovery-hint"></small></aside>
         <div id="adventure-ui"><p id="quest-status" aria-live="polite"></p><button id="interact-button" type="button" hidden><kbd aria-hidden="true">Q</kbd><span id="interact-label"></span></button></div>
         <div id="build-strip" class="build-strip" aria-label="你的遗物" data-i18n-aria-label="Your relics"></div>

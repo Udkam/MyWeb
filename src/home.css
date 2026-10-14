@@ -1,0 +1,133 @@
+/* Home is an entrance to play: one action, a readable loadout, three short steps. */
+body[data-mode=title] #shade{background:linear-gradient(90deg,#0c0c15e8 0%,#10101adb 34%,#10101940 58%,#090b1208 100%)}
+#title-screen{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:22px;padding:94px 7vw 28px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+#title-screen .title-content{width:min(475px,44vw);min-height:0;padding:0;flex-shrink:0}
+#title-screen .title-heading{margin-bottom:26px}
+#title-screen .eyebrow{font-size:11px;letter-spacing:.16em;margin-bottom:18px}
+#title-screen h1{font-size:clamp(86px,8.7vw,132px);margin:0 0 21px;line-height:.88;letter-spacing:.015em;text-shadow:0 5px #432a30,0 10px 32px #0006}
+#title-screen .title-copy{font-size:15px;line-height:1.65;margin:0;max-width:420px;color:#e2d2c3}
+#title-screen .loadout-label{font-size:11px;letter-spacing:.07em;margin-bottom:10px;max-width:none}
+#title-screen .weapon-options{max-width:none;gap:9px;margin-bottom:9px}
+#title-screen .weapon-choice{font-size:13px;min-height:58px;padding:11px 12px;transition:transform .18s,border-color .18s,background .18s}
+#title-screen .weapon-choice small{font-size:10px;line-height:1.5}
+#title-screen .weapon-choice[aria-disabled=true]{opacity:.68}
+#title-screen .weapon-choice[aria-pressed=true]{background:linear-gradient(120deg,#583d31ed,#2c242bf0);border-color:#ffd4a1;box-shadow:inset 0 0 0 1px #ffc89133}
+#title-screen .weapon-choice:hover,#title-screen .weapon-choice:focus-visible{transform:translateY(-3px);border-color:#ffe3b5}
+#title-screen .weapon-choice:active{transform:translateY(1px)}
+#weapon-detail{font-size:12px;line-height:1.6;min-height:20px;margin:0 0 15px;color:#c5b8b3}
+.title-actions{display:flex;flex-direction:column;gap:9px}
+#title-screen .title-actions .primary-button{max-width:none;min-height:55px;font-size:17px;position:relative;overflow:hidden;margin:0}
+#title-screen #resume-run{background:#a8dbc2;border-color:#d2ffe7;border-bottom-color:#4c856e}
+#title-screen #resume-run:not([hidden])~#play{background:#1b1922d9;color:#e3cbb8;border:1px solid #75645c;min-height:44px;font-size:13px;box-shadow:none}
+.title-actions .primary-button span:last-child{transition:transform .25s}
+.title-actions .primary-button:hover span:last-child{transform:translate(3px,-3px)}
+#title-screen #load-message{max-width:none;font-size:11px;line-height:1.6;margin:9px 0 15px;color:#b5aba8}
+.home-loop{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;border-top:1px solid #caab8338;padding-top:15px}
+.home-loop>div{position:relative;display:flex;flex-direction:column;gap:4px}
+.home-loop>div+div{padding-left:12px;border-left:1px solid #caab8326}
+.home-loop b{font-size:10px;font-weight:500;color:#ca976c;letter-spacing:.15em;margin-bottom:3px}
+.home-loop strong{font-size:13px;font-weight:650;color:#efdfcc}
+.home-loop span{font-size:10px;line-height:1.55;color:#b8aaaa}
+.touch-hint{display:none}
+#title-screen .title-stats{margin-top:18px;font-size:10px;gap:26px}
+#title-screen .title-stats strong{font-size:17px;margin-bottom:3px}
+#title-screen .title-foot{position:static;display:flex;justify-content:flex-start;gap:23px;flex-shrink:0;width:100%;margin:0;font-size:10px}
+#title-screen .title-foot .text-button{font-size:12px;min-height:44px;padding:8px 0;display:flex;align-items:center;gap:7px}
+.help-key{display:grid;place-items:center;width:18px;height:18px;border:1px solid #ac8e7290;font-size:12px;color:#efc49b}
+#title-screen .title-save-note{margin:0 0 0 auto;letter-spacing:.12em;color:#a79996;display:block}
+body[data-mode=title] #language-toggle{position:relative;inset:auto}
+body[data-mode=title] .icon-button{min-width:44px;min-height:44px}
+
+/* A short, nonblocking first-room guide, driven by actual player actions. */
+#first-run-guide{pointer-events:none;position:absolute;top:112px;left:28px;width:270px;max-width:calc(100vw - 28px);padding:13px 42px 16px 15px;border:1px solid #dda77996;border-left:3px solid #ffc688;border-radius:4px;background:#151821f2;box-shadow:0 8px 26px #0005}
+#guide-step{display:block;font-size:10px;letter-spacing:.12em;color:#dbac82;margin-bottom:5px}
+#guide-action{display:block;font-size:17px;line-height:1.4;color:#fff0d8}
+#guide-detail{font-size:12px;line-height:1.6;margin:4px 0 0;color:#ccc1b9}
+#dismiss-guide{pointer-events:auto;position:absolute;right:0;top:0;width:44px;height:44px;background:transparent;color:#d0bcac;font-size:24px}
+.guide-progress{display:flex;gap:5px;position:absolute;bottom:0;left:0;right:0;height:3px}
+.guide-progress i{flex:1;background:#5c493c}
+.guide-progress i[data-done=true]{background:#a8e0c6}
+.guide-progress i[data-current=true]{background:#ffc688}
+#combat-ui:has(#first-run-guide:not([hidden])) #objective{display:none}
+
+@keyframes home-reveal{from{opacity:0;transform:translateY(13px)}to{opacity:1;transform:translateY(0)}}
+@keyframes ember-sheen{0%,75%{transform:translateX(-150%);opacity:0}80%{opacity:.4}100%{transform:translateX(200%);opacity:0}}
+@keyframes guide-arrive{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+@keyframes mode-arrive{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+#title-screen:not([hidden]) .title-heading{animation:home-reveal .5s both}
+#title-screen:not([hidden]) .title-play{animation:home-reveal .5s .09s both}
+#title-screen:not([hidden]) .title-foot{animation:home-reveal .4s .18s both}
+.title-actions .primary-button:not(:disabled):first-child::after,.title-actions #resume-run[hidden]+#play:not(:disabled)::after{content:'';pointer-events:none;position:absolute;inset:0;width:60%;background:linear-gradient(110deg,transparent,#fff1cd9c,transparent);animation:ember-sheen 7s 2s infinite}
+#first-run-guide:not([hidden]){animation:guide-arrive .24s both}
+.guide-copy[data-enter=true]{animation:guide-arrive .2s both}
+#reward-screen:not([hidden]) .relic-card{animation:mode-arrive .3s both}
+#reward-screen:not([hidden]) .relic-card:nth-child(2){animation-delay:.06s}
+#reward-screen:not([hidden]) .relic-card:nth-child(3){animation-delay:.12s}
+dialog[open]{animation:mode-arrive .2s both}
+#end-screen:not([hidden]) .end-content{animation:mode-arrive .35s both}
+
+@media(max-width:800px){
+  #title-screen{padding:86px 22px 20px;gap:16px;justify-content:flex-start}
+  #title-screen .title-content{width:min(460px,100%);align-self:center}
+  #title-screen .title-heading{margin-bottom:21px}
+  #title-screen h1{font-size:clamp(70px,17.5vw,116px);margin-bottom:18px}
+  #title-screen .eyebrow{font-size:10px;letter-spacing:.1em;margin-bottom:15px}
+  #title-screen .title-copy{font-size:13px;max-width:300px}
+  #title-screen .weapon-choice{font-size:12px;min-height:54px;padding:10px 9px}
+  #title-screen .loadout-label{font-size:10px}
+  #weapon-detail{font-size:11px;margin-bottom:12px;min-height:18px}
+  #title-screen .title-actions .primary-button{min-height:52px;font-size:16px}
+  .home-loop{gap:7px;padding-top:12px}
+  .home-loop>div+div{padding-left:7px}
+  .home-loop strong{font-size:12px}.home-loop span{font-size:10px}
+  #title-screen #load-message{font-size:10px;margin-bottom:12px}
+  #title-screen .title-foot{max-width:460px;align-self:center;gap:24px}
+  #title-screen .title-save-note{display:none}
+  body[data-mode=title] #shade{background:linear-gradient(90deg,#0c0c15ed,#10101aa8 65%,#10101922),linear-gradient(0deg,#111019fa 30%,transparent 74%)}
+  #first-run-guide{top:112px;left:14px;width:250px;padding:10px 40px 13px 12px}
+  #guide-action{font-size:15px}#guide-detail{font-size:12px}
+}
+@media(pointer:coarse){.home-loop .desktop-hint{display:none}.home-loop .touch-hint{display:block}}
+@media(min-width:801px) and (max-height:800px){
+  #title-screen{padding-top:79px;gap:10px}
+  #title-screen .title-heading{margin-bottom:18px}
+  #title-screen h1{font-size:clamp(72px,7vw,108px);margin-bottom:16px}
+  #title-screen .eyebrow{margin-bottom:12px}
+  #title-screen .title-copy{font-size:13px}
+  #title-screen .weapon-choice{min-height:48px}
+  #title-screen .title-stats{display:none}
+}
+@media(max-width:800px) and (max-height:700px){
+  #title-screen{padding-top:76px;gap:8px}
+  #title-screen h1{font-size:66px;margin-bottom:13px}
+  #title-screen .title-heading{margin-bottom:17px}
+  #title-screen .eyebrow{font-size:9px;margin-bottom:11px}
+  #title-screen .title-copy{font-size:12px}
+  #title-screen .title-stats{display:none}
+  .home-loop{padding-top:10px}
+}
+@media(min-width:701px) and (max-height:500px){
+  body[data-mode=title] #shade{background:linear-gradient(90deg,#0c0c15cb 26%,#10101a65 37%,#10101a65 45%,#101019e8 51%)}
+  #title-screen{padding:75px 5vw 14px;gap:10px;justify-content:flex-start}
+  #title-screen .title-content{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1fr);column-gap:6vw;width:100%;align-self:stretch;padding:0;min-height:0}
+  #title-screen .title-heading{margin:0}
+  #title-screen h1{font-size:clamp(64px,9vw,88px);margin-bottom:13px}
+  #title-screen .title-copy{font-size:12px;max-width:290px}
+  #title-screen .eyebrow{font-size:9px;margin-bottom:12px}
+  #title-screen .weapon-options{margin-bottom:6px}
+  #title-screen .weapon-choice{min-height:44px;padding:7px;font-size:11px}
+  #weapon-detail{font-size:10px;margin-bottom:8px}
+  #title-screen .title-actions .primary-button{min-height:44px;font-size:14px;padding:9px 13px}
+  #title-screen .title-actions{gap:6px}
+  #title-screen #load-message{margin:6px 0 8px;font-size:10px}
+  .home-loop{padding-top:8px;gap:8px}
+  .home-loop b,.home-loop span{display:none}
+  .home-loop strong{font-size:11px}
+  #title-screen .title-foot{width:100%;max-width:none;gap:22px}
+  #title-screen .title-stats{display:none}
+  #first-run-guide{top:82px;left:14px;width:230px}
+  #guide-action{font-size:14px}
+}
+/* User and OS preferences both disable CSS and Canvas decoration. */
+body[data-reduce-motion=true] *,body[data-reduce-motion=true] *::before,body[data-reduce-motion=true] *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+body[data-paused=true] #title-screen *,body[data-paused=true] #title-screen *::after,body[data-page-hidden=true] *,body[data-page-hidden=true] *::before,body[data-page-hidden=true] *::after{animation-play-state:paused!important}

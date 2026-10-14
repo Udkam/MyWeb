@@ -27,6 +27,8 @@ The interface defaults to Simplified Chinese while the game title stays **Cinder
 
 Phones have two independent sticks and separate Dash / Nova buttons. The game fills the browser viewport even where the Fullscreen API is unavailable. Portrait and landscape are supported; small screens can use landscape for more horizontal aiming space.
 
+首页以独立像素舞台展示主角与首领，武器选择会更新说明和展示弹幕；有存档时优先显示“继续”，新局按钮独立保留。三步短指引介绍移动射击、清房选遗物、选择路线。首次冒险提供可关闭的移动／射击／冲刺提示，根据真实动作推进；继续存档不会重复教学。首页、遗物和菜单采用短入场动效，暂停或后台时停止标题绘制；系统或设置中的“减少特效”同时停用 CSS 与 Canvas 装饰动画。
+
 第一房用单波介绍操作，后续普通房有两波遭遇。每段两场普通战斗后，从该段两位首领中随机选一位；首领拥有独立招式循环和阶段机制。十二种碰撞布局采用种子洗牌并组合镜像，包含错层回廊、双庭院、环行裂隙与断桥。五段环境及异界采用不同铺层、遗迹、边缘和光色；普通攻击只用敌人自身蓄力动作提示，落石／落雷才显示圆形落点。
 
 每次清房获得三选一遗物：分裂、弹射、穿透、追踪、连锁、灼烧、减速、爆炸、环刃、冲刺火迹、星爆和生命换伤害可叠加组合。救援旅人、三灯谜题、供奉、破墙宝箱和无伤幽灵均为可跳过的探索；详情放在暂停菜单“怪物与奇遇”。
@@ -62,6 +64,7 @@ python tests/browser-storage-check.py
 python tests/browser-combat-check.py
 python tests/browser-language-check.py http://127.0.0.1:4328/src/?test=1
 python tests/browser-adventure-check.py
+python tests/browser_home.py
 ```
 
 测试使用 `?test=1` 与确定性 `advanceTime(ms)` 钩子。正常战斗通关测试只使用真实键鼠，不修改血量、敌人或世界。支线专用测试会明确标注房间入口存档夹具，与无作弊通关记录分别保存。`render_game_to_text()` 提供只读状态，不能据此把测试钩子称为自动游玩功能。
