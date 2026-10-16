@@ -15,7 +15,7 @@ import zipfile
 from PIL import Image
 from playwright.sync_api import sync_playwright, expect
 
-ROOT = Path(__file__).resolve().parent.parent / ".qa" / "io-acceptance"
+ROOT = Path(os.environ.get("SPRITELAB_TEST_OUTPUT", str(Path(__file__).resolve().parent.parent / ".qa" / "io-acceptance"))).resolve()
 ROOT.mkdir(parents=True, exist_ok=True)
 BASE = os.environ.get("SPRITELAB_TEST_URL", "http://127.0.0.1:4392").rstrip("/")
 checks = []
@@ -219,6 +219,6 @@ with sync_playwright() as p:
     check("no uncaught browser page errors",not errors)
     ui.close();browser.close()
 
-report={"time":datetime.now(timezone.utc).isoformat(),"browser":"Chromium via Python Playwright","checks":checks,"count":len(checks),"errors":errors,"independentDecoders":["Pillow 12.2.0","Python zipfile"],"sourceLimitations":["16-bit PNG samples reduce to their high eight bits","PNG color-profile chunks do not alter stored samples","Fully transparent samples normalize to packed integer 0"]}
+report={"time":datetime.now(timezone.utc).isoformat(),"baseURL":BASE,"browser":"Chromium via Python Playwright","checks":checks,"count":len(checks),"errors":errors,"independentDecoders":["Pillow 12.2.0","Python zipfile"],"sourceLimitations":["16-bit PNG samples reduce to their high eight bits","PNG color-profile chunks do not alter stored samples","Fully transparent samples normalize to packed integer 0"]}
 (ROOT/"results.json").write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
 print(json.dumps({"passed":len(checks),"errors":errors,"evidence":str(ROOT/"results.json")},ensure_ascii=False))

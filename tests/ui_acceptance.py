@@ -1,6 +1,6 @@
 """Real Chromium UI acceptance. No app-state hooks or synthetic DOM events.
 
-Run: python tests/ui_acceptance.py [--url http://127.0.0.1:4392/]
+Run: python tests/ui_acceptance.py [--url http://127.0.0.1:4392/] [--output .qa]
 Without --url, requests use an immutable local snapshot to avoid relying on
 localhost networking. With --url, Chromium reads the actual running server.
 Edits use pointer/keyboard/touch input; assertions read the files downloaded
@@ -22,8 +22,6 @@ from playwright.sync_api import sync_playwright, expect
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / '.qa'
 DOWNLOADS = OUT / 'ui-downloads'
-OUT.mkdir(exist_ok=True)
-DOWNLOADS.mkdir(exist_ok=True)
 SOURCE = {p.relative_to(ROOT / 'src').as_posix(): p.read_bytes()
           for p in (ROOT / 'src').rglob('*') if p.is_file()}
 RESULTS = []
@@ -376,10 +374,16 @@ def mobile_controls(ui):
 
 
 def main():
-    global BASE_URL
+    global BASE_URL, OUT, DOWNLOADS
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--url', help='Use an actual running server instead of local-source route fulfillment.')
-    BASE_URL = parser.parse_args().url
+    parser.add_argument('--output', default='.qa', help='Output directory relative to the project root, or an absolute path.')
+    options = parser.parse_args()
+    BASE_URL = options.url
+    OUT = (ROOT / options.output).resolve()
+    DOWNLOADS = OUT / 'ui-downloads'
+    OUT.mkdir(parents=True, exist_ok=True)
+    DOWNLOADS.mkdir(exist_ok=True)
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True, args=['--no-proxy-server'])
         for width in [1440, 390, 320]:
@@ -399,6 +403,7 @@ def main():
         browser.close()
     report = {'timeUTC': datetime.now(timezone.utc).isoformat(),
               'method': f'Chromium; {BASE_URL or "immutable local-source route fixture"}; real mouse/keyboard and CDP touch input; UI download assertions; no internal app state hooks.',
+              'sourceHashScope': 'Local staging source snapshot. Production response hashes are independently verified outside this UI test.',
               'sourceSHA256': {key: hashlib.sha256(value).hexdigest() for key, value in SOURCE.items() if key.endswith(('.js', '.css', '.html'))},
               'results': RESULTS}
     (OUT / 'ui-acceptance.json').write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')

@@ -2,6 +2,8 @@
 
 直接在浏览器里亲手画角色、逐帧调动作，再用小舞台试跑。中文界面，无需登录。适用于小型游戏角色、像素动画练习和可导出的创作草稿。
 
+公开使用：[SpriteLab](https://foreseer.site/spritelab/)。2026-10-16 已完成匿名生产验收；平台为 Vercel，运行资源全部同源托管。
+
 ## 开发
 
 独立源码目录：`E:\Proj\Active\MyWeb\spritelab`。运行文件全部位于 `src`，没有在线 CDN、后端服务、用户文件上传或额外账户。
@@ -37,7 +39,7 @@ PNG 输入最多 16MiB、单边 8192、总像素 2,097,152。支持灰度、调�
 
 ## 发布
 
-平台：Vercel，复用 4c 已有项目的 `/spritelab/`。实际生产验收完成后记录在 `docs/ACCEPTANCE.md`；未经验证不加入 MyWeb。
+平台：Vercel，复用 4c 已有项目的 `/spritelab/`。生产验收结果记录在 `docs/ACCEPTANCE.md`；公开入口已通过资源哈希和真实浏览器文件往返检查。
 
 ```sh
 # 在本独立目录提交已经验收的源文件，然后在 personal-web 执行：
