@@ -1,0 +1,720 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#f4f2eb" />
+    <meta
+      name="description"
+      content="SpriteLab 像素动作工坊。亲手画角色、编辑逐帧动画，在小舞台试跑，导出透明精灵图。免费、无需登录，作品保存在本机。"
+    />
+    <title>SpriteLab · 像素动作工坊</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./styles.css" />
+    <script type="module" src="./app.js"></script>
+  </head>
+  <body>
+    <a class="skip" href="#workspace">跳到画布</a>
+    <header class="masthead">
+      <a class="brand" href="./" aria-label="SpriteLab 首页"
+        ><span class="brand-mark" aria-hidden="true">▞</span>
+        <h1>Sprite<span>Lab</span></h1>
+        <span class="brand-caption">像素动作工坊</span></a
+      >
+      <div class="header-actions">
+        <button id="help-button" class="quiet">
+          <span data-icon="help"></span><span>使用指南</span></button
+        ><a class="back-link" href="https://foreseer.site/myweb/"
+          >MyWeb <span aria-hidden="true">↗</span></a
+        >
+      </div>
+    </header>
+    <main>
+      <section class="project-bar" aria-label="项目操作">
+        <div class="project-identity">
+          <span class="eyebrow">YOUR LITTLE WORLD</span
+          ><input
+            id="project-name"
+            aria-label="作品名称"
+            maxlength="128"
+            value="正在打开作品…"
+          /><span id="project-meta" class="mono">32 × 32</span>
+        </div>
+        <div class="project-actions">
+          <button id="new-button"><span data-icon="plus"></span>新建</button
+          ><button id="import-button">
+            <span data-icon="import"></span>导入</button
+          ><button id="save-project">
+            <span data-icon="save"></span><span>保存项目</span></button
+          ><button id="export-button" class="primary">
+            <span data-icon="export"></span>导出作品
+          </button>
+        </div>
+      </section>
+      <div class="welcome-strip" id="welcome-strip">
+        <span class="welcome-dot" aria-hidden="true"></span
+        ><span
+          ><strong>一格像素，一个小世界。</strong>
+          在画布上改一笔，再去右边看看它动起来。</span
+        ><button id="dismiss-welcome" aria-label="收起入门提示">×</button>
+      </div>
+      <div class="studio" id="workspace">
+        <aside class="tools-panel" aria-label="绘画工具">
+          <div class="section-kicker">TOOLS</div>
+          <div class="tool-grid" id="tools">
+            <button
+              data-tool="pencil"
+              title="画笔 B"
+              aria-label="画笔 B"
+              aria-pressed="true"
+            >
+              <span data-icon="pencil"></span><span>画笔</span><kbd>B</kbd>
+            </button>
+            <button
+              data-tool="eraser"
+              title="橡皮 E"
+              aria-label="橡皮 E"
+              aria-pressed="false"
+            >
+              <span data-icon="eraser"></span><span>橡皮</span><kbd>E</kbd>
+            </button>
+            <button
+              data-tool="fill"
+              title="填充 G"
+              aria-label="填充 G"
+              aria-pressed="false"
+            >
+              <span data-icon="fill"></span><span>填充</span><kbd>G</kbd>
+            </button>
+            <button
+              data-tool="picker"
+              title="取色 I · Alt 临时取色"
+              aria-label="取色 I"
+              aria-pressed="false"
+            >
+              <span data-icon="picker"></span><span>取色</span><kbd>I</kbd>
+            </button>
+            <button
+              data-tool="line"
+              title="直线 L"
+              aria-label="直线 L"
+              aria-pressed="false"
+            >
+              <span data-icon="line"></span><span>直线</span><kbd>L</kbd>
+            </button>
+            <button
+              data-tool="rect"
+              title="矩形 R"
+              aria-label="矩形 R"
+              aria-pressed="false"
+            >
+              <span data-icon="rect"></span><span>矩形</span><kbd>R</kbd>
+            </button>
+            <button
+              data-tool="select"
+              title="框选 M"
+              aria-label="框选 M"
+              aria-pressed="false"
+            >
+              <span data-icon="select"></span><span>选区</span><kbd>M</kbd>
+            </button>
+            <button
+              data-tool="move"
+              title="移动 V"
+              aria-label="移动 V"
+              aria-pressed="false"
+            >
+              <span data-icon="move"></span><span>移动</span><kbd>V</kbd>
+            </button>
+          </div>
+          <label class="brush-control"
+            >笔刷 <output id="brush-label">1 px</output
+            ><input
+              id="brush-size"
+              type="range"
+              min="1"
+              max="8"
+              value="1"
+              aria-label="笔刷大小"
+          /></label>
+          <button
+            id="mirror-button"
+            class="toggle-control"
+            aria-pressed="false"
+          >
+            <span data-icon="mirror"></span>左右对称
+          </button>
+          <div class="palette-section">
+            <div class="section-kicker">PALETTE <span>调色板</span></div>
+            <div id="palette" class="palette"></div>
+            <div class="custom-color">
+              <input
+                id="color-picker"
+                type="color"
+                value="#e78a51"
+                aria-label="自定义颜色"
+              /><input
+                id="color-hex"
+                aria-label="颜色十六进制"
+                value="#e78a51"
+                maxlength="9"
+                spellcheck="false"
+              />
+            </div>
+            <label class="opacity-label"
+              >不透明度 <output id="alpha-label">100%</output
+              ><input
+                id="color-alpha"
+                type="range"
+                min="0"
+                max="255"
+                value="255"
+                aria-label="画笔不透明度"
+            /></label>
+          </div>
+          <div class="tool-footnote">Alt 取色<br />Ctrl / ⌘ Z 撤销</div>
+        </aside>
+        <section class="editor-panel" aria-label="像素编辑器">
+          <div class="editor-toolbar">
+            <div class="toolbar-group">
+              <button
+                id="undo"
+                class="icon-button"
+                title="撤销 Ctrl / ⌘ Z"
+                aria-label="撤销"
+                disabled
+              >
+                <span data-icon="undo"></span></button
+              ><button
+                id="redo"
+                class="icon-button"
+                title="重做 Ctrl / ⌘ Shift Z"
+                aria-label="重做"
+                disabled
+              >
+                <span data-icon="redo"></span></button
+              ><span class="divider"></span
+              ><button
+                id="flip-x"
+                class="icon-button"
+                title="水平翻转当前层或选区"
+                aria-label="水平翻转"
+              >
+                <span data-icon="flip"></span></button
+              ><button
+                id="clear-frame"
+                class="icon-button"
+                title="清空当前层的这一帧（可撤销）"
+                aria-label="清空当前层这一帧"
+              >
+                <span data-icon="trash"></span>
+              </button>
+            </div>
+            <div class="toolbar-group">
+              <button
+                id="onion-toggle"
+                aria-pressed="true"
+                title="显示前后帧的半透明轮廓"
+              >
+                <span data-icon="onion"></span><span>洋葱皮</span></button
+              ><button
+                id="grid-toggle"
+                class="icon-button"
+                aria-label="像素网格"
+                aria-pressed="true"
+                title="像素网格"
+              >
+                <span data-icon="grid"></span>
+              </button>
+            </div>
+          </div>
+          <div class="board-shell" id="board-shell">
+            <div class="board-wrap">
+              <canvas
+                id="pixel-canvas"
+                width="512"
+                height="512"
+                aria-label="像素画布，可用鼠标或触控绘制"
+                >浏览器需支持 Canvas。你也可以在支持 Canvas
+                的现代浏览器中打开此站。</canvas
+              >
+            </div>
+          </div>
+          <div class="canvas-status">
+            <span id="cursor-info" class="mono">X — · Y —</span
+            ><span id="canvas-info">32 × 32 · 第 1 帧</span>
+            <div class="zoom-controls">
+              <button id="zoom-out" aria-label="缩小画布">−</button
+              ><span id="zoom-label" class="mono">1600%</span
+              ><button id="zoom-in" aria-label="放大画布">+</button
+              ><button id="zoom-fit">适应</button
+              ><button id="resize-button" title="调整全部帧的画布尺寸">
+                尺寸
+              </button>
+            </div>
+          </div>
+        </section>
+        <aside class="inspector" aria-label="动画预览与图层">
+          <section class="preview-panel">
+            <div class="panel-heading">
+              <h2>让它动起来</h2>
+              <span class="live-label"><i></i> LIVE</span>
+            </div>
+            <div class="stage-tabs" role="group" aria-label="预览方式">
+              <button id="mode-preview" aria-pressed="true">循环预览</button
+              ><button id="mode-run" aria-pressed="false">小舞台试跑</button>
+            </div>
+            <div class="stage-wrap">
+              <canvas
+                id="stage-canvas"
+                width="640"
+                height="360"
+                aria-label="当前动作预览舞台"
+              ></canvas
+              ><span class="stage-corner" id="stage-frame">01 / 04</span>
+            </div>
+            <div class="playback-controls">
+              <button
+                id="previous-frame"
+                class="icon-button"
+                aria-label="预览上一帧"
+              >
+                <span data-icon="previous"></span></button
+              ><button
+                id="play-toggle"
+                class="play-button"
+                aria-label="暂停预览"
+                aria-pressed="true"
+              >
+                <span data-icon="pause"></span></button
+              ><button
+                id="next-frame"
+                class="icon-button"
+                aria-label="预览下一帧"
+              >
+                <span data-icon="next"></span></button
+              ><label class="speed-label"
+                ><span class="sr-only">播放速度</span
+                ><select id="play-speed" aria-label="播放速度">
+                  <option value="0.25">0.25×</option>
+                  <option value="0.5">0.5×</option>
+                  <option value="1" selected>1× 速度</option>
+                  <option value="2">2×</option>
+                </select></label
+              >
+            </div>
+            <div id="run-controls" class="run-controls" hidden>
+              <button id="run-left" aria-label="向左移动">←</button
+              ><button id="run-jump">跳跃 <kbd>Space</kbd></button
+              ><button id="run-right" aria-label="向右移动">→</button
+              ><span>方向键 / A D 移动</span>
+            </div>
+            <div class="stage-settings">
+              <label
+                >场景<select id="stage-background">
+                  <option value="studio">纸上工作室</option>
+                  <option value="forest" selected>森林小径</option>
+                  <option value="night">月夜林间</option>
+                </select></label
+              ><label
+                >角色倍率<select id="stage-scale">
+                  <option value="2">2×</option>
+                  <option value="3">3×</option>
+                  <option value="4" selected>4×</option>
+                  <option value="6">6×</option>
+                </select></label
+              >
+            </div>
+          </section>
+          <section class="layers-panel">
+            <div class="panel-heading">
+              <h2>图层</h2>
+              <button
+                id="add-layer"
+                class="icon-button"
+                aria-label="添加图层"
+                title="最多 4 个图层"
+              >
+                <span data-icon="plus"></span>
+              </button>
+            </div>
+            <div id="layer-list" class="layer-list"></div>
+            <div class="layer-properties">
+              <input
+                id="layer-name"
+                aria-label="当前图层名称"
+                maxlength="128"
+              /><button
+                id="layer-up"
+                class="icon-button"
+                title="当前图层上移"
+                aria-label="图层上移"
+              >
+                ↑</button
+              ><button
+                id="layer-down"
+                class="icon-button"
+                title="当前图层下移"
+                aria-label="图层下移"
+              >
+                ↓</button
+              ><button
+                id="delete-layer"
+                class="icon-button"
+                title="删除当前图层（可撤销）"
+                aria-label="删除图层"
+              >
+                <span data-icon="trash"></span>
+              </button>
+            </div>
+            <label class="layer-opacity-label"
+              >图层不透明度<input
+                id="layer-opacity"
+                type="range"
+                min="0"
+                max="100"
+                value="100"
+                aria-label="图层不透明度"
+              /><output id="layer-opacity-value">100%</output></label
+            >
+          </section>
+          <section class="hint-panel">
+            <span class="section-kicker">A SMALL TIP</span>
+            <p id="context-tip">
+              先复制一帧，再改动手脚的位置。打开洋葱皮，前后动作就有了参照。
+            </p>
+          </section>
+        </aside>
+        <section class="timeline-panel" aria-label="动作与动画帧">
+          <div class="timeline-heading">
+            <div class="clip-controls">
+              <span class="section-kicker">ANIMATION</span>
+              <div id="clip-tabs" class="clip-tabs"></div>
+              <button
+                id="add-clip"
+                class="icon-button"
+                aria-label="添加动作"
+                title="添加动作"
+              >
+                <span data-icon="plus"></span>
+              </button>
+            </div>
+            <div class="frame-actions">
+              <button id="duplicate-frame" title="复制当前帧 D">
+                <span data-icon="copy"></span>复制帧</button
+              ><button id="add-frame" title="添加透明空白帧">
+                <span data-icon="plus"></span>空白帧</button
+              ><button
+                id="delete-frame"
+                class="icon-button"
+                aria-label="删除当前帧"
+                title="删除帧（至少保留一帧）"
+              >
+                <span data-icon="trash"></span>
+              </button>
+            </div>
+          </div>
+          <div
+            class="frame-strip"
+            id="frame-strip"
+            aria-label="选择动画帧"
+          ></div>
+          <div class="timeline-bottom">
+            <div class="duration-control">
+              <label for="frame-duration">当前帧停留</label
+              ><input
+                id="frame-duration"
+                type="number"
+                min="30"
+                max="2000"
+                step="10"
+                value="140"
+              /><span>ms</span
+              ><button id="apply-duration">应用到整个动作</button>
+            </div>
+            <div class="frame-order">
+              <button
+                id="frame-left"
+                title="当前帧向前移动"
+                aria-label="帧向前移"
+              >
+                ←</button
+              ><button
+                id="frame-right"
+                title="当前帧向后移动"
+                aria-label="帧向后移"
+              >
+                →</button
+              ><input
+                id="clip-name"
+                aria-label="当前动作名称"
+                maxlength="128"
+              /><button
+                id="delete-clip"
+                class="icon-button"
+                aria-label="删除当前动作"
+                title="删除当前动作（可撤销）"
+              >
+                <span data-icon="trash"></span>
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+      <footer class="statusbar">
+        <span id="save-status" role="status"><i></i> 正在打开…</span
+        ><span>作品保存在本机 · 无需登录</span
+        ><button id="about-button">制作与说明</button>
+      </footer>
+    </main>
+    <div id="toast" class="toast" role="status" hidden></div>
+    <input
+      id="file-input"
+      type="file"
+      accept="image/png,.json,.spritelab"
+      hidden
+    />
+    <dialog id="new-dialog">
+      <form method="dialog" class="dialog-header">
+        <div>
+          <span class="eyebrow">START SOMETHING SMALL</span>
+          <h2>从一个小动作开始</h2>
+        </div>
+        <button aria-label="关闭新建窗口" class="icon-button">×</button>
+      </form>
+      <div class="dialog-body">
+        <p class="muted">先画，再试。可编辑示例让你更快找到感觉。</p>
+        <div id="template-gallery" class="template-gallery"></div>
+        <div class="blank-project">
+          <div>
+            <h3>一张空白画布</h3>
+            <p class="muted">透明底，从第一格像素开始。</p>
+          </div>
+          <select id="new-size" aria-label="新画布尺寸">
+            <option value="16">16 × 16</option>
+            <option value="32" selected>32 × 32</option>
+            <option value="64">64 × 64</option></select
+          ><button id="new-blank" class="primary">开始绘制</button>
+        </div>
+        <p class="footnote">
+          新建会替换当前本机草稿。需要保留时，先点击「保存项目」下载源文件。
+        </p>
+      </div>
+    </dialog>
+    <dialog id="import-dialog">
+      <form method="dialog" class="dialog-header">
+        <h2>导入 PNG 精灵图</h2>
+        <button aria-label="关闭导入窗口" class="icon-button">×</button>
+      </form>
+      <div class="dialog-body">
+        <div class="import-preview">
+          <canvas id="import-preview" width="256" height="256"></canvas>
+        </div>
+        <p id="import-meta" class="muted"></p>
+        <div class="field-grid">
+          <label
+            >每帧宽度<input
+              id="import-width"
+              type="number"
+              min="1"
+              max="128"
+              value="32" /></label
+          ><label
+            >每帧高度<input
+              id="import-height"
+              type="number"
+              min="1"
+              max="128"
+              value="32" /></label
+          ><label
+            >帧停留（ms）<input
+              id="import-duration"
+              type="number"
+              min="30"
+              max="2000"
+              value="140"
+          /></label>
+        </div>
+        <p id="import-summary" class="footnote"></p>
+        <p class="footnote">
+          按规则网格从左到右、从上到下切帧。原图不会被缩放或裁切。
+        </p>
+        <button id="confirm-import" class="primary">导入并开始编辑</button>
+      </div>
+    </dialog>
+    <dialog id="export-dialog">
+      <form method="dialog" class="dialog-header">
+        <div>
+          <span class="eyebrow">MADE BY YOU</span>
+          <h2>带走你的作品</h2>
+        </div>
+        <button aria-label="关闭导出窗口" class="icon-button">×</button>
+      </form>
+      <div class="dialog-body">
+        <div id="export-summary" class="export-summary"></div>
+        <div class="field-grid">
+          <label
+            >每行帧数<select id="export-columns">
+              <option value="0">自动排列</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="4">4</option>
+              <option value="8">8</option>
+              <option value="16">16</option>
+            </select></label
+          ><label
+            >导出倍率<select id="export-scale">
+              <option value="1">1× 原像素</option>
+              <option value="2">2×</option>
+              <option value="4">4×</option>
+              <option value="8">8×</option>
+            </select></label
+          >
+        </div>
+        <div class="export-options">
+          <button id="export-sheet">
+            <span data-icon="grid"></span
+            ><span
+              ><strong>精灵图 PNG</strong
+              ><small>当前动作全部帧 · 透明背景</small></span
+            ><span aria-hidden="true">↓</span></button
+          ><button id="export-metadata">
+            <span data-icon="code"></span
+            ><span
+              ><strong>时间与坐标 JSON</strong
+              ><small>与当前精灵图设置对应 · 含每帧时长</small></span
+            ><span aria-hidden="true">↓</span></button
+          ><button id="export-frames">
+            <span data-icon="copy"></span
+            ><span
+              ><strong>逐帧 PNG 打包</strong
+              ><small>原像素 PNG + timing.json · ZIP</small></span
+            ><span aria-hidden="true">↓</span></button
+          ><button id="export-frame">
+            <span data-icon="image"></span
+            ><span
+              ><strong>当前帧 PNG</strong
+              ><small>当前帧可见图层合成 · 原像素</small></span
+            ><span aria-hidden="true">↓</span></button
+          ><button id="export-project">
+            <span data-icon="save"></span
+            ><span
+              ><strong>可编辑项目</strong
+              ><small>全部动作、帧、图层 · 可重新导入</small></span
+            ><span aria-hidden="true">↓</span>
+          </button>
+        </div>
+        <p id="export-status" role="status" class="footnote">
+          导出仅包含你的作品，不含棋盘格、网格或洋葱皮。
+        </p>
+      </div>
+    </dialog>
+    <dialog id="resize-dialog">
+      <form method="dialog" class="dialog-header">
+        <h2>调整画布尺寸</h2>
+        <button class="icon-button" aria-label="关闭尺寸窗口">×</button>
+      </form>
+      <div class="dialog-body">
+        <div class="field-grid">
+          <label
+            >宽度<input
+              id="resize-width"
+              type="number"
+              min="1"
+              max="128" /></label
+          ><label
+            >高度<input id="resize-height" type="number" min="1" max="128"
+          /></label>
+        </div>
+        <p>
+          所有动作、所有帧一起调整，居中保留像素。缩小会裁掉边缘，可立即撤销。
+        </p>
+        <button id="confirm-resize" class="primary">应用尺寸</button>
+      </div>
+    </dialog>
+    <dialog id="help-dialog">
+      <form method="dialog" class="dialog-header">
+        <div>
+          <span class="eyebrow">A LITTLE PRACTICE GOES A LONG WAY</span>
+          <h2>亲手，让它动起来</h2>
+        </div>
+        <button class="icon-button" aria-label="关闭指南">×</button>
+      </form>
+      <div class="dialog-body help-body">
+        <ol class="guide-steps">
+          <li>
+            <strong>先改一笔</strong>
+            <p>
+              选颜色，在大画布绘制。画笔会连接拖动轨迹，橡皮擦回透明。触屏可直接画；放大后可在画布周围滚动查看。
+            </p>
+          </li>
+          <li>
+            <strong>再复制一帧</strong>
+            <p>
+              复制当前帧，改一点姿势。洋葱皮用淡色显示前后帧，便于对齐。每帧停留时间可以不同。
+            </p>
+          </li>
+          <li>
+            <strong>在舞台里试试</strong>
+            <p>
+              切到「小舞台试跑」，方向键或 A / D
+              移动，空格跳跃，也可使用屏幕按钮。舞台用于检查节奏，不代表游戏引擎的物理效果。
+            </p>
+          </li>
+          <li>
+            <strong>保存可编辑的作品</strong>
+            <p>
+              自动保存只属于当前浏览器。点「保存项目」下载源文件，可备份、换设备或发给别人。新建或导入前，请先保存需要保留的作品。
+            </p>
+          </li>
+        </ol>
+        <h3>快捷键</h3>
+        <div class="shortcut-grid">
+          <span><kbd>B</kbd>画笔</span><span><kbd>E</kbd>橡皮</span
+          ><span><kbd>G</kbd>填充</span><span><kbd>I</kbd>取色</span
+          ><span><kbd>L</kbd>直线</span><span><kbd>R</kbd>矩形</span
+          ><span><kbd>M</kbd>选区</span><span><kbd>V</kbd>移动</span
+          ><span><kbd>D</kbd>复制帧</span><span><kbd>Esc</kbd>清除选区</span
+          ><span><kbd>Ctrl / ⌘ Z</kbd>撤销</span
+          ><span><kbd>Ctrl / ⌘ Shift Z</kbd>重做</span>
+        </div>
+        <h3>选区与图层</h3>
+        <p>
+          框选后切「移动」拖动；选区外透明像素不会盖掉目标。按 Delete
+          清除选区。未选区时移动和翻转作用于当前图层。图层设置在全部动作中共用，每一帧独立保存像素。
+        </p>
+        <h3>制作与许可</h3>
+        <p>
+          SpriteLab 由 4c
+          制作。内置角色、场景与调色板为本项目原创示例，可自由修改并用于你的作品。ZIP
+          打包使用 MIT 许可的 fflate；<a
+            href="./vendor/LICENSE-fflate.txt"
+            target="_blank"
+            rel="noopener"
+            >查看许可</a
+          >。本站不上传作品，也不提供云端同步。
+        </p>
+      </div>
+    </dialog>
+    <dialog id="confirm-dialog">
+      <div class="dialog-header"><h2>替换当前草稿？</h2></div>
+      <div class="dialog-body">
+        <p id="confirm-text">当前作品会被替换。可先下载项目保留副本。</p>
+        <div class="dialog-actions">
+          <button id="confirm-cancel">取消</button
+          ><button id="confirm-save">先下载当前项目</button
+          ><button id="confirm-yes" class="primary">替换草稿</button>
+        </div>
+      </div>
+    </dialog>
+    <noscript
+      ><div class="noscript">
+        SpriteLab 需要启用 JavaScript
+        才能绘画、播放与导出。作品在你的浏览器内处理。
+      </div></noscript
+    >
+  </body>
+</html>
