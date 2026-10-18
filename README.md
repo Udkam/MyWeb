@@ -21,3 +21,11 @@ git clone --single-branch --branch codex/cinder-below https://github.com/Udkam/M
 ```
 
 Each website branch contains its own README, dependencies, verification commands and asset credits. Keep local saves and deployment settings independent between websites.
+
+## Deployments
+
+- TetraMorph uses the existing Vercel project and public domain. Its production branch is `codex/tetramorph`; the project's ignored-build rule skips the directory and other website branches.
+- Cinder Below is published as a verified static snapshot by the separate `Udkam/personal-web` portal. A game-source push alone does not update that snapshot.
+- The `main` branch is a source directory and maintenance guide.
+
+The original `Udkam/TetraMorph` repository is retained as a read-only historical archive. New development belongs on the branch linked above.
