@@ -6,6 +6,9 @@ repository is `https://github.com/Udkam/MyWeb.git`; this website belongs to
 `Udkam/personal-web`, on `main` in its own checkout. The MyWeb `main` branch is
 the directory of website branches.
 
+Canonical local source: `E:\Proj\Active\MyWeb\cinder-below`. The parent MyWeb
+folder groups the separate website checkouts; it is not an additional Git root.
+
 - Keep game work on `codex/cinder-below`; never push the game tree to the directory `main` branch.
 - `src` contains the deployable HTML, JavaScript, CSS, art and audio.
 - Preserve asset licenses, source credits and the existing local-save contract.

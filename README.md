@@ -25,7 +25,7 @@ npm test
 npm run build
 ```
 
-本机独立开发目录为 `E:\Proj\Active\cinder-below`。后续提交推送到 `origin/codex/cinder-below`。个人入口站单独维护于 `Udkam/personal-web`；各网站源码不合并到 MyWeb 的目录分支。
+本机独立开发目录为 `E:\Proj\Active\MyWeb\cinder-below`，与 TetraMorph、SpriteLab 一起归入 MyWeb 本地站点目录。后续提交推送到 `origin/codex/cinder-below`。个人入口站单独维护于 `Udkam/personal-web`；各网站源码不合并到 MyWeb 的目录分支。
 
 The existing public ChatGPT Sites project and stable URL are retained. The old Focus Desk / Mosslight Post URL slug is not the game's title. This game replaces Mosslight Post; its complete earlier source remains in Git at `fb20b88e4e7c564eb9912d390c69678d52bdd5af`.
 
