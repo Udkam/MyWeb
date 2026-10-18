@@ -1,6 +1,9 @@
 # Bounded Commit Policy
 
-Status: authoritative for every task and worker in `E:\Proj\reproduction-tetris`.
+Status: authoritative for every task and worker in
+`E:\Proj\Active\MyWeb\TetraMorph`, branch `codex/tetramorph` of `Udkam/MyWeb`.
+The `legacy` remote preserves the former standalone repository; do not push its
+other local work branches or inherited dirty material during repository migration.
 
 This policy prevents a workstream from accumulating an entire rules change, frontend
 pass, evidence matrix, and QA history into one opaque commit. It complements

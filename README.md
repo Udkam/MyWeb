@@ -2,8 +2,14 @@
 
 Play: **https://tetramorph.vercel.app/**
 
-Source: https://github.com/Udkam/TetraMorph . Production is deployed by Vercel
-from `main`, using `vercel.json`; only the static `dist/` output is published.
+Source: https://github.com/Udkam/MyWeb/tree/codex/tetramorph . The canonical local
+source is `E:\Proj\Active\MyWeb\TetraMorph`, on branch `codex/tetramorph`.
+The full accepted history is preserved; the former repository remains available
+through the local `legacy` remote.
+
+Vercel project `tetramorph` keeps the existing public domain. The migration targets
+`Udkam/MyWeb` branch `codex/tetramorph`; the platform connection requires separate
+release verification. `vercel.json` still publishes only the static `dist/` output.
 
 Documentation: [single entrypoint](docs/README.md) · [current status](docs/CURRENT_TASK.md) ·
 [deployment](docs/release/README.md) · [file map](docs/PROJECT_STRUCTURE.md).

@@ -3,6 +3,10 @@
 Start with [the documentation index](README.md). Current contracts are short;
 superseded accumulated records live under `docs/archive/2026-09-22/`.
 
+The canonical local root is `E:\Proj\Active\MyWeb\TetraMorph`; its independent
+code tree lives on `Udkam/MyWeb` branch `codex/tetramorph`. Other websites have
+separate branches and must not be copied into this tree.
+
 This repository separates product code, durable records, reusable tooling, and local
 generated material. New files should follow this map instead of accumulating at the
 repository root.

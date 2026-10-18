@@ -1,15 +1,19 @@
-# reproduction-tetris Working Agreement
+# TetraMorph Working Agreement
 
 ## Coordinator and workstream boundary
 
 - The primary Codex task is the coordinator. It owns scope, sequencing, integration,
   `docs/logs/CHANGELOG.md`, final browser review, and push. A writer may create only the
   bounded local checkpoint commits authorized by `docs/COMMIT_POLICY.md`.
-- This repository is the standalone falling-block game at `E:\Proj\reproduction-tetris`.
+- This branch is the standalone falling-block game at `E:\Proj\Active\MyWeb\TetraMorph`.
+- Source is `https://github.com/Udkam/MyWeb/tree/codex/tetramorph`; `origin` targets
+  `Udkam/MyWeb`, and `legacy` preserves `https://github.com/Udkam/TetraMorph.git`.
 - Temple Run and Patrick's Parabox are separate repositories. Never copy their source,
   evidence, screenshots, generated assets, workstream registers, or Git metadata here.
-- The active development branch is `main`, migrated from `codex/tetris-recovery` at its
-  latest accepted tip without rewriting shared history.
+- The active development branch is `codex/tetramorph`. It preserves the complete
+  accepted `main` history through `96057f1b` without rewriting shared history.
+- Other websites use separate branches in `Udkam/MyWeb`; do not merge their product
+  trees, push all local branches, or stage inherited user-owned work.
 - Each implementation slice has one writer. Independent QA is read-only until the
   implementation owner produces a candidate SHA or explicitly requests an audit.
 - A design or QA task may not self-authorize production edits. Only the coordinator's

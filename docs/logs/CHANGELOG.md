@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-10-18 — MyWeb branch repository migration
+
+- Canonical local source is `E:\Proj\Active\MyWeb\TetraMorph`; source is now
+  organized on `Udkam/MyWeb` branch `codex/tetramorph`, preserving the full accepted
+  1,908-commit history through `96057f1b`. The former remote is retained as `legacy`.
+- Updated current documentation for the repository, branch, source path, and Vercel
+  connection target. Other local branches and the inherited T27/progress changes
+  are excluded; gameplay, assets, lockfile, build settings, and browser saves are unchanged.
+- Existing public domain remains `https://tetramorph.vercel.app/`. Source migration
+  and platform reconnection are separate checks; this entry does not claim the
+  Vercel Git connection has already changed.
+- Verification: Node 24.12.0, typecheck, 789 tests passed / 17 optional skipped,
+  and production build pass. Current documentation links resolve, and all 13
+  inherited modified/untracked files retain their pre-migration SHA-256 hashes.
+
 ## 2026-09-22 — Selected crystal icon and file organization
 
 - User accepted the exact isometric cube: 18-degree tilt, ice-blue gradient faces,

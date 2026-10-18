@@ -1,8 +1,11 @@
 # 当前发布
 
 - 游戏：https://tetramorph.vercel.app/
-- 仓库：https://github.com/Udkam/TetraMorph
-- 托管：Vercel 项目 `tetramorph`，Git 集成跟随 `main`。
+- 源码：https://github.com/Udkam/MyWeb/tree/codex/tetramorph
+- 本地：`E:\Proj\Active\MyWeb\TetraMorph`；独立分支 `codex/tetramorph`。
+- Git：`origin` 指向 `Udkam/MyWeb`；`legacy` 保留原 `Udkam/TetraMorph` 仓库，原完整历史不改写。
+- 托管：保留 Vercel 项目 `tetramorph` 和现有域名；目标 Git 连接为
+  `Udkam/MyWeb` / `codex/tetramorph`。平台重连与线上验收单独执行，不能仅凭源码上传声称连接已切换。
 - 构建：Node 24.x，`npm ci` → `npm run build`，仅发布 `dist/`。
 - 配置：根目录 `vercel.json`；游戏/残局直达路径回退到首页，静态资源缺失保留 404。
 
