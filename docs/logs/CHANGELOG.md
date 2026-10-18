@@ -1,5 +1,28 @@
 # Changelog
 
+## 2026-10-18 — Source-map dependency security gate repair
+
+- Patched the single transitive `source-map-js` lock from 1.2.1 to the official
+  1.2.2 release for GHSA-68fv-2mgg-jv7q. Only its version, registry tarball and
+  integrity changed; direct dependency ranges and the high-severity CI audit gate
+  are unchanged. Vite/PostCSS and jsdom/css-tree remain on their existing versions.
+- The three reported Actions runs stopped at the same dependency-audit failure.
+  Clean installation now reports zero vulnerabilities. A bounded regression
+  accepts a normal map and rejects huge, negative, fractional, non-finite, string
+  and cumulatively oversized nested section offsets before parsing mappings.
+- GitHub secret-scanning alert 1 still concerns a historical third-party HTML blob.
+  The current archived response differs from that blob and has no standard or
+  common encoded `sk.` candidate; it was left unchanged. Alert state remains open
+  with validity unknown. No credential values were exported, validated, revoked
+  or rotated; no alert resolution or Git history rewrite was performed.
+- Node 24.12.0: typecheck, 789 tests passed / 17 pre-existing optional skipped,
+  production build and all 12 desktop/mobile/landscape release-smoke scenes pass;
+  zero browser errors, no horizontal overflow, single-canvas and SPA cleanup checks
+  pass. Independent candidate review reports no actionable finding.
+- All 13 inherited modified/untracked files retain their pre-slice SHA-256 hashes
+  and remain unstaged. Temporary browser evidence uses managed security storage;
+  the preview listener is closed. Existing Vite chunk-size warning is unchanged.
+
 ## 2026-10-18 — Verified Vercel branch connection
 
 - Existing Vercel project `tetramorph` now follows `Udkam/MyWeb` production branch

@@ -45,8 +45,16 @@ and old BLOCKED/ACTIVE labels do not authorize restarting work.
   independent read-only review, current branch CI and Vercel status before reporting.
 - Separate contract, dependency and final verification checkpoints; the coordinator
   explicitly authorizes this worker to push only this accepted linear chain.
-- Current state: investigation confirms source-map-js 1.2.1 and audit failure;
-  implementation and verification are pending.
+- Source candidate `8034ff9c` locks source-map-js to 1.2.2. Clean `npm ci`, audit
+  (zero vulnerabilities), typecheck, 789 tests (17 pre-existing optional skips),
+  production build and all 12 release-smoke scenes pass with zero browser errors.
+  A normal map resolves correctly; six malformed/oversized/nested offset classes
+  are rejected. Independent read-only candidate review found no actionable issue.
+- The current archived HTML is unchanged: zero standard/encoded secret-token
+  candidates, current blob `c7f492a6` differs from alert commit blob `826d4505`.
+  The historical alert remains open, validity unknown; no revocation is implied.
+- All 13 inherited file hashes are unchanged and remain unstaged. Remote CI and
+  deployment are verified separately in the task report, not inferred from local gates.
 
 ## Preserved boundaries
 
