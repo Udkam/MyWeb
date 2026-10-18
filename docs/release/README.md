@@ -3,11 +3,26 @@
 - 游戏：https://tetramorph.vercel.app/
 - 源码：https://github.com/Udkam/MyWeb/tree/codex/tetramorph
 - 本地：`E:\Proj\Active\MyWeb\TetraMorph`；独立分支 `codex/tetramorph`。
-- Git：`origin` 指向 `Udkam/MyWeb`；`legacy` 保留原 `Udkam/TetraMorph` 仓库，原完整历史不改写。
-- 托管：保留 Vercel 项目 `tetramorph` 和现有域名；目标 Git 连接为
-  `Udkam/MyWeb` / `codex/tetramorph`。平台重连与线上验收单独执行，不能仅凭源码上传声称连接已切换。
+- Git：`origin` 指向 `Udkam/MyWeb`；`legacy` 保留原 `Udkam/TetraMorph` 仓库。
+  原仓库已设为 archived，只读保留完整历史。
+- 托管：Vercel 项目 `tetramorph` 已连接 `Udkam/MyWeb`，Production Branch
+  为 `codex/tetramorph`；现有域名保持不变。
+- 平台验收：迁移提交 `ac7afcea` 已 Ready/current；首页、`/play`、`/endgames`
+  返回 200，经典模式和残局界面实际可用。
 - 构建：Node 24.x，`npm ci` → `npm run build`，仅发布 `dist/`。
 - 配置：根目录 `vercel.json`；游戏/残局直达路径回退到首页，静态资源缺失保留 404。
+
+## 分支构建过滤
+
+Vercel 项目的 Ignored Build Step 使用 Custom 命令：
+
+```sh
+test "$VERCEL_GIT_COMMIT_REF" != "codex/tetramorph"
+```
+
+该步骤退出码为 `0` 时跳过构建，为 `1` 时继续构建。因此只有
+`codex/tetramorph` 分支会构建，目录主分支及其他网站分支均跳过；不要反转判断。
+Node 24、Vite、仓库根目录与 `dist/` 输出配置保持不变。
 
 ## 更新前
 

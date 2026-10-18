@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-10-18 — Verified Vercel branch connection
+
+- Existing Vercel project `tetramorph` now follows `Udkam/MyWeb` production branch
+  `codex/tetramorph`; migration source `ac7afcea` is Ready/current. The public
+  homepage, `/play`, and `/endgames` return 200, with Classic and Endgame verified.
+- Project Ignored Build Step skips all other repository branches. Node 24, Vite,
+  root, output, and public domain are unchanged. The former `Udkam/TetraMorph`
+  repository is archived read-only; local `legacy` and all inherited work are retained.
+- This follow-up updates current deployment facts only; product, dependencies,
+  build configuration, and runtime behavior remain identical to the verified source.
+
 ## 2026-10-18 — MyWeb branch repository migration
 
 - Canonical local source is `E:\Proj\Active\MyWeb\TetraMorph`; source is now

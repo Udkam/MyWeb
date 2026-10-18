@@ -11,9 +11,14 @@ and old BLOCKED/ACTIVE labels do not authorize restarting work.
 - Canonical local source: `E:\Proj\Active\MyWeb\TetraMorph`. The complete accepted
   1,908-commit history through `96057f1b` is preserved. Other websites occupy separate
   branches; their product trees are not merged into this game.
-- Vercel migration target: Git repository `Udkam/MyWeb`, production branch
-  `codex/tetramorph`. Platform reconnection and production verification are handled
-  separately; the existing website stays available throughout source migration.
+- Vercel project `tetramorph` is connected to `Udkam/MyWeb`, with production branch
+  `codex/tetramorph`. Migration commit `ac7afcea` is Ready/current; the public homepage,
+  `/play` and `/endgames` return 200, with Classic and Endgame verified in the UI.
+- Vercel uses the existing Node 24/Vite/root/`dist` configuration. Its custom Ignored
+  Build Step is `test "$VERCEL_GIT_COMMIT_REF" != "codex/tetramorph"`; exit 0 skips
+  other branches and exit 1 builds this branch.
+- The former `Udkam/TetraMorph` repository is archived read-only and retained as
+  `legacy`; no history or inherited local material was deleted.
 - User accepted the ice-blue, 18-degree tilted isometric cube icon. Geometry
   source `993b9942`; typecheck/build, 789 tests, 12 browser scenes and independent QA pass.
 - Documentation is organized; historical content is retained, not deleted. Old local

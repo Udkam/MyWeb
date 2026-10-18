@@ -32,8 +32,9 @@ independent QA precede publication. A screenshot alone is not gameplay proof.
 Check exactly one canvas, zero errors, input, responsive layout and lifecycle cleanup.
 Maintain deterministic replay coverage and bounded audio/presentation behavior.
 
-The publishing source is `Udkam/MyWeb` branch `codex/tetramorph`; the Vercel migration
-must reconnect the existing `tetramorph` project to that branch and verify production.
+The existing Vercel `tetramorph` project is connected to `Udkam/MyWeb`, production
+branch `codex/tetramorph`, with the original public domain. Its Ignored Build Step
+skips other branches so other website trees do not trigger a TetraMorph build.
 Vercel publishes only `dist/`. Game routes use SPA rewrites; missing static
 assets must remain 404. No private work logs or development evidence in production.
 Subjective player acceptance must be distinguished from automated tests.
