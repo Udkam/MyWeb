@@ -14,7 +14,7 @@
 
 ## Repository
 
-MyWeb uses a separate branch for each website. The `main` branch contains the 4c portal; `codex/cinder-below` contains this complete standalone game, including its original Git history. Work on the game branch from its own folder:
+MyWeb uses a separate branch for each website. Its `main` branch is the website directory; `codex/cinder-below` contains this complete standalone game, including its original Git history. The 4c portal has its own repository, `Udkam/personal-web`, and is maintained separately. Work on the game branch from its own folder:
 
 ```bash
 git clone --branch codex/cinder-below --single-branch https://github.com/Udkam/MyWeb.git cinder-below
@@ -25,7 +25,7 @@ npm test
 npm run build
 ```
 
-本机独立开发目录为 `E:\Proj\Active\cinder-below`。后续提交推送到 `origin/codex/cinder-below`；不要从游戏目录推送或合并到入口站的 `main`。
+本机独立开发目录为 `E:\Proj\Active\cinder-below`。后续提交推送到 `origin/codex/cinder-below`。个人入口站单独维护于 `Udkam/personal-web`；各网站源码不合并到 MyWeb 的目录分支。
 
 The existing public ChatGPT Sites project and stable URL are retained. The old Focus Desk / Mosslight Post URL slug is not the game's title. This game replaces Mosslight Post; its complete earlier source remains in Git at `fb20b88e4e7c564eb9912d390c69678d52bdd5af`.
 
@@ -92,7 +92,7 @@ python tests/browser_home.py
 
 ## Hosting and evidence
 
-The canonical source is the `codex/cinder-below` branch of `Udkam/MyWeb`. `vercel.json` builds this branch as a standalone static website with `npm ci` and `npm run build`, publishing `dist`. The existing public game URL remains `https://foreseer.site/cinder-below/`: the portal main branch imports the exact verified game source using `scripts/import-cinder-game.mjs`, and its release manifest records the source commit and file hashes. A source-branch push does not update that portal snapshot.
+The canonical source is the `codex/cinder-below` branch of `Udkam/MyWeb`. `vercel.json` builds this branch as a standalone static website with `npm ci` and `npm run build`, publishing `dist`. The existing public game URL remains `https://foreseer.site/cinder-below/`: the separate `Udkam/personal-web` main branch imports the exact verified game source using `scripts/import-cinder-game.mjs`, and its release manifest records the source commit and file hashes. A source-branch push does not update that portal snapshot.
 
 The existing ChatGPT Sites deployment remains a backup; `.openai/hosting.json` points to `dist`. Local acceptance evidence is kept in ignored `.qa`; a local build does not establish that either public deployment has changed.
 
