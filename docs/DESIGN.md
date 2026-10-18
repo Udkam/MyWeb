@@ -25,6 +25,17 @@ iterations live in [the historical design record](archive/2026-09-22/DESIGN.md).
 - Browser-local settings/progress; no account/cloud-sync promise. Preserve unreadable
   or future-version stored data and disclose storage failures.
 
+## Security maintenance boundary
+
+Dependency maintenance preserves gameplay, rendering, authored evidence and saved
+progress. Build tools must reject malformed indexed source-map section offsets
+without unbounded work; normal source maps and the existing production build must
+remain usable. Security gates retain the current high-severity failure threshold.
+Historical third-party evidence is not product code: an alert against an older
+blob does not prove that the current archived response still contains a secret.
+Credential ownership, effective revocation and historical cleanup are separate
+from a dependency fix and may not be inferred from a successful build.
+
 ## Verification and publication
 
 Typecheck, full test suite, production build, source-bound browser evidence and

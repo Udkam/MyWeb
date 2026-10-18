@@ -25,6 +25,29 @@ and old BLOCKED/ACTIVE labels do not authorize restarting work.
   output, Playwright logs and inactive Serena files are under `.local/archive/`.
 - No custom-domain purchase or DNS change is authorized by the current request.
 
+## Authorized security maintenance — 2026-10-18
+
+- Coordinator-authorized slice `myweb-security-alerts-20261018`, base
+  `08c077ba13f0cd8a1728d52e0ca87012ed635fb7`; one writer, no gameplay changes.
+- Exact implementation scope: only `package-lock.json` may move the existing
+  `source-map-js` transitive lock from 1.2.1 to the advisory-fixed 1.2.2. Preserve
+  the existing high-severity audit gate and all direct dependency ranges.
+- GitHub secret-scanning alert 1 remains open with validity unknown. The reported
+  historical HTML blob differs from HEAD; the current file has zero standard or
+  encoded `sk.` prefixes. Do not alter it speculatively or read/export the old value.
+  No credential revocation, rotation, alert resolution or history rewriting is authorized.
+- Contract paths: this file and `docs/DESIGN.md`. Final verification facts belong in
+  `docs/logs/CHANGELOG.md`. The 13 inherited modified/untracked files must retain
+  their pre-slice SHA-256 hashes and remain unstaged.
+- Required gates: focused source-map rejection/control, clean-lock installation,
+  `npm audit --audit-level=high --registry=https://registry.npmjs.org`, typecheck,
+  full test suite, production build and existing 12-scene release smoke. Inspect
+  independent read-only review, current branch CI and Vercel status before reporting.
+- Separate contract, dependency and final verification checkpoints; the coordinator
+  explicitly authorizes this worker to push only this accepted linear chain.
+- Current state: investigation confirms source-map-js 1.2.1 and audit failure;
+  implementation and verification are pending.
+
 ## Preserved boundaries
 
 - T37 exact proof searches remain explicitly deferred. Keep only verified certificates.
