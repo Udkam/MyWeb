@@ -2,13 +2,30 @@
 
 全视口像素动作肉鸽。五段共十五房、二十种普通怪物、十位独立首领、十二种叠加遗物和三把起始武器。打开即玩，每局以新种子生成遭遇与布局。默认中文，支持即时切换英文；游戏名保留 Cinder Below。
 
-**Public site:** https://foreseer-focus-desk.fresh-ape-5596.chatgpt.site
+**Play:** https://foreseer.site/cinder-below/
+
+**Source:** [MyWeb · codex/cinder-below](https://github.com/Udkam/MyWeb/tree/codex/cinder-below)
+
+**Backup:** https://foreseer-focus-desk.fresh-ape-5596.chatgpt.site
 
 本轮主入口迁移至既有 Vercel 项目的 `https://foreseer.site/cinder-below/`；公开验证状态记录在 `.qa/release.json`。ChatGPT Sites 地址作为公开备用。全部游戏资源随静态发布，不依赖外部字体、素材 CDN 或 ChatGPT 登录。
 
 不同域名的浏览器本地存档不能自动互通。已有玩家可在旧入口“设置 → 导出存档”，再在新首页“导入存档”；导入会显示确认，取消保留原进度。
 
-**Canonical editable source:** `E:\Proj\Active\MyWeb\cinder-below`
+## Repository
+
+MyWeb uses a separate branch for each website. The `main` branch contains the 4c portal; `codex/cinder-below` contains this complete standalone game, including its original Git history. Work on the game branch from its own folder:
+
+```bash
+git clone --branch codex/cinder-below --single-branch https://github.com/Udkam/MyWeb.git cinder-below
+cd cinder-below
+npm ci
+npm run check
+npm test
+npm run build
+```
+
+本机独立开发目录为 `E:\Proj\Active\cinder-below`。后续提交推送到 `origin/codex/cinder-below`；不要从游戏目录推送或合并到入口站的 `main`。
 
 The existing public ChatGPT Sites project and stable URL are retained. The old Focus Desk / Mosslight Post URL slug is not the game's title. This game replaces Mosslight Post; its complete earlier source remains in Git at `fb20b88e4e7c564eb9912d390c69678d52bdd5af`.
 
@@ -75,7 +92,9 @@ python tests/browser_home.py
 
 ## Hosting and evidence
 
-ChatGPT Sites project: `appgprj_6accfe11a0ec8191ab683ddd3e52de07`. `.openai/hosting.json` points to `dist`. The official Sites source workflow opens/synchronizes the existing repository, runs remaining checks, commits and pushes the exact source, and packages the static output. A saved archive-backed version is deployed with public access. Local build success alone does not establish deployment; `.qa/release.json` records the actual source/version/deployment evidence.
+The canonical source is the `codex/cinder-below` branch of `Udkam/MyWeb`. `vercel.json` builds this branch as a standalone static website with `npm ci` and `npm run build`, publishing `dist`. The existing public game URL remains `https://foreseer.site/cinder-below/`: the portal main branch imports the exact verified game source using `scripts/import-cinder-game.mjs`, and its release manifest records the source commit and file hashes. A source-branch push does not update that portal snapshot.
+
+The existing ChatGPT Sites deployment remains a backup; `.openai/hosting.json` points to `dist`. Local acceptance evidence is kept in ignored `.qa`; a local build does not establish that either public deployment has changed.
 
 - [Design and module boundaries](DESIGN.md)
 - [五段战斗、随机异界与探索设计](COMBAT-DESIGN.md)
