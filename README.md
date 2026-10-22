@@ -1,31 +1,57 @@
 # MyWeb
 
-Independent websites and games from [4c](https://foreseer.site/myweb/), with one complete source tree per branch.
+Independent websites and games from [4c](https://foreseer.site/myweb/), with one complete source tree per branch of this repository.
 
-The `main` branch is this directory and its maintenance guide. Each website is checked out in a separate local folder, built from its own branch, and deployed using its own settings. Website branches are independent histories and are not merged into this directory.
+`main` contains this directory and its maintenance history. Each product has its own local checkout, branch, dependencies and deployment. Product branches are not merged into `main`.
 
-The 4c personal portal is maintained separately in `Udkam/personal-web`; it is not part of this repository.
+The personal portal is a separate repository: [Udkam/personal-web](https://github.com/Udkam/personal-web).
 
-## Websites
+## Published websites
 
-| Website | Source branch | Play |
+| Website | Source branch | Public entry |
 | --- | --- | --- |
 | TetraMorph | [codex/tetramorph](https://github.com/Udkam/MyWeb/tree/codex/tetramorph) | [tetramorph.vercel.app](https://tetramorph.vercel.app/) |
 | Cinder Below | [codex/cinder-below](https://github.com/Udkam/MyWeb/tree/codex/cinder-below) | [foreseer.site/cinder-below](https://foreseer.site/cinder-below/) |
+| SpriteLab | [codex/spritelab](https://github.com/Udkam/MyWeb/tree/codex/spritelab) | [foreseer.site/spritelab](https://foreseer.site/spritelab/) |
 
-Clone just the website you want to work on:
+## Work in progress
+
+| Project | Source branch | Status as of 2026-10-22 |
+| --- | --- | --- |
+| Sailsong (working title) | [codex/bright-journey](https://github.com/Udkam/MyWeb/tree/codex/bright-journey) | Bright fantasy third-person travel adventure in development; no public game release yet. |
+| Wild Circuit | [codex/game-next](https://github.com/Udkam/MyWeb/tree/codex/game-next) | Paused prototype. The local checkout contains additional unpublished work; the remote branch is not a complete backup. |
+
+Each branch's README and current task document describe its actual implementation and release state. A source branch alone does not imply a playable deployment.
+
+## Local layout
+
+`E:\Proj\Active\MyWeb` is a container of independent checkouts, not another Git root.
+
+| Local folder | Role |
+| --- | --- |
+| `TetraMorph` | Published TetraMorph source |
+| `cinder-below` | Published Cinder Below source |
+| `spritelab` | Published SpriteLab source |
+| `bright-journey` | Active Sailsong development |
+| `_paused/wild-circuit` | Paused Wild Circuit checkout, including its uncommitted work |
+| `_pending-delete/paper-and-pinions` | Retired source awaiting local deletion; not an active product or backup policy |
+
+The local container README is the navigation entry. Its `_workspace` folder holds machine-specific repository and move verification records, which are not part of product releases.
+
+## Working with a product
+
+Clone the required product branch into its own directory, for example:
 
 ```bash
-git clone --single-branch --branch codex/tetramorph https://github.com/Udkam/MyWeb.git TetraMorph
-git clone --single-branch --branch codex/cinder-below https://github.com/Udkam/MyWeb.git cinder-below
+git clone --single-branch --branch codex/spritelab https://github.com/Udkam/MyWeb.git spritelab
 ```
 
-Each website branch contains its own README, dependencies, verification commands and asset credits. Keep local saves and deployment settings independent between websites.
+Run Git commands from that product's root, fetch its branch, inspect local changes, and stage only the files belonging to the current task. Each checkout tracks its own branch; some also track the directory's `main`. Preserve local-only branches, uncommitted assets and saves when reorganizing folders.
 
 ## Deployments
 
-- TetraMorph uses the existing Vercel project and public domain. Its production branch is `codex/tetramorph`; the project's ignored-build rule skips the directory and other website branches.
-- Cinder Below is published as a verified static snapshot by the separate `Udkam/personal-web` portal. A game-source push alone does not update that snapshot.
-- The `main` branch is a source directory and maintenance guide.
+- TetraMorph uses its existing Vercel project. Its production branch is `codex/tetramorph`; other product and directory branches are skipped by that project's build rules.
+- Cinder Below and SpriteLab are published as verified static snapshots by the separate personal portal. Changes to their source branches reach the portal through their dedicated import scripts.
+- New sites prefer an independent Vercel project, with ChatGPT Sites as the available fallback. A new public entry is added to the portal after deployment verification.
 
-The original `Udkam/TetraMorph` repository is retained as a read-only historical archive. New development belongs on the branch linked above.
+The original `Udkam/TetraMorph` repository remains a historical archive. Current TetraMorph development belongs on the branch linked above.
