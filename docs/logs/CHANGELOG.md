@@ -1,5 +1,12 @@
 # MyWeb directory history
 
+## 2026-10-23 — Cancel Sailsong and return to human-reviewed selection
+
+- Stopped Sailsong production, paused its unfinished Goal, and closed its public preview access. Removed the product's remote branch and active directory entry.
+- Moved the local checkout intact into `_pending-delete/sailsong`; verified the directory identity, Git worktree state and stopped-file SHA256 manifest. Local residual deletion is not claimed.
+- New 2D pixel-game proposals remain local for human review. No replacement project, production conversation or automatic handoff has been started; the user will manually open the next production conversation after approval.
+- Existing published games and the personal portal runtime are unchanged.
+
 ## 2026-10-22 — Align repository directory with local projects
 
 - Added the published SpriteLab source branch after connecting and normally pushing its existing independent history to `codex/spritelab`.

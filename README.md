@@ -14,14 +14,15 @@ The personal portal is a separate repository: [Udkam/personal-web](https://githu
 | Cinder Below | [codex/cinder-below](https://github.com/Udkam/MyWeb/tree/codex/cinder-below) | [foreseer.site/cinder-below](https://foreseer.site/cinder-below/) |
 | SpriteLab | [codex/spritelab](https://github.com/Udkam/MyWeb/tree/codex/spritelab) | [foreseer.site/spritelab](https://foreseer.site/spritelab/) |
 
-## Work in progress
+## Paused prototypes
 
-| Project | Source branch | Status as of 2026-10-22 |
+| Project | Source branch | Status as of 2026-10-23 |
 | --- | --- | --- |
-| Sailsong (working title) | [codex/bright-journey](https://github.com/Udkam/MyWeb/tree/codex/bright-journey) | Bright fantasy third-person travel adventure in development; no public game release yet. |
 | Wild Circuit | [codex/game-next](https://github.com/Udkam/MyWeb/tree/codex/game-next) | Paused prototype. The local checkout contains additional unpublished work; the remote branch is not a complete backup. |
 
 Each branch's README and current task document describe its actual implementation and release state. A source branch alone does not imply a playable deployment.
+
+Sailsong was cancelled on 2026-10-23. Its preview is no longer public and its product branch was removed. New pixel-game proposals await human review; no replacement game has been selected or started. The user will manually open the next production conversation after approving a proposal.
 
 ## Local layout
 
@@ -32,9 +33,10 @@ Each branch's README and current task document describe its actual implementatio
 | `TetraMorph` | Published TetraMorph source |
 | `cinder-below` | Published Cinder Below source |
 | `spritelab` | Published SpriteLab source |
-| `bright-journey` | Active Sailsong development |
+| `_planning` | New pixel-game proposals awaiting human review |
 | `_paused/wild-circuit` | Paused Wild Circuit checkout, including its uncommitted work |
 | `_pending-delete/paper-and-pinions` | Retired source awaiting local deletion; not an active product or backup policy |
+| `_pending-delete/sailsong` | Cancelled Sailsong source awaiting local deletion |
 
 The local container README is the navigation entry. Its `_workspace` folder holds machine-specific repository and move verification records, which are not part of product releases.
 
