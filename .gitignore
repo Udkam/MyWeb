@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.vercel/
+.openai/
+.qa/
+artifacts/tmp/
+__pycache__/
+*.pyc
+.env
+.env.*
+!.env.example
+*.log
+*.tmp
+*.blend1
+*.blend2

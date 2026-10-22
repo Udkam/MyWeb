@@ -1,31 +1,20 @@
-# MyWeb
+# MyWeb · Next Game
 
-Independent websites and games from [4c](https://foreseer.site/myweb/), with one complete source tree per branch.
+新网页游戏的独立研发目录。2026-10-22 已完成方向调研与本地工具核验，当前只有策划和执行文档，尚无可玩的游戏或部署地址。游戏正式英文名由执行对话复核候选后确定；界面默认中文，可切换英文。
 
-The `main` branch is this directory and its maintenance guide. Each website is checked out in a separate local folder, built from its own branch, and deployed using its own settings. Website branches are independent histories and are not merged into this directory.
+- 本地：`E:\Proj\Active\MyWeb\game-next`
+- 远端：`https://github.com/Udkam/MyWeb.git`
+- 网站专用分支：`codex/game-next`
+- 个人入口站：`E:\Proj\Active\personal-web`，独立仓库 `Udkam/personal-web`。
 
-The 4c personal portal is maintained separately in `Udkam/personal-web`; it is not part of this repository.
+## 从这里开始
 
-## Websites
+1. [当前任务](docs/CURRENT_TASK.md)：用户授权、状态和下一步。
+2. [方向调研](docs/RESEARCH.md)：原作者及官方页面、事实边界、机制结论。
+3. [三个候选](docs/PRODUCT-CANDIDATES.md)：玩法、内容范围与取舍。
+4. [资产与技术](docs/ASSET-AND-TECH.md)：本机工具、素材来源和预算。
+5. [执行与发布](docs/EXECUTION.md)：独立复核、制作阶段、完成条件和挂载 MyWeb。
 
-| Website | Source branch | Play |
-| --- | --- | --- |
-| TetraMorph | [codex/tetramorph](https://github.com/Udkam/MyWeb/tree/codex/tetramorph) | [tetramorph.vercel.app](https://tetramorph.vercel.app/) |
-| Cinder Below | [codex/cinder-below](https://github.com/Udkam/MyWeb/tree/codex/cinder-below) | [foreseer.site/cinder-below](https://foreseer.site/cinder-below/) |
+用户已要求由新对话自动复核、选定一个方向并开启 goal 模式执行，指定模型 **GPT-6.1-sol / ultra**；无需用户手工复制提示词。不要在本分支同时制作三款游戏。
 
-Clone just the website you want to work on:
-
-```bash
-git clone --single-branch --branch codex/tetramorph https://github.com/Udkam/MyWeb.git TetraMorph
-git clone --single-branch --branch codex/cinder-below https://github.com/Udkam/MyWeb.git cinder-below
-```
-
-Each website branch contains its own README, dependencies, verification commands and asset credits. Keep local saves and deployment settings independent between websites.
-
-## Deployments
-
-- TetraMorph uses the existing Vercel project and public domain. Its production branch is `codex/tetramorph`; the project's ignored-build rule skips the directory and other website branches.
-- Cinder Below is published as a verified static snapshot by the separate `Udkam/personal-web` portal. A game-source push alone does not update that snapshot.
-- The `main` branch is a source directory and maintenance guide.
-
-The original `Udkam/TetraMorph` repository is retained as a read-only historical archive. New development belongs on the branch linked above.
+当前没有 `package.json`，本阶段不声称运行过游戏测试或构建。选定技术栈后提交锁文件、真实运行命令、测试结果和部署信息。
