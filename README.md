@@ -4,6 +4,19 @@
 
 公开使用：[SpriteLab](https://foreseer.site/spritelab/)。2026-10-16 已完成匿名生产验收；平台为 Vercel，运行资源全部同源托管。
 
+## 源码仓库
+
+源码：[Udkam/MyWeb · codex/spritelab](https://github.com/Udkam/MyWeb/tree/codex/spritelab)。本地目录为 `E:\Proj\Active\MyWeb\spritelab`，`origin` 指向 `https://github.com/Udkam/MyWeb.git`，当前分支跟踪 `origin/codex/spritelab`。
+
+MyWeb 的每个网站使用独立目录和分支；仓库的 `main` 仅用于网站目录，不合并 SpriteLab 的产品树。2026-10-22 将本地原 `main` 更名为 `codex/spritelab` 并接入远端，保留原有全部提交历史。4c 入口站继续独立使用 `Udkam/personal-web` 的 `main`，公开快照仍由下述导入流程发布。
+
+```sh
+git clone --branch codex/spritelab --single-branch https://github.com/Udkam/MyWeb.git spritelab
+cd spritelab
+```
+
+后续提交前先拉取本分支的远端状态，只精确暂存本轮文件并正常快进推送，不改写其他网站分支。仓库连接整理记录见 [CHANGELOG](docs/logs/CHANGELOG.md)。
+
 ## 开发
 
 独立源码目录：`E:\Proj\Active\MyWeb\spritelab`。运行文件全部位于 `src`，没有在线 CDN、后端服务、用户文件上传或额外账户。
