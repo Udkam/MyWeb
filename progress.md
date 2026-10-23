@@ -1,0 +1,5 @@
+Original prompt: 开启新的 Goal，按照已选方案②制作 Cutlass Wake。先完整读取方案、交接及目录约束；独立目录/分支开发，先合法素材检查、真实拼板和小型实机动作样片供用户审核，再扩完整三章、验收发布及门户接入。
+
+2026-10-24: Goal created. Production plan and handoff read in full. Independent checkout created from directory-only MyWeb/main; repository boundaries verified. Stage A resource acquisition and license/frame audit in progress. User visual approval remains pending. No complete-game or production-release claim.
+
+2026-10-24 continuation: Stage A audit/boards and the old 18s B runtime are review candidates (historical 27 model tests, 14 browser controls). User accepted the salt-copper refinement through HANDOFF-PLAYTEST-2026-10-24. Read it and DESIGN-REFINEMENT in full; synchronized CURRENT_TASK/STATE. Current work is a polished, repeatable 45–90s encounter with continuous animation, contextual E, two-cut confirmation, guard pressure and layered ship art. Chapters remain gated on user playtest. Reuse verified local Vite 5176; preserve the new research/history documents.

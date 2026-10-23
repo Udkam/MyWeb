@@ -1,0 +1,272 @@
+:root {
+  color-scheme: dark;
+  font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", system-ui, sans-serif;
+  font-synthesis: none;
+  --wake-navy: #102b37;
+  --wake-deep: #0a1e29;
+  --wake-paper: #f4eed8;
+  --wake-dim: #b5b8a7;
+  --wake-gold: #b69a5e;
+  --wake-gold-line: #b69a5e61;
+  --wake-coral: #d47c59;
+  --wake-mast-height: 58px;
+  --wake-foot-height: 76px;
+}
+
+* { box-sizing: border-box; }
+html, body, #app { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+html { background: var(--wake-deep); overscroll-behavior: none; }
+body { min-width: 280px; touch-action: none; }
+button { font: inherit; }
+button:focus-visible { outline: 2px solid var(--wake-paper); outline-offset: 4px; }
+button, a { -webkit-tap-highlight-color: transparent; }
+[hidden] { display: none !important; }
+
+.wake-shell {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  display: grid;
+  grid-template-rows: var(--wake-mast-height) minmax(0, 1fr) var(--wake-foot-height);
+  overflow: hidden;
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+  color: var(--wake-paper);
+  background: radial-gradient(ellipse at 50% 40%, #173845 0%, var(--wake-deep) 82%);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.wake-mast {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 0 28px;
+  border-bottom: 1px solid var(--wake-gold-line);
+}
+.wake-wordmark {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  white-space: nowrap;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 19px;
+  letter-spacing: 0.12em;
+  line-height: 1;
+}
+.wake-wordmark span { color: var(--wake-dim); font-size: 11px; letter-spacing: 0.17em; }
+.wake-wordmark b { font-weight: 500; }
+.wake-review { color: var(--wake-dim); font-size: 11px; letter-spacing: 0.14em; }
+.wake-tools { display: flex; align-items: center; gap: 4px; margin-left: auto; }
+.wake-tools button {
+  min-height: 40px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 2px;
+  color: #d6d8c9;
+  background: transparent;
+  font-size: 12px;
+  cursor: pointer;
+}
+.wake-tools button:hover { color: var(--wake-paper); background: #f4eed80b; }
+.wake-tools [data-command="language"] { min-width: 42px; font-family: system-ui, sans-serif; letter-spacing: 0.04em; }
+
+.wake-play-area {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  isolation: isolate;
+}
+.wake-stage {
+  position: relative;
+  width: min(100%, calc((100dvh - var(--wake-mast-height) - var(--wake-foot-height) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) * 16 / 9));
+  max-height: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: #173c49;
+  box-shadow: 0 0 0 1px var(--wake-gold-line), 0 15px 55px #0002;
+}
+.wake-game-host, .wake-game-host canvas { display: block; width: 100%; height: 100%; }
+.wake-game-host { position: absolute; inset: 0; touch-action: none; }
+.wake-game-host canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
+.wake-hud {
+  position: absolute;
+  inset: 0 0 auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: clamp(12px, 1.6vw, 26px) clamp(14px, 2vw, 32px);
+  background: linear-gradient(#0a24345e, #0a243400);
+  pointer-events: none;
+  text-shadow: 0 1px 2px #0a1e29b3;
+}
+.wake-hero-name { margin-bottom: 7px; font-size: 15px; font-weight: 500; letter-spacing: 0.14em; }
+.wake-health { display: flex; align-items: center; gap: 5px; height: 16px; }
+.wake-health-pip {
+  display: block;
+  width: 8px;
+  height: 15px;
+  background: var(--wake-paper);
+  border: 1px solid #fff7;
+  clip-path: polygon(25% 0, 100% 0, 100% 77%, 70% 100%, 0 100%, 0 24%);
+  box-shadow: 0 1px 2px #0005;
+}
+.wake-health-pip.is-empty { background: #1b3c48b3; border-color: #f4eed873; opacity: 0.65; }
+.wake-chapter { display: flex; align-items: flex-end; gap: 10px; padding-top: 2px; }
+.wake-chapter > span { font-size: 15px; font-weight: 500; letter-spacing: 0.12em; }
+.wake-chapter > small { color: #e1e0c9; font-size: 11px; letter-spacing: 0.1em; line-height: 1.6; }
+.wake-guard-state { display: flex; align-items: center; gap: 9px; margin-top: 9px; color: #f4be84; font-size: 11px; }
+.wake-pressure-pips { letter-spacing: 0.08em; font-size: 14px; font-weight: 600; }
+.wake-momentum { display: flex; align-items: baseline; gap: 9px; margin-top: 9px; color: #fff0ba; }
+.wake-momentum b { font-size: 12px; font-weight: 500; letter-spacing: 0.08em; }
+.wake-momentum small { font-size: 10px; color: #e7e1bf; }
+
+.wake-scene-overlay { position: absolute; inset: 0; display: grid; place-items: center; background: #071d2938; }
+.wake-pause-card {
+  width: min(340px, 78%);
+  padding: 23px 28px 26px;
+  text-align: center;
+  border: 1px solid #d4bd7b80;
+  background: #102b37f2;
+  box-shadow: 0 8px 30px #071b2540, inset 0 0 0 5px #142f3b;
+}
+.wake-card-rule { display: block; width: 32px; height: 1px; margin: 0 auto 18px; background: var(--wake-gold); }
+.wake-card-title { margin: 0; font-size: 23px; font-weight: 500; letter-spacing: 0.12em; }
+.wake-card-note { margin: 13px 0 23px; color: #d0d3c6; font-size: 12px; line-height: 1.9; }
+.wake-primary { min-height: 44px; padding: 0 27px; border: 1px solid #d2ba80; border-radius: 2px; background: #f1e7c9; color: #183440; font-size: 14px; font-weight: 500; letter-spacing: 0.08em; cursor: pointer; }
+.wake-primary:hover { background: #fff7de; }
+.wake-loading { position: absolute; inset: 0; display: grid; place-items: center; color: var(--wake-paper); background: var(--wake-navy); font-size: 14px; letter-spacing: 0.12em; }
+
+.wake-foot { position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px; padding: 6px 16px; border-top: 1px solid var(--wake-gold-line); }
+.wake-cue { min-height: 18px; max-width: min(780px, 90%); color: #ede6cd; font-size: 13px; letter-spacing: 0.025em; line-height: 1.5; text-align: center; }
+.wake-keyboard-help { display: flex; align-items: center; justify-content: center; flex-wrap: nowrap; gap: 23px; color: #aebbb5; font-size: 10px; }
+.wake-keyboard-help > span { display: flex; align-items: center; gap: 7px; white-space: nowrap; }
+kbd { display: inline-flex; min-height: 18px; min-width: 18px; justify-content: center; align-items: center; padding: 0 4px; border: 1px solid #b4b99c4d; border-radius: 2px; color: #e6e3c9; background: #1e3943; font: 10px system-ui, sans-serif; line-height: 1.4; }
+.wake-cannon-hint { position: absolute; right: 25px; top: 14px; display: flex; align-items: center; gap: 7px; color: #f3dfa9; font-size: 12px; }
+
+.wake-touch { display: none; position: absolute; inset: 0; pointer-events: none; }
+.wake-touch-move { position: absolute; left: 12px; bottom: 15px; display: flex; gap: 8px; }
+.wake-touch-actions { position: absolute; right: 12px; bottom: 15px; display: grid; grid-template-columns: repeat(2, 48px); gap: 8px; }
+.wake-touch-key {
+  display: grid;
+  place-items: center;
+  min-width: 48px;
+  min-height: 48px;
+  padding: 5px;
+  border: 1px solid #d3bc7b96;
+  border-radius: 7px;
+  color: #f8f0d7;
+  background: #14303ceb;
+  box-shadow: inset 0 0 0 2px #e4d3a009, 0 2px 0 #03141f73;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+  text-align: center;
+  touch-action: none;
+  pointer-events: auto;
+  cursor: pointer;
+}
+.wake-touch-key:disabled { opacity: 0.35; cursor: default; }
+.wake-touch-key.is-held { color: #112c38; background: #f1e7c9; border-color: #f1e7c9; box-shadow: inset 0 2px 3px #18344030; }
+.wake-direction { min-width: 48px; min-height: 55px; font: 25px Georgia, serif; }
+.wake-touch-attack { border-color: #d79b70; background: #633c31e8; }
+.wake-touch-guard { border-color: #8fbdba; background: #244b52ed; }
+.wake-touch-interact { position: absolute; left: 50%; bottom: 9px; min-height: 44px; min-width: 76px; transform: translateX(-50%); }
+.wake-portrait { position: absolute; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px; background: #102b37f8; text-align: center; }
+.wake-orientation-mark { position: relative; width: 66px; height: 36px; margin-bottom: 28px; border: 1px solid var(--wake-gold); border-radius: 5px; }
+.wake-orientation-mark::after { content: ''; position: absolute; right: 6px; top: 13px; width: 4px; height: 8px; border-radius: 1px; background: var(--wake-gold); }
+.wake-portrait h2 { margin: 0; font-size: 22px; font-weight: 500; line-height: 1.6; letter-spacing: 0.06em; }
+.wake-portrait p { max-width: 300px; margin: 15px 0 0; color: #bec9bf; font-size: 14px; line-height: 1.9; }
+.wake-portrait-review { margin-top: 42px; color: var(--wake-gold); font-size: 11px; letter-spacing: 0.16em; }
+
+@media (pointer: coarse), (max-width: 900px) {
+  :root { --wake-mast-height: 41px; --wake-foot-height: 40px; }
+  .wake-mast { gap: 14px; padding: 0 15px; }
+  .wake-wordmark { font-size: 16px; gap: 5px; letter-spacing: 0.09em; }
+  .wake-wordmark span { font-size: 9px; letter-spacing: 0.11em; }
+  .wake-review { font-size: 9px; letter-spacing: 0.08em; }
+  .wake-tools { gap: 0; }
+  .wake-tools button { min-height: 36px; padding: 0 9px; font-size: 11px; }
+  .wake-tools [data-command="language"] { min-width: 35px; }
+  .wake-play-area { padding: 0 115px; }
+  .wake-stage { width: min(100%, calc((100dvh - var(--wake-mast-height) - var(--wake-foot-height) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) * 16 / 9)); }
+  .wake-touch { display: block; }
+  .wake-hud { padding: 11px 13px; }
+  .wake-hero-name { margin-bottom: 5px; font-size: 12px; }
+  .wake-health { gap: 4px; height: 12px; }
+  .wake-health-pip { width: 6px; height: 12px; }
+  .wake-chapter { display: flex; flex-direction: column; gap: 3px; padding-top: 0; }
+  .wake-chapter > span { font-size: 12px; }
+  .wake-chapter > small { font-size: 9px; }
+  .wake-guard-state { margin-top: 5px; gap: 5px; font-size: 10px; }
+  .wake-momentum { margin-top: 5px; flex-direction: column; gap: 2px; }
+  .wake-momentum b { font-size: 11px; }
+  .wake-momentum small { font-size: 9px; }
+  .wake-foot { padding: 4px 100px; gap: 0; }
+  .wake-cue { max-width: 100%; font-size: 11px; line-height: 1.45; }
+  .wake-keyboard-help, .wake-cannon-hint { display: none !important; }
+  .wake-touch-key { font-size: 12px; }
+  .wake-direction { font-size: 24px; }
+  .wake-pause-card { width: min(280px, 80%); padding: 16px 20px; }
+  .wake-card-rule { margin-bottom: 11px; }
+  .wake-card-title { font-size: 19px; }
+  .wake-card-note { margin: 8px 0 14px; font-size: 11px; }
+  .wake-primary { min-height: 44px; font-size: 12px; }
+}
+
+@media (max-height: 380px) and (orientation: landscape) {
+  :root { --wake-mast-height: 36px; --wake-foot-height: 32px; }
+  .wake-mast { padding: 0 12px; }
+  .wake-tools button { min-height: 32px; }
+  .wake-touch-move { bottom: 12px; }
+  .wake-touch-actions { bottom: 12px; gap: 6px; }
+  .wake-touch-key { min-height: 44px; min-width: 44px; }
+  .wake-touch-actions { grid-template-columns: repeat(2, 46px); }
+  .wake-direction { min-height: 51px; }
+  .wake-hud { padding: 9px 11px; }
+}
+
+@media (max-width: 600px) and (orientation: portrait) {
+  .wake-mast { flex-wrap: wrap; gap: 0; }
+  .wake-review { display: none; }
+  .wake-tools { gap: 0; }
+  .wake-tools button { padding: 0 5px; font-size: 10px; }
+  .wake-wordmark { font-size: 13px; gap: 4px; }
+  .wake-wordmark span { font-size: 8px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; }
+}
+
+/* Landscape touch uses the otherwise empty waterline for controls. Keep the
+   native world large; chrome must not consume its height. */
+@media (pointer: coarse) and (orientation: landscape) {
+  .wake-shell { display: block; }
+  .wake-play-area { position: absolute; inset: 0; padding: 0; width: 100%; height: 100%; }
+  .wake-mast {
+    position: absolute; z-index: 30; top: 0; left: 0; right: 0;
+    height: 44px; min-height: 44px; border: 0; padding: 0 10px;
+    background: linear-gradient(#0a1e29b0, #0a1e2900);
+  }
+  .wake-wordmark { display: none; }
+  .wake-review { font-size: 10px; }
+  .wake-tools button { min-height: 44px; min-width: 44px; padding: 0 9px; font-size: 11px; }
+  .wake-hud { padding-top: 43px; }
+  .wake-foot {
+    position: absolute; z-index: 25; bottom: 0; left: 115px; right: 115px;
+    height: 33px; padding: 1px 4px 5px; border: 0;
+    background: #0a1e2978;
+  }
+  .wake-cue { font-size: 13px; line-height: 1.35; }
+  .wake-touch-actions { bottom: 3px; }
+  .wake-touch-move { bottom: 7px; }
+  .wake-touch-interact { bottom: 39px; }
+}
+
+.wake-tools button,
+.wake-tools [data-command="language"] { min-width: 44px; min-height: 44px; }

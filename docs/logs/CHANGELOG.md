@@ -6,6 +6,7 @@
 - Move prior candidate/production documents into `docs/design-history`. Keep local container evidence and the original container index in ignored `.local/myweb-maintenance`; MyWeb top level now contains product workspaces plus the previously blocked `_pending-delete` exception.
 - Move paused Wild Circuit to the sibling `wild-circuit` workspace with its original Git and working files preserved. Update affected document paths; active Cutlass runtime/assets are untouched by this research and organization work.
 - Save one generated discussion concept and its full prompt in ignored `.local/art-direction-2026-10-24`; the image is not gameplay evidence or an animation-ready asset.
+- Final filesystem read-back shows only TetraMorph, cinder-below, spritelab and cutlass-wake at MyWeb top level. The user confirmed manually deleting the retired residuals and Wild Circuit after the preservation move; this agent did not execute their removal.
 - Validate UTF-8, document links, preserved move contents and Git identities. No game tests/build/deployment were run for these document and directory changes; prior prototype concerns remain static findings to reproduce against the current implementation.
 
 ## 2026-10-24 · Stage A resources and art comparison

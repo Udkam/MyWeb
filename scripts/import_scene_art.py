@@ -22,7 +22,11 @@ def digest(path):
 
 def source(name, file):
     target = LOCAL / name
-    shutil.copyfile(SOURCE / file, target)
+    if not target.exists():
+        original = SOURCE / file
+        if not original.exists():
+            raise FileNotFoundError(f"Restore original source {name} in {LOCAL}; see docs/art/scene-import.json for its SHA256")
+        shutil.copyfile(original, target)
     return target, Image.open(target).convert("RGBA")
 
 bg_path, bg = source("harbor-source.png", "exec-6cd9d37b-96a2-4da8-9e09-6065bbf66c56.png")
