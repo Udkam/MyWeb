@@ -2,7 +2,7 @@
 
 横版像素海盗动作冒险，英文游戏名，默认中文，可切英文。
 
-当前是**盐蚀铜版遭遇试玩的制作阶段**，用户已接受深化方向，尚未进行实际试玩验收。完整制作目标仍是三章、六类敌人职责、两位独立 Boss、两条短支路与逃生结局。独立 Vercel 项目已配置，试玩尚未部署，未接入个人门户；不能把样片当成完整产品。
+**在线试玩：[Cutlass Wake](https://cutlass-wake.vercel.app/)**。当前是已发布的盐蚀铜版首遭遇审核版，用户已接受深化方向，尚未进行实际试玩验收。完整制作目标仍是三章、六类敌人职责、两位独立 Boss、两条短支路与逃生结局。未接入个人门户；不能把样片当成完整产品。
 
 专用源码：[Udkam/MyWeb / codex/cutlass-wake](https://github.com/Udkam/MyWeb/tree/codex/cutlass-wake)。工作目录 E:\Proj\Active\MyWeb\cutlass-wake，来自目录基线 d38086c051e6476e0bd3e3783a4b543de398d4c1，没有复制旧游戏。MyWeb/main 只放目录，不合并本作源码。
 
@@ -43,4 +43,6 @@ Vite输出 dist。Phaser固定3.90.0，不混用其他主版本API。生产构�
 
 浏览器检查使用已安装的Python Playwright。新版 scripts/verify_playtest_controls.py 检查键盘、多指触控、旋转、设置、显示对比与无滚动；scripts/record_playtest_realtime.py 按真实墙钟输入并记录正常RAF运行，不调用推进时间或修改游戏状态。旧 verify_art_sample.py、verify_controls.py、create_review_inputs.ts、capture_review.py 仅对应旧固定时间样片。手机为Chromium模拟，不是真机触屏验收；视频没有捕获系统音频，听感仍需实际试听。
 
-用户亲自试玩认可前不扩全量章节。独立Vercel项目与分支过滤见[部署记录](docs/DEPLOYMENT.md)：生产分支 codex/cutlass-wake、构建根为分支仓库根、npm ci / npm run build / dist。实际部署与验收尚未完成，配置域名不等于已经上线。最终完整生产部署与游戏验收之后才接入独立 personal-web/main。任何 foreseer.site 浏览器验收必须导航前拦截 /api/visits*。
+首个生产试玩对应源码 `ca3de6126611da29b776c589ee3d6da7603f6dcb`，Vercel 已确认 Production / Ready；47 个线上文件与本地构建逐一 SHA-256 相同，生产手机模拟与死亡重开检查通过。详见[验收证据及限制](docs/VERIFICATION.md)。这不替代用户的美术、手感、真机与人工试听验收。
+
+用户亲自试玩认可前不扩全量章节。独立Vercel项目与分支过滤见[部署记录](docs/DEPLOYMENT.md)：生产分支 codex/cutlass-wake、构建根为分支仓库根、npm ci / npm run build / dist。后续文档提交不改变该试玩的运行内容。最终完整生产部署与游戏验收之后才接入独立 personal-web/main。任何 foreseer.site 浏览器验收必须导航前拦截 /api/visits*。

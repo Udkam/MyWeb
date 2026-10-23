@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-24 · Verified encounter review deployment
+
+- Publish runtime commit `ca3de6126611da29b776c589ee3d6da7603f6dcb` to the new independent Vercel project at https://cutlass-wake.vercel.app/. Verify Ready / Production Current, exact source SHA and all47 served file hashes against local dist.
+- Exercise production mobile-emulated controls (9/9) and ordinary-input death/restart/run/jump with no page/console errors or production debug globals. Keep complete videos/reports locally and document the absence of physical-phone, human audio/art/feel, first-player-duration and full-adventure acceptance.
+- Record deployment settings, source provenance, maintenance and task-process cleanup. This phase changes Markdown only. Goal remains active at the user review gate; no chapter expansion or personal-web entry.
+
 ## 2026-10-24 · Salt-copper encounter playtest
 
 - Replace the action-study runtime with layered ship art and a unified 70/105px character set: 38 hero, 20 sword and 12 musket body poses, plus fixed weapon rigs and original-hand occlusion. Keep actual source dimensions, hashes, aliases and remaining animation limitations explicit.

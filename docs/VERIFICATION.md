@@ -45,7 +45,17 @@ Phone evidence is Chromium touch/viewport emulation, not a physical phone. The r
 
 ## Release record
 
-Independent Vercel project, production branch and project-level branch filtering are configured as documented in [DEPLOYMENT.md](DEPLOYMENT.md). Exact release SHA, served-byte comparison and production browser results are pending the first deployment.
+The independent Vercel project serves https://cutlass-wake.vercel.app/. Its first production deployment `48CV3HXRLQHHqjYwfjcWm4peu5UA` was inspected as Ready / Production Current and linked to exact source `ca3de6126611da29b776c589ee3d6da7603f6dcb`. Production branch, repository root and project-level branch filtering are documented in [DEPLOYMENT.md](DEPLOYMENT.md).
+
+All 47 local `dist` files matched their served SHA-256 with zero mismatches (`.qa/playtest/production-ca3de61-bytes.json`). This establishes byte equality for that release; it is separate from the following actual browser checks.
+
+- Production phone emulation: Chromium/CDP, 844×390, DPR3, 9/9 checks passed, zero page/console errors. Three-finger movement/jump/attack and separate finger release, guard/dodge, settings pause, effects, 640/960, English, rotation and explicit resume were exercised. Touch targets are at least44 CSS px and the viewport has no scroll. Evidence: `.qa/playtest/production-mobile-ca3de61`.
+- All three developer globals were `undefined` on title and final pages. A normal attack loaded `slash.ogg` and produced browser Media events `kPlay` then `kEnded`; pause/seek events were also observed. This verifies one ordinary playback path, not human hearing or all seven samples.
+- Production death/restart used `record_playtest_realtime.py --ui-only`, ordinary input and normal RAF. Held guard reached40% pressure at2.809s and100% break at5.608s; natural death was visible at12.310s. The actual primary button was pressed at13.182–13.232s, with playing mode and6HP restored at13.246s, followed by running and jumping. Action wall time15.857s; uncut video19.00s including load/title. No state/debug access, fast-forward, console/page errors or scroll. Evidence: `.qa/playtest/production-death-restart-ca3de61`; MP4 SHA256 `c3027c4e51c806f05fb2c847b0b25a80cbf9cb728bf3fcc08f0f78546bd2372b`.
+
+Production recordings contain no system audio; this route did not separately cover an airborne fatal hit or every final-cannon result effect. These production checks complement the model/local-route evidence without claiming complete game acceptance. Test contexts installed an `/api/visits*` interceptor before navigation; no foreseer.site page was visited or portal changed.
+
+Task-owned Vite and esbuild were stopped after verifying their PIDs and commands; port5176 is closed. Redundant old raw capture frames and the task Python cache were removed, while acceptance/failure videos, reports and source images remain ignored in `.qa` and `.local/assets`. No unrelated project cleanup was performed.
 
 ## Maintenance
 
