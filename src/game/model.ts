@@ -1,14 +1,44 @@
+import { ART_CONTACT_DATA } from './art-contact-data';
+import { actorAabb, capsuleIntersectsAabb, feetPointToWorld, feetSegmentToWorld, sampleClipFrame,
+  type ArtContactData, type ArtContactFrame } from './contact';
+
 /** Pure, fixed 60 Hz action-sample simulation. Positions use feet-centre coordinates. */
 export const FIXED_MS = 1000 / 60;
+/** The new 70px bodies retain only 2px of hair above their standing collision/hurt box. */
+export const STANDING_HEIGHT = 68;
+const CONTACT_DATA: ArtContactData = ART_CONTACT_DATA;
+const DODGE_ART = CONTACT_DATA.actors.hero!.actions.dodge!;
+export const DODGE_TIMING = {
+  duration: 260,
+  invulnerableStart: 60,
+  invulnerableEnd: 180,
+  frameDurations: DODGE_ART.frames.map(frame => frame.durationMs),
+  /** Actual alpha heights 49/51/51/64/70 minus the same 2px hair margin. */
+  frameHeights: DODGE_ART.frames.map(frame => Math.min(STANDING_HEIGHT, -frame.visibleTopFromFeet - 2)),
+} as const;
+export function getDodgeFrame(elapsedMs: number): number {
+  let remaining = Math.max(0, elapsedMs);
+  for (let i = 0; i < DODGE_TIMING.frameDurations.length; i += 1) {
+    if (remaining < DODGE_TIMING.frameDurations[i]!) return i;
+    remaining -= DODGE_TIMING.frameDurations[i]!;
+  }
+  return DODGE_TIMING.frameDurations.length - 1;
+}
+export function getDodgeHeight(elapsedMs: number): number {
+  return DODGE_TIMING.frameHeights[getDodgeFrame(elapsedMs)]!;
+}
 export const WORLD = { width: 640, height: 360, floor: 255, left: 18, right: 622 } as const;
 /** Art-space offsets from feet-centre, shared with the renderer's muzzle effects. */
 export const MUZZLES = {
-  musket: { x: 37, y: -46 },
-  cannon: { x: -30, y: -28 },
+  musket: {
+    x: ART_CONTACT_DATA.actors.musket.actions.fire.frames[0].weapon.muzzle[0],
+    y: ART_CONTACT_DATA.actors.musket.actions.fire.frames[0].weapon.muzzle[1],
+  },
+  cannon: { x: -43, y: -24 },
 } as const;
 export const PLATFORMS = [
   { id: 'crate', x: 160, y: 231, width: 48, height: 24, oneWay: false },
-  { id: 'platform', x: 430, y: 207, width: 112, height: 12, oneWay: true },
+  { id: 'platform', x: 430, y: 207, width: 112, height: 12, oneWay: false },
 ] as const;
 
 export type Facing = -1 | 1;
@@ -18,7 +48,29 @@ export type HeroAction =
   | 'guard' | 'parry' | 'shovePrep' | 'shoveHit' | 'shoveRecovery'
   | 'hurt' | 'hurtRecover' | 'dead' | 'dodge';
 export type EnemyAction = 'idle' | 'run' | 'windup' | 'attack' | 'recovery'
-  | 'aim' | 'fire' | 'reload' | 'hurt' | 'stagger' | 'pushed' | 'dead';
+  | 'aim' | 'fire' | 'reload' | 'hurt' | 'stagger' | 'pushed' | 'brace' | 'retreat' | 'dead';
+
+export interface ContextAction {
+  kind: 'none' | 'shove' | 'cannon';
+  targetId: string | null;
+  opportunityId: number | null;
+  revision: number;
+}
+
+export interface Opportunity {
+  id: number;
+  targetId: string;
+  source: 'parry' | 'whiffPunish' | 'reloadInterrupt';
+  enemyActionId: number;
+  expiresAt: number;
+  facing: Facing;
+}
+
+export interface BufferedInput {
+  kind: 'attack' | 'guard' | 'jump' | 'dodge' | 'context';
+  expiresAt: number;
+  contextIntent?: ContextAction;
+}
 
 export interface Input {
   move: number;
@@ -28,6 +80,8 @@ export interface Input {
   guardHeld: boolean;
   dodgePressed: boolean;
   interactPressed: boolean;
+  /** Copy of the displayed action when E/touch-interact was pressed. Never retargeted. */
+  contextIntent?: ContextAction;
 }
 
 interface Body {
@@ -62,6 +116,11 @@ export interface HeroAttack {
   facing: Facing;
   targetId?: string;
   hitTargets: string[];
+  stage: 1 | 2;
+  hitConfirmed: boolean;
+  cancelOpen: boolean;
+  opportunityId?: number;
+  pursuitTargetId?: string;
 }
 
 export interface Hero extends Body {
@@ -73,6 +132,14 @@ export interface Hero extends Body {
   guardHeld: boolean;
   guardBrokenUntil: number;
   blockTimes: number[];
+  guardPressure: number;
+  guardRecoverAfter: number;
+  parryReadyAt: number;
+  blockedUntil: number;
+  attackLatched: boolean;
+  interactLatched: boolean;
+  inputBuffer: BufferedInput | null;
+  opportunity: Opportunity | null;
   stunUntil: number;
   dodgeUntil: number;
   dodgeInvulnerableFrom: number;
@@ -96,6 +163,18 @@ export interface Enemy extends Body {
   pushDirection: Facing;
   aimX: number;
   aimY: number;
+  actionId: number;
+  attackId: number;
+  attackContact: boolean;
+  whiffRecovery: boolean;
+  effectiveLightHits: number;
+  braceAt: number;
+  braceEstablished: boolean;
+  retreatKind: 'guarded' | 'spacing';
+  disengagedAt: number;
+  staggerUntil: number;
+  opportunityUntil: number;
+  lockedFacing: Facing;
 }
 
 export interface Projectile {
@@ -144,9 +223,16 @@ export interface Model {
   projectiles: Projectile[];
   log: GameEvent[];
   nextId: number;
+  contextAction: ContextAction;
+  encounter: {
+    status: 'active' | 'exitReady' | 'complete';
+    exitX: number;
+    completedAt: number | null;
+    routeFlags: string[];
+  };
 }
 
-const GRAVITY = 1150;
+export const GRAVITY = 1150;
 const EPSILON = 0.00001;
 const DEFAULT_INPUT: Input = {
   move: 0, jumpPressed: false, attackPressed: false, guardPressed: false,
@@ -156,11 +242,15 @@ const DEFAULT_INPUT: Input = {
 export function createModel(): Model {
   return {
     time: 0, tick: 0, paused: false, focused: true, nextId: 1,
+    contextAction: { kind: 'none', targetId: null, opportunityId: null, revision: 0 },
+    encounter: { status: 'active', exitX: 606, completedAt: null, routeFlags: [] },
     hero: {
-      id: 'hero', x: 86, y: WORLD.floor, vx: 0, vy: 0, width: 20, height: 46,
+      id: 'hero', x: 86, y: WORLD.floor, vx: 0, vy: 0, width: 22, height: STANDING_HEIGHT,
       facing: 1, grounded: true, hp: 6, maxHp: 6, action: 'idle', actionTime: 0,
       frameIndex: 0, invulnerableUntil: 0, guardPressedAt: -Infinity,
       guardLatched: false, guardHeld: false, guardBrokenUntil: 0, blockTimes: [],
+      guardPressure: 0, guardRecoverAfter: 0, parryReadyAt: 0, blockedUntil: 0,
+      attackLatched: false, interactLatched: false, inputBuffer: null, opportunity: null,
       stunUntil: 0, dodgeUntil: 0, dodgeInvulnerableFrom: 0, dodgeInvulnerableUntil: 0,
       dodgeStartX: 86, dodgeTargetX: 86, dodgeCooldownUntil: 0, coyoteUntil: 80,
       jumpBufferedUntil: -Infinity, airAttackUsed: false, parryTarget: null, attack: null,
@@ -172,12 +262,15 @@ export function createModel(): Model {
 }
 
 function makeEnemy(id: string, kind: Enemy['kind'], x: number, y: number): Enemy {
-  const hp = kind === 'sword' ? 3 : 2;
+  const hp = kind === 'sword' ? 4 : 3;
   return {
-    id, kind, x, y, vx: 0, vy: 0, width: kind === 'sword' ? 24 : 20, height: 46,
+    id, kind, x, y, vx: 0, vy: 0, width: kind === 'sword' ? 26 : 22, height: STANDING_HEIGHT,
     facing: -1, grounded: true, hp, maxHp: hp, action: 'idle', actionTime: 0,
     frameIndex: kind === 'sword' ? 0 : 12, attackResolved: false,
     pushRemaining: 0, pushDirection: -1, aimX: 86, aimY: WORLD.floor - 24,
+    actionId: 0, attackId: 0, attackContact: false, whiffRecovery: false,
+    effectiveLightHits: 0, braceAt: Infinity, braceEstablished: false, retreatKind: 'guarded',
+    disengagedAt: Infinity, staggerUntil: 0, opportunityUntil: 0, lockedFacing: -1,
   };
 }
 
@@ -197,6 +290,7 @@ export function setPaused(model: Model, paused: boolean): void {
   model.hero.guardHeld = false;
   // Resuming requires a new physical press; an old held guard cannot become a fresh parry.
   model.hero.guardPressedAt = -Infinity;
+  model.hero.inputBuffer = null;
   emit(model, { type: paused ? 'pause' : 'resume', actor: 'system' });
 }
 
@@ -205,6 +299,7 @@ export function setFocused(model: Model, focused: boolean): void {
   model.focused = focused;
   model.hero.guardHeld = false;
   model.hero.guardPressedAt = -Infinity;
+  model.hero.inputBuffer = null;
   if (!focused) model.paused = true;
   emit(model, { type: focused ? 'focus' : 'blur', actor: 'system' });
 }
@@ -219,6 +314,7 @@ function enemyAction(enemy: Enemy, action: EnemyAction): void {
   if (enemy.action === action) return;
   enemy.action = action;
   enemy.actionTime = 0;
+  enemy.actionId += 1;
 }
 
 function locked(hero: Hero): boolean {
@@ -228,7 +324,7 @@ function locked(hero: Hero): boolean {
 
 /** Each invocation advances exactly one simulation tick. The host owns the RAF accumulator. */
 export function step(model: Model, partial: Partial<Input> = {}): void {
-  if (model.paused || !model.focused) return;
+  if (model.paused || !model.focused || model.encounter.status === 'complete') return;
   const input = { ...DEFAULT_INPUT, ...partial };
   input.move = Number.isFinite(input.move) ? Math.max(-1, Math.min(1, input.move)) : 0;
   model.tick += 1;
@@ -238,106 +334,95 @@ export function step(model: Model, partial: Partial<Input> = {}): void {
   for (const enemy of model.enemies) updateEnemy(model, enemy);
   updateCannon(model);
   updateProjectiles(model);
+  publishContextAction(model);
+  if (model.enemies.every(enemy => enemy.hp <= 0) && model.hero.hp > 0) {
+    if (model.encounter.status === 'active') {
+      model.encounter.status = 'exitReady';
+      emit(model, { type: 'exitReady', actor: 'system' });
+    }
+    if (model.hero.grounded && model.hero.x >= model.encounter.exitX) {
+      model.encounter.status = 'complete';
+      model.encounter.completedAt = model.time;
+      model.hero.inputBuffer = null;
+      emit(model, { type: 'encounterComplete', actor: 'hero' });
+    }
+  }
   updateFrames(model);
 }
 
 function updateHero(model: Model, input: Input): void {
   const hero = model.hero;
   hero.actionTime += FIXED_MS;
-  hero.blockTimes = hero.blockTimes.filter(time => model.time - time < 2000);
-  if (hero.parryTarget && model.time > hero.parryTarget.expiresAt) hero.parryTarget = null;
-  if (!input.guardHeld && !input.guardPressed) hero.guardLatched = false;
-  if (input.guardPressed && !hero.guardLatched && !locked(hero) && model.time >= hero.guardBrokenUntil) {
-    hero.guardPressedAt = model.time;
+  if (hero.opportunity && (model.time >= hero.opportunity.expiresAt
+    || !model.enemies.some(enemy => enemy.id === hero.opportunity!.targetId && enemy.hp > 0))) {
+    clearOpportunity(model, 'expired');
   }
+  if (!hero.guardHeld && !input.guardHeld && !input.guardPressed && model.time >= hero.guardRecoverAfter) {
+    hero.guardPressure = Math.max(0, hero.guardPressure - 20 * FIXED_MS / 1000);
+    if (hero.guardPressure === 0) hero.blockTimes = [];
+  }
+  const attackPressed = input.attackPressed && !hero.attackLatched;
+  const contextPressed = input.interactPressed && !hero.interactLatched;
+  const guardPressed = input.guardPressed && !hero.guardLatched;
+  hero.attackLatched = input.attackPressed;
+  hero.interactLatched = input.interactPressed;
+  if (!input.guardHeld && !input.guardPressed) hero.guardLatched = false;
   if (input.guardHeld || input.guardPressed) hero.guardLatched = true;
   hero.guardHeld = input.guardHeld || input.guardPressed;
 
+  if (hero.inputBuffer && model.time > hero.inputBuffer.expiresAt) {
+    if (hero.inputBuffer.kind === 'context') emit(model, { type: 'contextMiss', actor: 'hero',
+      target: hero.inputBuffer.contextIntent?.targetId ?? undefined });
+    hero.inputBuffer = null;
+  }
   if (hero.hp <= 0) {
+    hero.inputBuffer = null;
+    hero.height = STANDING_HEIGHT;
     heroAction(hero, 'dead');
     hero.vx = 0;
     integrate(hero, FIXED_MS / 1000, model);
     return;
   }
-
   if (hero.action === 'hurt' && hero.actionTime + EPSILON >= 160) heroAction(hero, 'hurtRecover');
-  if ((hero.action === 'hurt' || hero.action === 'hurtRecover') && model.time >= hero.stunUntil) {
-    heroAction(hero, 'idle');
-  }
+  if ((hero.action === 'hurt' || hero.action === 'hurtRecover') && model.time >= hero.stunUntil) heroAction(hero, 'idle');
   if (hero.action === 'dodge' && model.time >= hero.dodgeUntil) {
+    hero.height = STANDING_HEIGHT;
     hero.x = nearestLegalX(model, hero, hero.x);
     heroAction(hero, 'idle');
   }
   if (hero.action === 'parry' && hero.actionTime + EPSILON >= 210) heroAction(hero, 'idle');
   if (hero.action === 'land' && hero.actionTime + EPSILON >= 140) heroAction(hero, 'idle');
-
   if (hero.attack) {
     hero.attack.elapsed += FIXED_MS;
-    if (hero.attack.elapsed >= hero.attack.duration - EPSILON) {
+    hero.attack.cancelOpen = hero.attack.hitConfirmed && hero.attack.elapsed + EPSILON >= hero.attack.activeEnd;
+    if (hero.attack.elapsed + EPSILON >= hero.attack.duration) {
+      if (!hero.attack.hitConfirmed && hero.attack.kind !== 'shove') emit(model, { type: 'attackWhiff', actor: 'hero' });
       hero.attack = null;
       heroAction(hero, 'idle');
     } else syncAttackAction(hero);
   }
-
   if (input.move && !locked(hero) && !hero.attack) hero.facing = input.move < 0 ? -1 : 1;
-
-  if (input.dodgePressed && hero.grounded && !locked(hero) && !hero.attack
-    && model.time >= hero.dodgeCooldownUntil) {
-    heroAction(hero, 'dodge');
-    hero.dodgeUntil = model.time + 240;
-    hero.dodgeInvulnerableFrom = model.time + 60;
-    hero.dodgeInvulnerableUntil = model.time + 180;
-    hero.dodgeStartX = hero.x;
-    const preview = { ...hero };
-    moveHorizontal(preview, hero.facing * 330 * 0.24, model, true);
-    hero.dodgeTargetX = nearestLegalX(model, hero, preview.x,
-      Math.min(hero.x, preview.x), Math.max(hero.x, preview.x));
-    hero.dodgeCooldownUntil = model.time + 650;
-    emit(model, { type: 'dodge', actor: 'hero' });
-  }
-
-  if (input.jumpPressed) hero.jumpBufferedUntil = model.time + 100;
   if (hero.grounded) hero.coyoteUntil = model.time + 80;
-  if (model.time <= hero.jumpBufferedUntil && model.time <= hero.coyoteUntil
-    && !locked(hero) && !hero.attack && !hero.guardHeld) {
-    hero.vy = -380;
-    hero.grounded = false;
-    hero.jumpBufferedUntil = -Infinity;
-    hero.coyoteUntil = -Infinity;
-    heroAction(hero, 'launch');
-    emit(model, { type: 'jump', actor: 'hero' });
-  }
 
-  if (input.attackPressed && !locked(hero) && !hero.attack) {
-    const token = hero.parryTarget;
-    const target = token && model.enemies.find(enemy => enemy.id === token.enemyId && enemy.hp > 0);
-    if (token && target && model.time <= token.expiresAt && hero.facing === token.facing
-      && input.move * token.facing > 0
-      && inFront(hero, target.x) && Math.abs(target.x - hero.x) <= 88
-      && Math.abs((target.y - target.height / 2) - (hero.y - hero.height / 2)) < 40) {
-      beginAttack(model, 'shove', target.id);
-      hero.parryTarget = null;
-    } else if (hero.grounded || !hero.airAttackUsed) {
-      beginAttack(model, hero.grounded ? 'ground' : 'air');
-      if (!hero.grounded) hero.airAttackUsed = true;
-    }
-  }
-
-  if (input.interactPressed && !locked(hero) && !hero.attack && model.cannon.action === 'idle'
-    && Math.abs(hero.x - model.cannon.x) <= 58 && Math.abs(hero.y - model.cannon.y) <= 30) {
-    model.cannon.action = 'windup';
-    model.cannon.actionTime = 0;
-    emit(model, { type: 'cannonIgnite', actor: 'hero', target: 'cannon' });
-  }
+  // Exactly one slot. A fresh deliberate input replaces an older pending action.
+  const kind: BufferedInput['kind'] | null = contextPressed ? 'context' : input.dodgePressed ? 'dodge'
+    : input.jumpPressed ? 'jump' : guardPressed ? 'guard' : attackPressed ? 'attack' : null;
+  if (kind) hero.inputBuffer = {
+    kind, expiresAt: model.time + 180,
+    ...(kind === 'context' ? { contextIntent: { ...(input.contextIntent ?? model.contextAction) } } : {}),
+  };
+  executeBufferedInput(model);
 
   if (hero.action === 'dodge') {
+    hero.height = getDodgeHeight(hero.actionTime);
     const remaining = hero.dodgeTargetX - hero.x;
     hero.vx = Math.sign(remaining) * Math.min(330, Math.abs(remaining) * 1000 / FIXED_MS);
-  }
-  else if (hero.action === 'hurt') hero.vx *= 0.88;
-  else if (hero.action === 'hurtRecover') hero.vx = 0;
-  else if (hero.attack && hero.grounded) hero.vx = 0;
-  else if (hero.guardHeld && hero.grounded && !hero.attack) hero.vx = 0;
+  } else if (hero.action === 'hurt') hero.vx *= 0.88;
+  else if (hero.action === 'hurtRecover' || model.time < hero.blockedUntil) hero.vx = 0;
+  else if (hero.attack && hero.grounded) {
+    hero.vx = hero.attack.stage === 2 && hero.attack.elapsed >= 100 && hero.attack.elapsed < hero.attack.activeEnd
+      ? hero.attack.facing * 75 : 0;
+  } else if (hero.guardHeld && hero.grounded) hero.vx = 0;
   else if (hero.action === 'parry' && hero.grounded) hero.vx = 0;
   else hero.vx = input.move * 150;
 
@@ -351,7 +436,7 @@ function updateHero(model: Model, input: Input): void {
     }
   }
   if (!locked(hero) && !hero.attack && hero.action !== 'parry' && hero.action !== 'land') {
-    if (hero.guardHeld && hero.grounded && model.time >= hero.guardBrokenUntil) heroAction(hero, 'guard');
+    if (hero.guardHeld && hero.grounded && hero.guardPressure < 100 && model.time >= hero.guardBrokenUntil) heroAction(hero, 'guard');
     else if (!hero.grounded) {
       if (hero.action === 'launch' && hero.actionTime < 70) return;
       heroAction(hero, hero.vy < -35 ? 'rise' : 'fall');
@@ -359,17 +444,166 @@ function updateHero(model: Model, input: Input): void {
   }
 }
 
-function beginAttack(model: Model, kind: HeroAttack['kind'], targetId?: string): void {
+function executeBufferedInput(model: Model): void {
+  const hero = model.hero;
+  const buffered = hero.inputBuffer;
+  if (!buffered || locked(hero) || model.time < hero.blockedUntil) return;
+  let stage: 1 | 2 = 1;
+  if (hero.attack) {
+    if (!hero.attack.cancelOpen) return;
+    if (buffered.kind === 'attack') {
+      if (hero.attack.kind !== 'ground' || hero.attack.stage !== 1) return;
+      stage = 2;
+    }
+    emit(model, { type: 'hitConfirmCancel', actor: 'hero', target: buffered.kind });
+    hero.attack = null;
+    heroAction(hero, 'idle');
+  }
+  if (buffered.kind === 'guard') {
+    if (!hero.guardHeld || !hero.grounded || hero.guardPressure >= 100 || model.time < hero.guardBrokenUntil) {
+      hero.inputBuffer = null;
+      return;
+    }
+    if (model.time + EPSILON >= hero.parryReadyAt) {
+      hero.guardPressedAt = model.time;
+      hero.parryReadyAt = model.time + 480;
+    } else hero.guardPressedAt = -Infinity;
+    heroAction(hero, 'guard');
+  } else if (buffered.kind === 'jump') {
+    if (!hero.grounded && model.time > hero.coyoteUntil) return;
+    hero.vy = -380;
+    hero.grounded = false;
+    hero.coyoteUntil = -Infinity;
+    heroAction(hero, 'launch');
+    emit(model, { type: 'jump', actor: 'hero' });
+  } else if (buffered.kind === 'dodge') {
+    if (!hero.grounded || model.time + EPSILON < hero.dodgeCooldownUntil) return;
+    heroAction(hero, 'dodge');
+    hero.height = getDodgeHeight(0);
+    hero.dodgeUntil = model.time + DODGE_TIMING.duration;
+    hero.dodgeInvulnerableFrom = model.time + DODGE_TIMING.invulnerableStart;
+    hero.dodgeInvulnerableUntil = model.time + DODGE_TIMING.invulnerableEnd;
+    hero.dodgeStartX = hero.x;
+    const preview = { ...hero };
+    moveHorizontal(preview, hero.facing * 79.2, model, true);
+    hero.dodgeTargetX = nearestLegalX(model, { ...hero, height: STANDING_HEIGHT }, preview.x,
+      Math.min(hero.x, preview.x), Math.max(hero.x, preview.x));
+    hero.dodgeCooldownUntil = model.time + 800;
+    emit(model, { type: 'dodge', actor: 'hero' });
+  } else if (buffered.kind === 'context') {
+    executeContext(model, buffered.contextIntent!);
+  } else {
+    if (!hero.grounded && hero.airAttackUsed) { hero.inputBuffer = null; return; }
+    const opportunity = reachableOpportunity(model);
+    beginAttack(model, hero.grounded ? 'ground' : 'air', undefined, stage, opportunity);
+    if (opportunity) consumeOpportunity(model);
+    if (!hero.grounded) hero.airAttackUsed = true;
+  }
+  hero.inputBuffer = null;
+}
+
+function executeContext(model: Model, intent: ContextAction): void {
+  const hero = model.hero;
+  if (intent.kind === 'shove') {
+    const opportunity = reachableOpportunity(model);
+    if (opportunity && opportunity.id === intent.opportunityId && opportunity.targetId === intent.targetId
+      && shoveCanReach(model, opportunity)) {
+      beginAttack(model, 'shove', opportunity.targetId, 1, opportunity);
+      consumeOpportunity(model);
+      return;
+    }
+  } else if (intent.kind === 'cannon' && intent.targetId === 'cannon' && model.cannon.action === 'idle'
+    && Math.abs(hero.x - model.cannon.x) <= 58 && Math.abs(hero.y - model.cannon.y) <= 30) {
+    model.cannon.action = 'windup';
+    model.cannon.actionTime = 0;
+    emit(model, { type: 'cannonIgnite', actor: 'hero', target: 'cannon' });
+    return;
+  }
+  emit(model, { type: 'contextMiss', actor: 'hero', ...(intent.targetId ? { target: intent.targetId } : {}) });
+}
+
+function beginAttack(model: Model, kind: HeroAttack['kind'], targetId?: string,
+  stage: 1 | 2 = 1, opportunity?: Opportunity | null): void {
   const hero = model.hero;
   hero.attack = {
-    id: model.nextId++, kind, elapsed: 0, facing: hero.facing, hitTargets: [],
-    activeStart: kind === 'air' ? 35 : kind === 'shove' ? 120 : 110,
-    activeEnd: kind === 'air' ? 155 : kind === 'shove' ? 220 : 210,
-    duration: kind === 'air' ? 250 : kind === 'shove' ? 440 : 410,
+    id: model.nextId++, kind, elapsed: 0, facing: hero.facing, hitTargets: [], stage,
+    hitConfirmed: false, cancelOpen: false,
+    activeStart: kind === 'air' ? 35 : kind === 'shove' ? 120 : stage === 2 ? 150 : 100,
+    activeEnd: kind === 'air' ? 155 : kind === 'shove' ? 220 : stage === 2 ? 260 : 180,
+    duration: kind === 'air' ? 300 : kind === 'shove' ? 470 : stage === 2 ? 560 : 420,
     ...(targetId ? { targetId } : {}),
+    ...(opportunity ? { opportunityId: opportunity.id, pursuitTargetId: opportunity.targetId } : {}),
   };
   syncAttackAction(hero);
-  emit(model, { type: kind === 'shove' ? 'shovePrepare' : 'attack', actor: 'hero', ...(targetId ? { target: targetId } : {}) });
+  emit(model, { type: kind === 'shove' ? 'shovePrepare' : 'attack', actor: 'hero',
+    ...(targetId ? { target: targetId } : {}), amount: stage });
+}
+
+function reachableOpportunity(model: Model): Opportunity | null {
+  const hero = model.hero;
+  const opportunity = hero.opportunity;
+  if (!opportunity || model.time >= opportunity.expiresAt || hero.facing !== opportunity.facing) return null;
+  const target = model.enemies.find(enemy => enemy.id === opportunity.targetId && enemy.hp > 0);
+  return target && inFront(hero, target.x) && Math.abs(target.x - hero.x) <= 88
+    && Math.abs((target.y - target.height / 2) - (hero.y - hero.height / 2)) < 46 ? opportunity : null;
+}
+
+/** The displayed E only promises the real forward palm, not the broader J opportunity radius. */
+function shoveCanReach(model: Model, opportunity: Opportunity): boolean {
+  const target = model.enemies.find(enemy => enemy.id === opportunity.targetId && enemy.hp > 0);
+  if (!target) return false;
+  const clip = CONTACT_DATA.actors.hero!.actions.shove!;
+  return (clip.phaseFrames?.active ?? []).some(index => {
+    const palm = clip.frames[index]?.palm;
+    if (!palm) return false;
+    const point = feetPointToWorld(palm, model.hero);
+    return capsuleIntersectsAabb({ a: point, b: point }, 2, actorAabb(target));
+  });
+}
+
+function clearOpportunity(model: Model, reason: string): void {
+  if (model.hero.opportunity) emit(model, { type: 'opportunityEnd', actor: 'hero',
+    target: model.hero.opportunity.targetId });
+  model.hero.opportunity = null;
+  model.hero.parryTarget = null;
+}
+
+function consumeOpportunity(model: Model): void {
+  const opportunity = model.hero.opportunity;
+  if (opportunity) {
+    const enemy = model.enemies.find(item => item.id === opportunity.targetId);
+    if (enemy) enemy.opportunityUntil = 0;
+    emit(model, { type: 'opportunityConsumed', actor: 'hero', target: opportunity.targetId });
+  }
+  model.hero.opportunity = null;
+  model.hero.parryTarget = null;
+}
+
+function grantOpportunity(model: Model, enemy: Enemy, source: Opportunity['source'], sourceActionId: number): void {
+  if (enemy.hp <= 0) return;
+  model.hero.opportunity = { id: model.nextId++, targetId: enemy.id, source, enemyActionId: sourceActionId,
+    expiresAt: model.time + 950, facing: model.hero.facing };
+  model.hero.parryTarget = { enemyId: enemy.id, facing: model.hero.facing, expiresAt: model.time + 950 };
+  enemy.opportunityUntil = model.time + 950;
+  enemy.staggerUntil = model.time + 950;
+  emit(model, { type: 'opportunity', actor: 'hero', target: enemy.id });
+  if (!model.encounter.routeFlags.includes(source)) model.encounter.routeFlags.push(source);
+}
+
+/** Last published intent, safe for a keydown handler to copy before the next tick. */
+export function getContextAction(model: Model): ContextAction {
+  return { ...model.contextAction };
+}
+
+function publishContextAction(model: Model): void {
+  const opportunity = model.hero.hp > 0 ? reachableOpportunity(model) : null;
+  let next: ContextAction = { kind: 'none', targetId: null, opportunityId: null, revision: model.contextAction.revision };
+  if (opportunity && shoveCanReach(model, opportunity)) next = { ...next, kind: 'shove', targetId: opportunity.targetId, opportunityId: opportunity.id };
+  else if (model.hero.hp > 0 && model.cannon.action === 'idle' && Math.abs(model.hero.x - model.cannon.x) <= 58
+    && Math.abs(model.hero.y - model.cannon.y) <= 30) next = { ...next, kind: 'cannon', targetId: 'cannon' };
+  if (next.kind !== model.contextAction.kind || next.targetId !== model.contextAction.targetId
+    || next.opportunityId !== model.contextAction.opportunityId) next.revision += 1;
+  model.contextAction = next;
 }
 
 function syncAttackAction(hero: Hero): void {
@@ -394,23 +628,52 @@ function inFront(body: Pick<Body, 'x' | 'facing'>, x: number): boolean {
 function resolveHeroAttack(model: Model): void {
   const hero = model.hero;
   const attack = hero.attack;
-  if (!attack || hero.hp <= 0 || attack.elapsed < attack.activeStart || attack.elapsed >= attack.activeEnd) return;
+  if (!attack || hero.hp <= 0 || attack.elapsed + EPSILON < attack.activeStart || attack.elapsed >= attack.activeEnd) return;
+  const name = attack.kind === 'shove' ? 'shove' : attack.kind === 'air' ? 'airAttack' : `attack${attack.stage}`;
+  const clip = CONTACT_DATA.actors.hero!.actions[name]!;
+  const frame = sampleClipFrame(clip, attack.elapsed - attack.activeStart, 'active', attack.activeEnd - attack.activeStart);
+  if (!frame) return;
   for (const enemy of model.enemies) {
     if (enemy.hp <= 0 || attack.hitTargets.includes(enemy.id)) continue;
     if (attack.kind === 'shove' && enemy.id !== attack.targetId) continue;
-    const dx = (enemy.x - hero.x) * attack.facing;
-    const dy = Math.abs((enemy.y - enemy.height / 2) - (hero.y - hero.height / 2));
-    if (dx <= 0 || dx > (attack.kind === 'shove' ? 88 : 50) + enemy.width / 2 || dy > 38) continue;
+    const pose = { x: hero.x, y: hero.y, facing: attack.facing };
+    if (attack.kind === 'shove') {
+      if (!frame.palm) continue;
+      const palm = feetPointToWorld(frame.palm, pose);
+      if (!capsuleIntersectsAabb({ a: palm, b: palm }, 2, actorAabb(enemy))) continue;
+    } else if (!bladeTouches(frame, pose, enemy)) continue;
     attack.hitTargets.push(enemy.id);
     if (attack.kind === 'shove') {
+      attack.hitConfirmed = true;
       enemy.pushDirection = attack.facing;
       enemy.pushRemaining = 54;
       enemyAction(enemy, 'pushed');
       enemy.actionTime = 0;
+      enemy.staggerUntil = model.time + 650;
       enemy.attackResolved = true;
       emit(model, { type: 'shove', actor: 'hero', target: enemy.id, amount: 54, x: enemy.x, y: enemy.y });
-    } else damageEnemy(model, enemy, 1, 'hero', 'attackHit');
+      if (!model.encounter.routeFlags.includes('shove')) model.encounter.routeFlags.push('shove');
+      continue;
+    }
+    if (enemy.braceEstablished && inFront(enemy, hero.x)) {
+      emit(model, { type: 'enemyBlock', actor: enemy.id, target: 'hero', x: enemy.x, y: enemy.y - 30 });
+      continue;
+    }
+    const source = enemy.kind === 'musket' && enemy.action === 'reload' ? 'reloadInterrupt'
+      : enemy.kind === 'sword' && enemy.action === 'recovery' && enemy.whiffRecovery ? 'whiffPunish' : null;
+    const actionId = source === 'whiffPunish' ? enemy.attackId : enemy.actionId;
+    const pursuing = attack.pursuitTargetId === enemy.id;
+    attack.hitConfirmed = true;
+    damageEnemy(model, enemy, pursuing ? 2 : 1, 'hero', 'attackHit');
+    if (attack.stage === 2 && enemy.hp > 0) moveHorizontal(enemy, attack.facing * 12, model);
+    if (source && !pursuing && enemy.hp > 0) grantOpportunity(model, enemy, source, actionId);
   }
+}
+
+function bladeTouches(frame: ArtContactFrame, pose: { x: number; y: number; facing: Facing }, target: Body): boolean {
+  const weapon = frame.weapon;
+  return Boolean(weapon?.root && weapon.tip
+    && capsuleIntersectsAabb(feetSegmentToWorld(weapon.root, weapon.tip, pose), 2, actorAabb(target)));
 }
 
 function updateEnemy(model: Model, enemy: Enemy): void {
@@ -421,6 +684,10 @@ function updateEnemy(model: Model, enemy: Enemy): void {
     integrate(enemy, FIXED_MS / 1000, model);
     return;
   }
+  if (Math.abs(enemy.x - model.hero.x) > 140) {
+    if (!Number.isFinite(enemy.disengagedAt)) enemy.disengagedAt = model.time;
+    if (model.time - enemy.disengagedAt >= 500) enemy.effectiveLightHits = 0;
+  } else enemy.disengagedAt = Infinity;
   if (enemy.pushRemaining > EPSILON) {
     const wanted = Math.min(enemy.pushRemaining, 360 * FIXED_MS / 1000);
     const oldX = enemy.x;
@@ -428,12 +695,62 @@ function updateEnemy(model: Model, enemy: Enemy): void {
     const moved = Math.abs(enemy.x - oldX);
     enemy.pushRemaining = Math.max(0, enemy.pushRemaining - moved);
     if (moved + EPSILON < wanted) enemy.pushRemaining = 0;
+    // A collision can interrupt a second foe, but never grants or refreshes opportunity.
+    for (const other of model.enemies) {
+      if (other.id === enemy.id || other.hp <= 0 || !verticalOverlap(enemy, other)) continue;
+      if (Math.abs(enemy.x - other.x) <= (enemy.width + other.width) / 2 + EPSILON
+        && inFront({ x: enemy.x, facing: enemy.pushDirection }, other.x)) {
+        enemyAction(other, 'stagger');
+        other.staggerUntil = Math.max(other.staggerUntil, model.time + 260);
+        other.attackResolved = true;
+        emit(model, { type: 'bodyInterrupt', actor: enemy.id, target: other.id });
+      }
+    }
   }
-
-  if (enemy.action === 'hurt' && enemy.actionTime + EPSILON >= 260) enemyAction(enemy, 'idle');
-  if ((enemy.action === 'stagger' || enemy.action === 'pushed') && enemy.actionTime + EPSILON >= 650) enemyAction(enemy, 'idle');
-
-  const stunned = enemy.action === 'hurt' || enemy.action === 'stagger' || enemy.action === 'pushed';
+  if (enemy.kind === 'sword' && model.time + EPSILON >= enemy.braceAt
+    && model.time >= enemy.opportunityUntil && enemy.action !== 'brace' && enemy.action !== 'retreat'
+    && enemy.action !== 'pushed') {
+    enemyAction(enemy, 'brace');
+    enemy.braceEstablished = false;
+    enemy.lockedFacing = model.hero.x < enemy.x ? -1 : 1;
+    enemy.facing = enemy.lockedFacing;
+    enemy.braceAt = Infinity;
+    emit(model, { type: 'enemyBrace', actor: enemy.id });
+  }
+  if (enemy.action === 'hurt' && enemy.actionTime + EPSILON >= 240) {
+    if (model.time < enemy.opportunityUntil) {
+      enemyAction(enemy, 'stagger');
+      enemy.staggerUntil = enemy.opportunityUntil;
+    } else enemyAction(enemy, 'idle');
+  }
+  if ((enemy.action === 'stagger' || enemy.action === 'pushed') && model.time >= enemy.staggerUntil) enemyAction(enemy, 'idle');
+  if (enemy.action === 'brace') {
+    enemy.facing = enemy.lockedFacing;
+    if (enemy.actionTime + EPSILON >= 160) {
+      enemy.braceEstablished = true;
+      enemy.retreatKind = 'guarded';
+      enemyAction(enemy, 'retreat');
+      emit(model, { type: 'enemyRetreat', actor: enemy.id });
+    }
+  }
+  if (enemy.action === 'retreat') {
+    if (enemy.retreatKind === 'spacing') {
+      enemy.facing = model.hero.x < enemy.x ? -1 : 1;
+      enemy.lockedFacing = enemy.facing;
+    }
+    enemy.vx = -enemy.lockedFacing * 82;
+    const frame = sampleClipFrame(CONTACT_DATA.actors.sword!.actions.attack!, 0, 'active', 150);
+    if (enemy.retreatKind === 'spacing' && enemy.actionTime + EPSILON >= 150
+      && frame && bladeTouches(frame, enemy, model.hero)) {
+      enemy.vx = 0;
+      enemyAction(enemy, 'idle');
+    } else if (enemy.retreatKind === 'guarded' && enemy.actionTime + EPSILON >= 550) {
+      enemy.braceEstablished = false;
+      enemy.effectiveLightHits = 0;
+      enemyAction(enemy, 'idle');
+    }
+  }
+  const stunned = ['hurt', 'stagger', 'pushed', 'brace', 'retreat'].includes(enemy.action);
   if (!stunned && model.hero.hp > 0) {
     if (enemy.kind === 'sword') updateSword(model, enemy);
     else updateMusket(model, enemy);
@@ -443,30 +760,56 @@ function updateEnemy(model: Model, enemy: Enemy): void {
 
 function updateSword(model: Model, enemy: Enemy): void {
   const hero = model.hero;
-  if (enemy.action === 'windup' && enemy.actionTime + EPSILON >= 520) {
-    enemyAction(enemy, 'attack');
-    enemy.attackResolved = false;
-    emit(model, { type: 'enemyAttack', actor: enemy.id, target: 'hero' });
+  if (enemy.action === 'windup') {
+    if (enemy.actionTime < 240) enemy.lockedFacing = hero.x < enemy.x ? -1 : 1;
+    enemy.facing = enemy.lockedFacing;
+    if (enemy.actionTime + EPSILON >= 520) {
+      enemyAction(enemy, 'attack');
+      enemy.attackResolved = false;
+      enemy.attackContact = false;
+      const preview = { ...enemy };
+      moveHorizontal(preview, enemy.facing * 8, model);
+      const frame = sampleClipFrame(CONTACT_DATA.actors.sword!.actions.attack!, 0, 'active', 150);
+      if (frame && bladeTouches(frame, preview, hero)) enemy.x = preview.x;
+      emit(model, { type: 'enemyAttack', actor: enemy.id, target: 'hero' });
+    }
   }
   if (enemy.action === 'attack') {
-    const dx = (hero.x - enemy.x) * enemy.facing;
-    if (!enemy.attackResolved && dx > -4 && dx < 58
-      && Math.abs((hero.y - hero.height / 2) - (enemy.y - enemy.height / 2)) < 36) {
+    const frame = sampleClipFrame(CONTACT_DATA.actors.sword!.actions.attack!, enemy.actionTime, 'active', 150);
+    if (!enemy.attackResolved && frame && bladeTouches(frame, enemy, hero)) {
       enemy.attackResolved = true;
-      incomingHeroHit(model, enemy.id, enemy.x, 1, 'melee');
+      const result = incomingHeroHit(model, enemy.id, enemy.x, 1, 'melee');
+      enemy.attackContact = result !== 'ignored';
     }
-    if (enemy.action === 'attack' && enemy.actionTime + EPSILON >= 130) enemyAction(enemy, 'recovery');
+    if (enemy.action === 'attack' && enemy.actionTime + EPSILON >= 150) {
+      enemy.whiffRecovery = !enemy.attackContact;
+      enemyAction(enemy, 'recovery');
+      if (enemy.whiffRecovery) emit(model, { type: 'enemyWhiff', actor: enemy.id });
+    }
   }
-  if (enemy.action === 'recovery' && enemy.actionTime + EPSILON >= 520) enemyAction(enemy, 'idle');
+  if (enemy.action === 'recovery' && enemy.actionTime + EPSILON >= 650) enemyAction(enemy, 'idle');
   if (enemy.action !== 'idle' && enemy.action !== 'run') return;
   const dx = hero.x - enemy.x;
   enemy.facing = dx < 0 ? -1 : 1;
-  if (Math.abs(dx) <= 62 && Math.abs(hero.y - enemy.y) < 34) {
+  const frame = sampleClipFrame(CONTACT_DATA.actors.sword!.actions.attack!, 0, 'active', 150);
+  if (Math.abs(dx) < 40 && Math.abs(hero.y - enemy.y) < 38 && frame && !bladeTouches(frame, enemy, hero)) {
+    enemy.retreatKind = 'spacing';
+    enemy.braceEstablished = false;
+    enemy.lockedFacing = enemy.facing;
+    enemyAction(enemy, 'retreat');
+    enemy.vx = -enemy.facing * 82;
+    emit(model, { type: 'enemySpace', actor: enemy.id, target: 'hero' });
+    return;
+  }
+  if (Math.abs(dx) <= 62 && Math.abs(hero.y - enemy.y) < 38) {
     enemyAction(enemy, 'windup');
+    enemy.lockedFacing = enemy.facing;
+    enemy.attackId = model.nextId++;
     enemy.attackResolved = false;
+    enemy.whiffRecovery = false;
     emit(model, { type: 'enemyWindup', actor: enemy.id, target: 'hero' });
   } else {
-    enemy.vx = enemy.facing * 61;
+    enemy.vx = enemy.facing * 64;
     enemyAction(enemy, 'run');
   }
 }
@@ -475,88 +818,106 @@ function updateMusket(model: Model, enemy: Enemy): void {
   const hero = model.hero;
   if (enemy.action === 'idle' || enemy.action === 'run') {
     enemy.facing = hero.x < enemy.x ? -1 : 1;
-    enemy.aimX = hero.x;
-    enemy.aimY = hero.y - 24;
+    const line = getMusketLine(enemy, 'aim');
+    enemy.aimX = line.muzzle.x + line.direction.x * 360;
+    enemy.aimY = line.muzzle.y + line.direction.y * 360;
     enemyAction(enemy, 'aim');
     emit(model, { type: 'enemyAim', actor: enemy.id, target: 'hero' });
   }
   if (enemy.action === 'aim') {
-    if (enemy.actionTime < 350) {
+    if (enemy.actionTime < 450) {
       enemy.facing = hero.x < enemy.x ? -1 : 1;
-      enemy.aimX = hero.x;
-      enemy.aimY = hero.y - 24;
+      const line = getMusketLine(enemy, 'aim');
+      enemy.aimX = line.muzzle.x + line.direction.x * 360;
+      enemy.aimY = line.muzzle.y + line.direction.y * 360;
     }
-    if (enemy.actionTime + EPSILON >= 700) {
+    if (enemy.actionTime + EPSILON >= 1000) {
       enemyAction(enemy, 'fire');
-      const x = enemy.x + enemy.facing * MUZZLES.musket.x;
-      const y = enemy.y + MUZZLES.musket.y;
-      const dx = enemy.aimX - x;
-      const dy = enemy.aimY - y;
-      // The sample has a horizontal gun pose, so aim only within 18 degrees of it.
-      const angle = Math.max(-Math.PI / 10, Math.min(Math.PI / 10, Math.atan2(dy, Math.abs(dx))));
+      const line = getMusketLine(enemy, 'fire');
+      const { x, y } = line.muzzle;
       model.projectiles.push({
         id: model.nextId++, kind: 'musket', owner: enemy.id, x, y,
-        vx: enemy.facing * Math.cos(angle) * 390, vy: Math.sin(angle) * 390, radius: 3, damage: 1,
-        age: 0, lifetime: 3500,
+        vx: line.direction.x * 390, vy: line.direction.y * 390,
+        radius: 3, damage: 1, age: 0, lifetime: 3500,
       });
       emit(model, { type: 'musketFire', actor: enemy.id, target: 'hero', x, y });
     }
   }
   if (enemy.action === 'fire' && enemy.actionTime + EPSILON >= 120) enemyAction(enemy, 'reload');
   if (enemy.action === 'reload') {
-    if (Math.abs(hero.x - enemy.x) < 130) {
-      enemy.vx = (hero.x < enemy.x ? 1 : -1) * 34;
-    }
-    if (enemy.actionTime + EPSILON >= 1050) enemyAction(enemy, 'idle');
+    if (Math.abs(hero.x - enemy.x) < 100) enemy.vx = (hero.x < enemy.x ? 1 : -1) * 26;
+    if (enemy.actionTime + EPSILON >= 1700) enemyAction(enemy, 'idle');
   }
 }
 
+/** Fixed art-authored downward firing line; hero movement cannot secretly bend it. */
+export function getMusketLine(pose: { x: number; y: number; facing: Facing }, phase: 'aim' | 'fire' = 'aim') {
+  const frame = CONTACT_DATA.actors.musket!.actions[phase]!.frames[0]!;
+  const root = feetPointToWorld(frame.weapon!.root!, pose);
+  const muzzle = feetPointToWorld(frame.weapon!.muzzle!, pose);
+  const length = Math.hypot(muzzle.x - root.x, muzzle.y - root.y);
+  return { root, muzzle, direction: { x: (muzzle.x - root.x) / length, y: (muzzle.y - root.y) / length } };
+}
+
 function incomingHeroHit(model: Model, owner: string, sourceX: number, damage: number,
-  kind: 'melee' | 'musket' | 'cannon'): void {
+  kind: 'melee' | 'musket' | 'cannon'): 'ignored' | 'parry' | 'block' | 'hurt' {
   const hero = model.hero;
-  if (hero.hp <= 0 || heroInvulnerable(model)) return;
-  const canGuard = kind === 'melee' && hero.guardHeld && hero.grounded && !locked(hero)
+  if (hero.hp <= 0 || heroInvulnerable(model)) return 'ignored';
+  const canGuard = kind === 'melee' && hero.guardHeld && hero.grounded && hero.guardPressure < 100 && !locked(hero)
     && !hero.attack && model.time >= hero.guardBrokenUntil && inFront(hero, sourceX);
   if (canGuard) {
     const attacker = model.enemies.find(enemy => enemy.id === owner && enemy.hp > 0);
     if (model.time - hero.guardPressedAt <= 140 + EPSILON && attacker) {
       heroAction(hero, 'parry');
       hero.actionTime = 0;
-      hero.parryTarget = { enemyId: attacker.id, facing: hero.facing, expiresAt: model.time + 800 };
+      hero.guardPressure = Math.max(0, hero.guardPressure - 40);
+      hero.guardRecoverAfter = model.time + 1200;
+      hero.parryReadyAt = model.time + 220;
+      grantOpportunity(model, attacker, 'parry', attacker.attackId);
       enemyAction(attacker, 'stagger');
       attacker.actionTime = 0;
       attacker.pushRemaining = 0;
       attacker.attackResolved = true;
-      emit(model, { type: 'parry', actor: 'hero', target: owner, x: hero.x, y: hero.y - 25 });
-      return;
+      emit(model, { type: 'parry', actor: 'hero', target: owner, x: hero.x, y: hero.y - 32 });
+      return 'parry';
     }
+    hero.guardPressure = Math.min(100, hero.guardPressure + 40);
+    hero.guardRecoverAfter = model.time + 1200;
     hero.blockTimes.push(model.time);
-    emit(model, { type: 'block', actor: 'hero', target: owner, amount: hero.blockTimes.length });
-    if (hero.blockTimes.length >= 3) {
-      hero.blockTimes = [];
+    if (hero.blockTimes.length > 3) hero.blockTimes.shift();
+    hero.blockedUntil = model.time + 110;
+    moveHorizontal(hero, -hero.facing * (hero.guardPressure >= 80 ? 5 : 3), model);
+    emit(model, { type: 'block', actor: 'hero', target: owner, amount: hero.guardPressure });
+    if (hero.guardPressure >= 100) {
       hero.guardBrokenUntil = model.time + 650;
-      hero.stunUntil = model.time + 360;
+      hero.stunUntil = model.time + 450;
       hero.guardHeld = false;
       hero.guardPressedAt = -Infinity;
-      hero.parryTarget = null;
+      hero.inputBuffer = null;
+      clearOpportunity(model, 'guardBreak');
       hero.vx = -hero.facing * 95;
       heroAction(hero, 'hurt');
       hero.actionTime = 0;
       emit(model, { type: 'guardBreak', actor: owner, target: 'hero' });
     }
-    return;
+    return 'block';
   }
   hero.hp = Math.max(0, hero.hp - damage);
   hero.attack = null;
-  hero.parryTarget = null;
+  hero.inputBuffer = null;
+  clearOpportunity(model, 'hurt');
+  hero.height = STANDING_HEIGHT;
+  hero.x = nearestLegalX(model, hero, hero.x);
   hero.invulnerableUntil = model.time + 700;
+  hero.guardRecoverAfter = model.time + 1200;
   hero.stunUntil = model.time + 360;
   hero.vx = (sourceX < hero.x ? 1 : -1) * 135;
   hero.guardPressedAt = -Infinity;
   heroAction(hero, hero.hp <= 0 ? 'dead' : 'hurt');
   hero.actionTime = 0;
-  emit(model, { type: 'hurt', actor: owner, target: 'hero', amount: damage, x: hero.x, y: hero.y - 25 });
+  emit(model, { type: 'hurt', actor: owner, target: 'hero', amount: damage, x: hero.x, y: hero.y - 32 });
   if (hero.hp <= 0) emit(model, { type: 'death', actor: owner, target: 'hero' });
+  return 'hurt';
 }
 
 function damageEnemy(model: Model, enemy: Enemy, amount: number, owner: string, type: string): void {
@@ -564,10 +925,24 @@ function damageEnemy(model: Model, enemy: Enemy, amount: number, owner: string, 
   enemy.hp = Math.max(0, enemy.hp - amount);
   enemy.pushRemaining = 0;
   enemy.attackResolved = true;
-  enemyAction(enemy, enemy.hp <= 0 ? 'dead' : 'hurt');
-  enemy.actionTime = 0;
-  if (enemy.hp <= 0 && model.hero.parryTarget?.enemyId === enemy.id) model.hero.parryTarget = null;
-  emit(model, { type, actor: owner, target: enemy.id, amount, x: enemy.x, y: enemy.y - 24 });
+  if (owner === 'hero' && type === 'attackHit') {
+    enemy.effectiveLightHits += 1;
+    if (enemy.kind === 'sword' && enemy.effectiveLightHits >= 2 && !Number.isFinite(enemy.braceAt)
+      && enemy.action !== 'brace' && enemy.action !== 'retreat') enemy.braceAt = model.time + 220;
+  }
+  // Full damage continues during the visible brace preparation. Extra hits do not rewind it.
+  const preparingBrace = enemy.action === 'brace' && !enemy.braceEstablished;
+  const alreadyReacting = enemy.action === 'hurt' && enemy.effectiveLightHits >= 3 && Number.isFinite(enemy.braceAt);
+  if (!preparingBrace && !alreadyReacting) {
+    enemyAction(enemy, enemy.hp <= 0 ? 'dead' : 'hurt');
+    enemy.actionTime = 0;
+  }
+  if (enemy.hp <= 0) {
+    enemyAction(enemy, 'dead');
+    enemy.braceEstablished = false;
+    if (model.hero.opportunity?.targetId === enemy.id) clearOpportunity(model, 'targetDead');
+  }
+  emit(model, { type, actor: owner, target: enemy.id, amount, x: enemy.x, y: enemy.y - 30 });
   if (enemy.hp <= 0) emit(model, { type: 'enemyDeath', actor: owner, target: enemy.id });
 }
 
@@ -745,6 +1120,7 @@ function updateProjectiles(model: Model): void {
       } else if (nearest.body) {
         damageEnemy(model, nearest.body as Enemy, projectile.damage, projectile.owner,
           projectile.kind === 'cannon' ? 'cannonHit' : 'musketHit');
+        if (projectile.kind === 'cannon' && !model.encounter.routeFlags.includes('cannon')) model.encounter.routeFlags.push('cannon');
       } else {
         emit(model, { type: projectile.kind === 'cannon' ? 'cannonImpact' : 'bulletImpact',
           actor: projectile.owner, target: nearest.terrain, x, y });
@@ -799,13 +1175,19 @@ export function snapshot(model: Model) {
       id: hero.id, x: hero.x, y: hero.y, vx: hero.vx, vy: hero.vy, width: hero.width, height: hero.height,
       facing: hero.facing, grounded: hero.grounded, hp: hero.hp, maxHp: hero.maxHp,
       action: hero.action, actionTime: hero.actionTime, frameIndex: hero.frameIndex,
+      animationClip: hero.attack?.kind === 'ground' ? `attack${hero.attack.stage}` : hero.action,
       invulnerable: heroInvulnerable(model),
       dodgeInvulnerableFrom: hero.dodgeInvulnerableFrom, dodgeInvulnerableUntil: hero.dodgeInvulnerableUntil,
       dodgeTargetX: hero.dodgeTargetX,
-      guardHeld: hero.guardHeld, guardBroken: model.time < hero.guardBrokenUntil,
+      guardHeld: hero.guardHeld, guardBroken: model.time < hero.guardBrokenUntil || hero.guardPressure >= 100,
+      guardPressure: hero.guardPressure, parryReadyAt: hero.parryReadyAt,
+      guardRecoveryRemaining: Math.max(0, hero.guardRecoverAfter - model.time),
       parryWindow: hero.guardHeld && hero.grounded && model.time >= hero.guardBrokenUntil
         && model.time - hero.guardPressedAt <= 140 && !locked(hero) && !hero.attack,
-      blockCount: hero.blockTimes.length, airAttackUsed: hero.airAttackUsed,
+      blockCount: Math.ceil(hero.guardPressure / 40), airAttackUsed: hero.airAttackUsed,
+      opportunity: hero.opportunity ? { ...hero.opportunity } : null,
+      inputBuffer: hero.inputBuffer ? { ...hero.inputBuffer,
+        ...(hero.inputBuffer.contextIntent ? { contextIntent: { ...hero.inputBuffer.contextIntent } } : {}) } : null,
       parryTarget: hero.parryTarget ? { ...hero.parryTarget } : null,
       attack: hero.attack ? { ...hero.attack, hitTargets: [...hero.attack.hitTargets] } : null,
     },
@@ -813,6 +1195,8 @@ export function snapshot(model: Model) {
     cannon: { ...model.cannon },
     projectiles: model.projectiles.map(projectile => ({ ...projectile })),
     log: model.log.map(event => ({ ...event })),
+    contextAction: { ...model.contextAction },
+    encounter: { ...model.encounter, routeFlags: [...model.encounter.routeFlags] },
   };
 }
 

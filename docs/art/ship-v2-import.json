@@ -1,0 +1,382 @@
+{
+  "date": "2026-10-24",
+  "tool": "built-in imagegen",
+  "status": "playtest work, user acceptance pending",
+  "sources": [
+    {
+      "name": "sea",
+      "file": "sea-source.png",
+      "source_size": [
+        1672,
+        941
+      ],
+      "sha256": "ea569830bf6a14417407984af02ce0e52635725e8e9d2ce1d76675c444fa4314"
+    },
+    {
+      "name": "sea-quiet",
+      "file": "sea-quiet-source.png",
+      "source_size": [
+        1672,
+        941
+      ],
+      "sha256": "2f8c6d0c6f4bd7c201d963ea52072036b9a592b0daf77968d787dd3e268a5277"
+    },
+    {
+      "name": "sail",
+      "file": "sail-source.png",
+      "source_size": [
+        2172,
+        724
+      ],
+      "sha256": "676d9209bf8459a96624ac69966eff6f6ac0a809da8024f1377f36063958046f"
+    },
+    {
+      "name": "decks",
+      "file": "decks-source.png",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "sha256": "14f70b96b324278f71415c4eb60d274a61e26ee875ac1b08fa41e4251b795dc8"
+    },
+    {
+      "name": "fittings",
+      "file": "fittings-source.png",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "sha256": "fcd78b3416c1e7b0d6ba13c858106ef553298293950a67f0484bfc75a04d9d0c"
+    },
+    {
+      "name": "far-ship",
+      "file": "far-ship-source.png",
+      "source_size": [
+        1493,
+        1054
+      ],
+      "sha256": "2f8f5ae9f6033e73fb2e255ed0d7d584fcb50b685e3538554700f4cf2a33f1e7"
+    }
+  ],
+  "assets": [
+    {
+      "name": "sea",
+      "source": "sea-quiet",
+      "source_region": null,
+      "alpha_bbox": null,
+      "display": 640,
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "f1839e4d69154fcaeaada7b0c6843b886f323d4827e4a477643b2bba78182dd5"
+    },
+    {
+      "name": "sea",
+      "source": "sea-quiet",
+      "source_region": null,
+      "alpha_bbox": null,
+      "display": 960,
+      "size": [
+        960,
+        540
+      ],
+      "sha256": "1eae7a6b41852dca30ad2f6d294edff71b16b54da64e26d4b95c3aa86d6fa8e8"
+    },
+    {
+      "name": "sail",
+      "source": "sail",
+      "source_region": null,
+      "alpha_bbox": [
+        26,
+        64,
+        2161,
+        660
+      ],
+      "display": 640,
+      "size": [
+        600,
+        190
+      ],
+      "sha256": "61516843018056c0f4406633e436f59c9de81a8ada0a20197c73c2e0e9f84da8"
+    },
+    {
+      "name": "sail",
+      "source": "sail",
+      "source_region": null,
+      "alpha_bbox": [
+        26,
+        64,
+        2161,
+        660
+      ],
+      "display": 960,
+      "size": [
+        900,
+        285
+      ],
+      "sha256": "335655ad01655b71ebc94ee1a289257c30edb62a71600010117fc84d14e73425"
+    },
+    {
+      "name": "hull",
+      "source": "decks",
+      "source_region": [
+        0,
+        100,
+        1536,
+        360
+      ],
+      "alpha_bbox": [
+        26,
+        39,
+        1510,
+        232
+      ],
+      "display": 640,
+      "size": [
+        640,
+        84
+      ],
+      "sha256": "ec031b43b41f3303655c29b29f35ecba3d0c66adf802872b0fd1389f14473ef3"
+    },
+    {
+      "name": "hull",
+      "source": "decks",
+      "source_region": [
+        0,
+        100,
+        1536,
+        360
+      ],
+      "alpha_bbox": [
+        26,
+        39,
+        1510,
+        232
+      ],
+      "display": 960,
+      "size": [
+        960,
+        126
+      ],
+      "sha256": "cf4a36807f04c4110cd25c2b87f900ad25ca7b2c66ab906db5f14b4cd0078349"
+    },
+    {
+      "name": "platform",
+      "source": "decks",
+      "source_region": [
+        80,
+        390,
+        1450,
+        750
+      ],
+      "alpha_bbox": [
+        49,
+        39,
+        1326,
+        329
+      ],
+      "display": 640,
+      "size": [
+        112,
+        48
+      ],
+      "sha256": "867827ec90c186fb26aea0976d69c41ece7b4226e341c7978bde3c9eb46ecde1"
+    },
+    {
+      "name": "platform",
+      "source": "decks",
+      "source_region": [
+        80,
+        390,
+        1450,
+        750
+      ],
+      "alpha_bbox": [
+        49,
+        39,
+        1326,
+        329
+      ],
+      "display": 960,
+      "size": [
+        168,
+        72
+      ],
+      "sha256": "99644304f1db0c6d438719c1a298c49c36a6fe7f21d98246ebeabc3fd9cedbf0"
+    },
+    {
+      "name": "crate",
+      "source": "fittings",
+      "source_region": [
+        200,
+        680,
+        1080,
+        990
+      ],
+      "alpha_bbox": [
+        60,
+        27,
+        810,
+        279
+      ],
+      "display": 640,
+      "size": [
+        48,
+        24
+      ],
+      "sha256": "9e33bdee6ee5066514aa751fc1c881b986d8e9bb5fbce7073c50d1cda019a1cf"
+    },
+    {
+      "name": "crate",
+      "source": "fittings",
+      "source_region": [
+        200,
+        680,
+        1080,
+        990
+      ],
+      "alpha_bbox": [
+        60,
+        27,
+        810,
+        279
+      ],
+      "display": 960,
+      "size": [
+        72,
+        36
+      ],
+      "sha256": "d0a971bf10c2eef0373a14a58d1332f4e1659b57ddd134726b1cee98f7ccc766"
+    },
+    {
+      "name": "cannon",
+      "source": "fittings",
+      "source_region": [
+        0,
+        210,
+        1095,
+        670
+      ],
+      "alpha_bbox": [
+        52,
+        37,
+        1088,
+        436
+      ],
+      "display": 640,
+      "size": [
+        88,
+        34
+      ],
+      "sha256": "d6a275d0d0a3d86f23ae0336fd0e733d60a24b16567d1baf8b28979eb5f2e42a"
+    },
+    {
+      "name": "cannon",
+      "source": "fittings",
+      "source_region": [
+        0,
+        210,
+        1095,
+        670
+      ],
+      "alpha_bbox": [
+        52,
+        37,
+        1088,
+        436
+      ],
+      "display": 960,
+      "size": [
+        132,
+        51
+      ],
+      "sha256": "636313e9c6b93481b13f664a9ea63d58a02dd4a6b180a4a385330d6cf02451b1"
+    },
+    {
+      "name": "mast",
+      "source": "fittings",
+      "source_region": [
+        1095,
+        0,
+        1536,
+        1024
+      ],
+      "alpha_bbox": [
+        8,
+        18,
+        394,
+        1008
+      ],
+      "display": 640,
+      "size": [
+        100,
+        255
+      ],
+      "sha256": "9aea3ff702087ebc3370b6402c37245ec1600cf88d7d279fe5a7e151bdc596ec"
+    },
+    {
+      "name": "mast",
+      "source": "fittings",
+      "source_region": [
+        1095,
+        0,
+        1536,
+        1024
+      ],
+      "alpha_bbox": [
+        8,
+        18,
+        394,
+        1008
+      ],
+      "display": 960,
+      "size": [
+        150,
+        382
+      ],
+      "sha256": "bd6f6f4dcaa7aade492c72e67eb62b90e6db6d4561c87d22562efc0b8a6f832f"
+    },
+    {
+      "name": "far-ship",
+      "source": "far-ship",
+      "source_region": null,
+      "alpha_bbox": [
+        90,
+        36,
+        1469,
+        983
+      ],
+      "display": 640,
+      "size": [
+        160,
+        110
+      ],
+      "sha256": "b34aef08a29a1c8e93f80c487a669c5e28a7d403278123e35be07a32dcdf6c66"
+    },
+    {
+      "name": "far-ship",
+      "source": "far-ship",
+      "source_region": null,
+      "alpha_bbox": [
+        90,
+        36,
+        1469,
+        983
+      ],
+      "display": 960,
+      "size": [
+        240,
+        165
+      ],
+      "sha256": "a197f8f52d2493777cc43165fad337feeb5df3ec8fa032ed923be0343355fec4"
+    }
+  ],
+  "modifications": "Reviewed isolated rectangles, alpha128 cutoff, nearest sampling directly from source into each display resolution. Structural props fitted to explicit collision dimensions; actor art is imported separately.",
+  "limits": [
+    "Generation did not obey a strict native pixel grid.",
+    "Both resolutions are source sampling comparisons, not upscale claims.",
+    "Concept reference is not used as a runtime layer.",
+    "Final visual and collision acceptance requires the actual scene."
+  ]
+}

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "checked_date_shanghai": "2026-10-24",
-  "scope": "动作与美术样片的6个音效候选。没有购买、登录、音乐下载或音频合成。",
+  "scope": "首个遭遇的7个音效候选。没有购买、登录、音乐下载或音频合成。",
   "verification": {
     "official_pages_checked": true,
     "downloaded_from_official_public_links": true,
@@ -10,7 +10,7 @@
     "actual_listening_performed": false,
     "in_browser_audition_performed": false,
     "quality_acceptance": "尚待实际试听，不能以文件名或响度分析代替听感验收。",
-    "distinct_sources": "6个输出对应6个不同的原始文件及SHA256；普通格挡与精准招架不是同文件变调。"
+    "distinct_sources": "7个输出对应7个不同的原始文件及SHA256；普通格挡与精准招架不是同文件变调，火炮发射与撞击也使用独立源。"
   },
   "downloads": [
     {
@@ -33,6 +33,13 @@
       "local_file": ".local/assets/raw/cannon_hit_cannon_0.ogg",
       "sha256": "4b4f7eba89368d9495a2d880d6a68bc6a75a85465e2cb165ba036f904bd3d7e0",
       "license_source": "OGA作者上传页明确CC0。"
+    },
+    {
+      "official_page": "https://opengameart.org/content/cannon-fire",
+      "download_url": "https://opengameart.org/sites/default/files/cannon_fire_0.ogg",
+      "local_file": ".local/assets/raw/cannon_fire_0.ogg",
+      "sha256": "2b21ffa41e5c3be4eecdfbd3490544f5aa8b6d1581787265863e13de1a8e599d",
+      "license_source": "OGA作者Thimras上传页明确CC0。"
     }
   ],
   "assets": [
@@ -249,12 +256,44 @@
       "edits": "重新编码为 Ogg Vorbis quality 5；统一降低4dB留余量；不剪切，保留采样率与声道；编码填充可使容器时长增加约3ms。无变调、无合成、无混音。",
       "purpose": "炮弹撞击金属候选。作者描述为远处一门炮击中另一门炮的夸张铃响；不是发炮爆鸣、炮烟或落水全套。",
       "status": "已下载并技术解码检查；未实际试听；待用户或浏览器试听确认。"
+    },
+    {
+      "id": "cannon-fire",
+      "author": "Thimras",
+      "pack": "Cannon fire",
+      "official_url": "https://opengameart.org/content/cannon-fire",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "public_repository_redistribution": "allowed_under_CC0",
+      "source_file": ".local/assets/raw/cannon_fire_0.ogg",
+      "source": {
+        "duration_seconds": 3.578542,
+        "codec": "vorbis",
+        "sample_rate": 48000,
+        "channels": 2,
+        "peak_dbfs": 0.0,
+        "bytes": 179939,
+        "sha256": "2b21ffa41e5c3be4eecdfbd3490544f5aa8b6d1581787265863e13de1a8e599d"
+      },
+      "output_file": "public/assets/audio/cannon-fire.ogg",
+      "output": {
+        "duration_seconds": 3.581208,
+        "codec": "vorbis",
+        "sample_rate": 48000,
+        "channels": 2,
+        "peak_dbfs": -3.6,
+        "bytes": 60868,
+        "sha256": "aa1fc36551beed9aa9c17341d4a5c0e9c25745a4a3904983a4dc69ebbc445f05"
+      },
+      "edits": "FFmpeg重新编码为Ogg Vorbis quality 5，降低4dB；不剪切，保留采样率与声道；容器填充约增加3ms。无变调、无合成、无混音。",
+      "purpose": "独立火炮发射候选。作者说明为船炮或其他火炮发射；与cannon-impact撞击源分别使用。",
+      "status": "已下载并检查解码、时长、格式、声道、峰值与SHA256；未完成人耳试听、逐事件音画时序或真实手机听感验收。峰值不能证明原录音无削波。"
     }
   ],
   "remaining_gaps": [
-    "专用火炮发射爆鸣尚未落实；cannon-impact仅能作撞击候选。",
+    "专用火炮发射候选已补齐并技术核验；发炮、撞击及各战斗声的实际听感和动画时序仍待验收。",
     "普通格挡／招架／受伤的独立源已区分，但实际声音辨识度、音量与叠加混音仍需真实听感确认。",
     "没有完成章节音乐或3至5首配乐试听，本轮未扩大范围。"
   ],
-  "maintenance": "原始ZIP与完整解包留在.local供溯源，保持Git忽略；公开目录仅6个实际候选导出；可依据本JSON中的作者、来源和CC0许可写入游戏鸣谢。"
+  "maintenance": "原始ZIP与完整解包留在.local供溯源，保持Git忽略；公开目录仅7个实际候选导出；可依据本JSON中的作者、来源和CC0许可写入游戏鸣谢。"
 }

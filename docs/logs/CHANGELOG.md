@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-24 · Salt-copper encounter playtest
+
+- Replace the action-study runtime with layered ship art and a unified 70/105px character set: 38 hero, 20 sword and 12 musket body poses, plus fixed weapon rigs and original-hand occlusion. Keep actual source dimensions, hashes, aliases and remaining animation limitations explicit.
+- Share frame phase, measured blade/palm geometry and the fixed downward musket barrel with combat. Add persistent guard pressure, legal parry starts, target-bound contextual E, two cuts, hit-confirm cancels and readable enemy spacing/guarded retreat. Reproduce and fix the close-body infinite sword-whiff case without invisible reach or invulnerability.
+- Keep 640/960 at the same on-screen composition; preserve 16:9 in small windows. Add result-only death falling and expiring visual effects without resuming combat. Add a separately licensed cannon firing sample.
+- Preserve independent MyWeb checkout and branch boundaries. Configure the new Vercel project with the game production branch and a project-level filter before connecting Git. No other project was reused and no personal-web entry was added.
+- Validation and explicit limits are recorded in `docs/VERIFICATION.md`. A passing build/model, generated art or configured URL is not human art/playtest approval; no chapters were expanded.
+
 ## 2026-10-24 · Design research and local workspace organization
 
 - Add `docs/DESIGN-REFINEMENT-2026-10-24.md`: primary-source research, maritime art direction, proposed combat decision rules, enemy/Boss relationships and a playable-sample acceptance plan. Proposals are not runtime implementation or visual acceptance.

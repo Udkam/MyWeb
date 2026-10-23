@@ -2,13 +2,13 @@
   color-scheme: dark;
   font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", system-ui, sans-serif;
   font-synthesis: none;
-  --wake-navy: #102b37;
-  --wake-deep: #0a1e29;
-  --wake-paper: #f4eed8;
-  --wake-dim: #b5b8a7;
-  --wake-gold: #b69a5e;
-  --wake-gold-line: #b69a5e61;
-  --wake-coral: #d47c59;
+  --wake-navy: #172f36;
+  --wake-deep: #101e29;
+  --wake-paper: #eee7d0;
+  --wake-dim: #b8c0ad;
+  --wake-gold: #a88b61;
+  --wake-gold-line: #91a48b61;
+  --wake-coral: #bc674c;
   --wake-mast-height: 58px;
   --wake-foot-height: 76px;
 }
@@ -83,6 +83,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 }
 .wake-stage {
   position: relative;
+  flex-shrink: 0;
   width: min(100%, calc((100dvh - var(--wake-mast-height) - var(--wake-foot-height) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) * 16 / 9));
   max-height: 100%;
   aspect-ratio: 16 / 9;
@@ -270,3 +271,102 @@ kbd { display: inline-flex; min-height: 18px; min-width: 18px; justify-content: 
 
 .wake-tools button,
 .wake-tools [data-command="language"] { min-width: 44px; min-height: 44px; }
+
+/* Playtest chrome sits in sky/water margins. The world owns the viewport. */
+.wake-shell { display: block; background: var(--wake-deep); }
+.wake-play-area { position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; }
+.wake-stage { border: 0; box-shadow: none; }
+.wake-mast {
+  position: absolute;
+  z-index: 30;
+  top: env(safe-area-inset-top, 0px);
+  left: env(safe-area-inset-left, 0px);
+  right: env(safe-area-inset-right, 0px);
+  height: 50px;
+  padding: 0 22px;
+  border: 0;
+  background: linear-gradient(#101e29b8, #101e2900);
+}
+.wake-tools button { color: var(--wake-paper); text-shadow: 0 1px #101e29; }
+.wake-wordmark { font-size: 18px; }
+.wake-hud { padding-top: 59px; }
+.wake-hero-name { letter-spacing: 0.1em; }
+.wake-hero, .wake-chapter { padding: 7px 10px; border-left: 1px solid #a5ae8d9c; background: #101e29bf; }
+.wake-guard-state { gap: 8px; color: #e4bd8c; }
+.wake-pressure-track { display: inline-block; width: 68px; height: 4px; background: #101e29b8; box-shadow: 0 0 0 1px #eee7d03b; }
+.wake-pressure-track i { display: block; height: 100%; background: #d2b383; }
+.is-pressured .wake-pressure-track i { background: #d48b64; }
+.wake-encounter-time { align-self: center; color: #c9cbb5; font: 11px ui-monospace, monospace; letter-spacing: 0.04em; }
+.wake-foot {
+  position: absolute;
+  z-index: 25;
+  bottom: env(safe-area-inset-bottom, 0px);
+  left: env(safe-area-inset-left, 0px);
+  right: env(safe-area-inset-right, 0px);
+  height: 64px;
+  padding: 5px 18px 8px;
+  gap: 8px;
+  border: 0;
+  background: linear-gradient(#101e2900, #101e29ba);
+  pointer-events: none;
+}
+.wake-cue { font-size: 14px; text-shadow: 0 1px #101e29; }
+.wake-cannon-hint { right: 24px; top: 9px; font-size: 14px; padding: 5px 9px; border-left: 1px solid #c2b180; background: #142c34b8; }
+.wake-context-target { color: #d7ddc7; font-size: 12px; }
+.wake-settings { position: absolute; inset: 0; z-index: 50; display: grid; place-items: center; padding: 18px; background: #0b1d28a6; }
+.wake-settings-card { width: min(440px, 100%); max-height: calc(100dvh - 36px); overflow-y: auto; padding: 25px 28px; border: 1px solid #9eaa8f; background: #172f36f7; box-shadow: 0 12px 40px #08172345; }
+.wake-settings-card h2 { margin: 0 0 21px; text-align: center; font-size: 22px; font-weight: 500; letter-spacing: 0.12em; }
+.wake-setting-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 65px; padding: 9px 0; border-top: 1px solid #91a48b40; }
+.wake-setting-row > div:first-child { min-width: 0; }
+.wake-setting-row b { display: block; font-size: 14px; font-weight: 500; }
+.wake-setting-row small { display: block; margin-top: 5px; color: #bac5b5; font-size: 11px; line-height: 1.5; }
+.wake-setting-toggle, .wake-display-options button { min-height: 44px; min-width: 62px; padding: 5px 11px; border: 1px solid #9eaa8f80; border-radius: 2px; background: #213d43; color: var(--wake-paper); font: inherit; font-size: 13px; cursor: pointer; }
+.wake-setting-toggle[aria-pressed="false"] { color: #c3c9b6; background: #142b33; }
+.wake-display-options { display: flex; gap: 5px; }
+.wake-display-options button { min-width: 48px; padding: 5px 8px; font-family: ui-monospace, monospace; }
+.wake-display-options button[aria-pressed="true"] { color: #132d35; background: var(--wake-paper); border-color: var(--wake-paper); }
+.wake-settings-card > .wake-primary { display: block; margin: 21px auto 0; }
+.wake-touch-interact { min-width: 88px; border-color: #a5bca5; background: #274b4be8; }
+.wake-touch-interact[data-context="shove"] { border-color: #d9b17b; background: #74523ae8; }
+.wake-portrait { z-index: 70; background: #142d36; }
+
+@media (pointer: coarse), (max-width: 900px) {
+  .wake-mast { height: 44px; padding: 0 9px; gap: 10px; }
+  .wake-wordmark { display: none; }
+  .wake-review { font-size: 10px; letter-spacing: 0.04em; }
+  .wake-tools button { min-width: 44px; min-height: 44px; padding: 0 7px; font-size: 12px; }
+  .wake-hud { padding: 50px 15px 0; }
+  .wake-hero-name { font-size: 13px; }
+  .wake-health-pip { width: 7px; height: 13px; }
+  .wake-chapter { gap: 2px; }
+  .wake-hero, .wake-chapter { padding: 6px 8px; }
+  .wake-chapter > span { font-size: 13px; }
+  .wake-chapter > small { font-size: 10px; }
+  .wake-encounter-time { align-self: flex-end; font-size: 10px; }
+  .wake-momentum b { font-size: 12px; }
+  .wake-momentum small { font-size: 10px; }
+  .wake-foot { left: max(118px, env(safe-area-inset-left, 0px)); right: max(118px, env(safe-area-inset-right, 0px)); bottom: env(safe-area-inset-bottom, 0px); height: 41px; padding: 3px 4px 6px; }
+  .wake-cue { font-size: 13px; line-height: 1.35; }
+  .wake-touch-move { left: max(10px, env(safe-area-inset-left, 0px)); bottom: max(8px, env(safe-area-inset-bottom, 0px)); }
+  .wake-touch-actions { right: max(10px, env(safe-area-inset-right, 0px)); bottom: max(8px, env(safe-area-inset-bottom, 0px)); }
+  .wake-touch-key { min-width: 48px; min-height: 48px; font-size: 14px; }
+  .wake-direction { min-height: 55px; font-size: 25px; }
+  .wake-touch-interact { bottom: max(49px, calc(env(safe-area-inset-bottom, 0px) + 41px)); min-width: 86px; }
+  .wake-pause-card { width: min(325px, 82%); padding: 19px 24px; }
+  .wake-card-title { font-size: 21px; }
+  .wake-card-note { font-size: 12px; line-height: 1.7; }
+  .wake-primary { font-size: 14px; }
+  .wake-settings-card { padding: 15px 24px; }
+  .wake-settings-card h2 { margin-bottom: 10px; font-size: 20px; }
+  .wake-settings-card .wake-card-rule { margin-bottom: 12px; }
+  .wake-setting-row { min-height: 58px; padding: 6px 0; }
+  .wake-settings-card > .wake-primary { margin-top: 14px; }
+}
+
+@media (max-height: 360px) and (orientation: landscape) {
+  .wake-review { max-width: 115px; font-size: 9px; }
+  .wake-settings-card { padding: 12px 24px; }
+  .wake-settings-card .wake-card-rule { display: none; }
+  .wake-setting-row { min-height: 50px; }
+  .wake-setting-row small { font-size: 10px; margin-top: 2px; }
+}

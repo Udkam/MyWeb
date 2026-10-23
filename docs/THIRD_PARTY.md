@@ -4,10 +4,11 @@
 
 ## 当前样片实际运行
 
-- 人物、港口、木箱、木桶、平台和火炮：本轮按用户授权使用内置imagegen生成的原创候选，经明确分帧/透明度/采样导入。提示与局限见 `art/GENERATION_PROMPTS.md`、`ART_DIRECTION.md`；原始工作图保存在忽略的 `.local/assets/generated`。没有使用旧作资产或Blender。
+- 新版人物、固定武器与盐蚀铜版船景：本轮按用户授权使用内置imagegen生成的原创候选，经完整轮廓、逐帧锚点和固定武器rig导入；640/960各自从新源采样。审计见 `art/actor-v2-audit.json`、`art/ship-v2-import.json`、`art/SHIP_V2_GENERATION.md`，原始工作图在忽略的 `.local/assets/actors-v2`、`musket-v2-source`、`sword-v2-source`、`ship-v2`。生成源不是严格原生网格，真实动作仍须验收。旧57px人物和港口记录保留为基线，没有使用其他旧作资产或Blender。
 - 斩击：Kenney Vleugels，[RPG Audio](https://kenney.nl/assets/rpg-audio)，[CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/)。
 - 普通格挡、精准招架、受伤、推击：Kenney，[Impact Sounds](https://kenney.nl/assets/impact-sounds)，CC0 1.0。每个动作使用不同原文件；导出仅编码/统一降低4dB，未变调伪造不同音色。
 - 炮弹撞击：Thimras，[Cannon hit cannon](https://opengameart.org/content/cannon-hit-cannon)，CC0 1.0。只用作撞击，不声称它是专用发炮声。
+- 火炮发射：Thimras，[Cannon fire](https://opengameart.org/content/cannon-fire)，CC0 1.0。使用独立原始录音，重新编码Vorbis quality 5并降低4dB，不剪切、变调、混音或合成；源与导出SHA、实测规格见 `audio-playtest.md` 和 `art/audio-audit.json`。
 - 中文文字：系统字体栈，不附带/再分发机器上的字体文件。
 
 CC0作者不要求署名，仍保留出处。Kenney原包许可文本保存在 `licenses/`。音效文件已解码及测量，浏览器播放状态可验证；听感与配乐仍待实际试听，不能以峰值或文件名当作完成。

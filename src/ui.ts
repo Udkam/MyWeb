@@ -8,6 +8,8 @@ export type UiAction =
   | 'interact';
 
 export type UiLocale = 'zh' | 'en';
+export type UiContextAction = 'none' | 'shove' | 'cannon';
+export type UiDisplayMode = '640' | '960';
 
 export interface UiCallbacks {
   action(name: UiAction, held: boolean): void;
@@ -17,6 +19,8 @@ export interface UiCallbacks {
   language(): void;
   mute(): void;
   fullscreen(): void;
+  effects?(enabled: boolean): void;
+  display?(mode: UiDisplayMode): void;
 }
 
 export interface UiState {
@@ -29,14 +33,19 @@ export interface UiState {
   nearCannon: boolean;
   locale: UiLocale;
   muted: boolean;
+  contextAction: UiContextAction;
+  contextTarget: string | null;
+  effectsEnabled: boolean;
+  displayMode: UiDisplayMode;
+  elapsedSeconds: number;
 }
 
 const copy = {
   zh: {
     hero: '洛恩',
     location: '盐风码头',
-    subtitle: '动作试演',
-    review: '美术审核样片',
+    subtitle: '铜潮试炼',
+    review: '试玩 · 待验收',
     pause: '暂停',
     resume: '继续',
     restart: '重开',
@@ -46,10 +55,28 @@ const copy = {
     fullscreen: '全屏',
     fullscreenLabel: '切换全屏',
     health: '生命',
-    momentum: '夺势就绪',
-    momentumHint: '朝敌人 + 攻击',
-    pressure: '格挡受压',
-    cannon: '操作火炮',
+    momentum: '破绽已现',
+    momentumHint: 'J 追击 · E 推撞',
+    pressure: '受压',
+    cannon: '点炮',
+    shove: '推撞',
+    contextNone: '暂无可用动作',
+    contextMiss: '目标已脱离',
+    settings: '设置',
+    settingsTitle: '航行设置',
+    closeSettings: '返回',
+    sound: '声音',
+    soundNote: '开始后开启浏览器音频',
+    effects: '战斗效果',
+    effectsNote: '火星、撞击碎屑与枪口闪光',
+    enabled: '开启',
+    disabled: '关闭',
+    display: '画面对照',
+    displayNote: '同一构图，比较动作读感',
+    objective: '击退守军，夺回甲板',
+    targetSword: '刀兵',
+    targetMusket: '火枪手',
+    targetCannon: '固定火炮',
     left: '向左移动',
     right: '向右移动',
     jump: '跳',
@@ -59,19 +86,19 @@ const copy = {
     interact: '互动',
     moveHelp: '移动',
     jumpHelp: '跳跃',
-    attackHelp: '攻击',
+    attackHelp: '两刀追击',
     guardHelp: '招架 / 防御',
     dodgeHelp: '闪避',
-    interactHelp: '互动',
-    title: '准备登岸',
-    titleNote: '在这段码头，试一试你的刀与胆量。',
-    start: '开始试演',
+    interactHelp: '推撞 / 点炮',
+    title: '盐风之下',
+    titleNote: '两层甲板，一门侧炮。用刀、招架和站位夺回通路。',
+    start: '开始遭遇',
     paused: '风浪稍歇',
     pausedNote: '喘口气，再接下一招。',
     dead: '再来一回',
     deadNote: '看清起手，守住正面。',
-    complete: '试演结束',
-    completeNote: '这是动作与美术样片，完整冒险尚在制作。',
+    complete: '甲板已清',
+    completeNote: '再试一条路线：先夺高台，或借炮线打开局面。',
     loading: '正在准备码头…',
     portrait: '横握设备，继续冒险',
     portraitNote: '游戏已暂停。转为横屏后，轻点“继续”。',
@@ -80,8 +107,8 @@ const copy = {
   en: {
     hero: 'Lorne',
     location: 'Saltwind Docks',
-    subtitle: 'Action Study',
-    review: 'Art Review Build',
+    subtitle: 'Copper Tide Trial',
+    review: 'Playtest · Awaiting Review',
     pause: 'Pause',
     resume: 'Resume',
     restart: 'Restart',
@@ -91,10 +118,28 @@ const copy = {
     fullscreen: 'Fullscreen',
     fullscreenLabel: 'Toggle fullscreen',
     health: 'Health',
-    momentum: 'Momentum ready',
-    momentumHint: 'Toward foe + Attack',
+    momentum: 'Opening created',
+    momentumHint: 'J follow-up · E shove',
     pressure: 'Guard pressure',
-    cannon: 'Use cannon',
+    cannon: 'Fire cannon',
+    shove: 'Shove',
+    contextNone: 'No action in reach',
+    contextMiss: 'Target moved away',
+    settings: 'Settings',
+    settingsTitle: 'Voyage settings',
+    closeSettings: 'Back',
+    sound: 'Sound',
+    soundNote: 'Audio unlocks when you begin',
+    effects: 'Combat effects',
+    effectsNote: 'Sparks, impact debris and muzzle flashes',
+    enabled: 'On',
+    disabled: 'Off',
+    display: 'Display comparison',
+    displayNote: 'Same framing, compare action readability',
+    objective: 'Clear the crew. Reclaim the deck.',
+    targetSword: 'Swordsman',
+    targetMusket: 'Musketeer',
+    targetCannon: 'Deck cannon',
     left: 'Move left',
     right: 'Move right',
     jump: 'Jump',
@@ -104,19 +149,19 @@ const copy = {
     interact: 'Use',
     moveHelp: 'Move',
     jumpHelp: 'Jump',
-    attackHelp: 'Attack',
+    attackHelp: 'Two-hit follow-up',
     guardHelp: 'Parry / guard',
     dodgeHelp: 'Dodge',
-    interactHelp: 'Interact',
-    title: 'Step ashore',
-    titleNote: 'A short dockside study of steel and nerve.',
-    start: 'Begin study',
+    interactHelp: 'Shove / fire cannon',
+    title: 'Beneath the saltwind',
+    titleNote: 'Two decks. One cannon. Take the passage with steel, timing and position.',
+    start: 'Begin encounter',
     paused: 'A moment of calm',
     pausedNote: 'Take a breath. Read the next strike.',
     dead: 'One more round',
     deadNote: 'Read the windup. Keep your guard in front.',
-    complete: 'Study complete',
-    completeNote: 'An art and action study. The full adventure is in production.',
+    complete: 'The deck is yours',
+    completeNote: 'Try another route: seize the high deck, or put a foe in the cannon line.',
     loading: 'Preparing the docks…',
     portrait: 'Turn your device sideways',
     portraitNote: 'The game is paused. Rotate to landscape, then tap Resume.',
@@ -134,6 +179,11 @@ const defaultState: UiState = {
   nearCannon: false,
   locale: 'zh',
   muted: false,
+  contextAction: 'none',
+  contextTarget: null,
+  effectsEnabled: true,
+  displayMode: '640',
+  elapsedSeconds: 0,
 };
 
 /** DOM chrome only. World rendering and all gameplay rules remain in the game. */
@@ -149,6 +199,7 @@ export class GameUi {
   private portraitPauseRequested = false;
   private isPortrait = false;
   private lastRenderSignature = '';
+  private settingsOpen = false;
 
   constructor(callbacks: UiCallbacks, target?: HTMLElement) {
     this.callbacks = callbacks;
@@ -161,6 +212,7 @@ export class GameUi {
         <nav class="wake-tools" aria-label="Game controls">
           <button type="button" data-command="pause"></button>
           <button type="button" data-command="restart" data-copy="restart"></button>
+          <button type="button" data-command="settings" data-copy="settings" aria-haspopup="dialog"></button>
           <button type="button" data-command="mute"></button>
           <button type="button" data-command="language" data-copy="language"></button>
           <button type="button" data-command="fullscreen" data-copy="fullscreen"></button>
@@ -174,10 +226,10 @@ export class GameUi {
             <div class="wake-hero">
               <div class="wake-hero-name" data-copy="hero"></div>
               <div class="wake-health" role="meter" aria-valuemin="0"></div>
-              <div class="wake-guard-state" hidden><span data-copy="pressure"></span><span class="wake-pressure-pips" aria-hidden="true"></span></div>
+              <div class="wake-guard-state" hidden><span data-copy="pressure"></span><span class="wake-pressure-track"><i></i></span></div>
               <div class="wake-momentum" hidden><b data-copy="momentum"></b><small data-copy="momentumHint"></small></div>
             </div>
-            <div class="wake-chapter"><span data-copy="location"></span><small data-copy="subtitle"></small></div>
+            <div class="wake-chapter"><span data-copy="location"></span><small data-copy="subtitle"></small><span class="wake-encounter-time" aria-label="Encounter time"></span></div>
           </div>
           <div class="wake-scene-overlay" hidden>
             <div class="wake-pause-card">
@@ -201,7 +253,7 @@ export class GameUi {
             <button type="button" class="wake-touch-key" data-action="dodge" data-copy="dodge"></button>
             <button type="button" class="wake-touch-key wake-touch-guard" data-action="guard" data-copy="guard"></button>
           </div>
-          <button type="button" class="wake-touch-key wake-touch-interact" data-action="interact" hidden data-copy="interact"></button>
+          <button type="button" class="wake-touch-key wake-touch-interact" data-action="interact" hidden></button>
         </div>
       </section>
 
@@ -215,8 +267,19 @@ export class GameUi {
           <span><kbd>Shift</kbd><span data-copy="dodgeHelp"></span></span>
           <span><kbd>E</kbd><span data-copy="interactHelp"></span></span>
         </div>
-        <div class="wake-cannon-hint" hidden><kbd>E</kbd><span data-copy="cannon"></span></div>
+        <div class="wake-cannon-hint" hidden><kbd>E</kbd><span class="wake-context-label"></span><small class="wake-context-target"></small></div>
       </footer>
+
+      <section class="wake-settings" hidden role="dialog" aria-modal="true" aria-labelledby="wake-settings-title">
+        <div class="wake-settings-card">
+          <span class="wake-card-rule" aria-hidden="true"></span>
+          <h2 id="wake-settings-title" data-copy="settingsTitle"></h2>
+          <div class="wake-setting-row"><div><b data-copy="sound"></b><small data-copy="soundNote"></small></div><button type="button" data-command="mute" class="wake-setting-toggle"></button></div>
+          <div class="wake-setting-row" data-setting="effects"><div><b data-copy="effects"></b><small data-copy="effectsNote"></small></div><button type="button" data-command="effects" class="wake-setting-toggle"></button></div>
+          <div class="wake-setting-row" data-setting="display"><div><b data-copy="display"></b><small data-copy="displayNote"></small></div><div class="wake-display-options"><button type="button" data-display="640">640</button><button type="button" data-display="960">960</button></div></div>
+          <button type="button" class="wake-primary" data-command="close-settings" data-copy="closeSettings"></button>
+        </div>
+      </section>
 
       <div class="wake-portrait" hidden role="status">
         <div class="wake-orientation-mark" aria-hidden="true"></div>
@@ -231,7 +294,14 @@ export class GameUi {
 
     const signal = this.listeners.signal;
     for (const button of this.element.querySelectorAll<HTMLButtonElement>('[data-command]')) {
-      button.addEventListener('click', () => this.command(button.dataset.command ?? ''), { signal });
+      button.addEventListener('click', (event) => {
+        this.command(button.dataset.command ?? '');
+        // Pointer toolbar use returns to play; keyboard activation retains Tab focus.
+        if (event.detail > 0 && this.state.mode === 'playing' && !this.settingsOpen) button.blur();
+      }, { signal });
+    }
+    for (const button of this.element.querySelectorAll<HTMLButtonElement>('[data-display]')) {
+      button.addEventListener('click', () => this.callbacks.display?.(button.dataset.display as UiDisplayMode), { signal });
     }
 
     for (const button of this.element.querySelectorAll<HTMLButtonElement>('[data-action]')) {
@@ -244,6 +314,14 @@ export class GameUi {
     }
 
     window.addEventListener('blur', this.releaseAll, { signal });
+    window.addEventListener('keydown', (event) => {
+      if (!this.settingsOpen) return;
+      if (event.code === 'Escape') {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        this.command('close-settings');
+      } else if (event.code === 'Tab') this.trapSettingsFocus(event);
+    }, { signal, capture: true });
     window.addEventListener('resize', this.syncOrientation, { signal });
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) this.releaseAll();
@@ -254,7 +332,7 @@ export class GameUi {
   update(next: Partial<UiState>): void {
     const previousMode = this.state.mode;
     this.state = { ...this.state, ...next };
-    const signature = JSON.stringify(this.state);
+    const signature = JSON.stringify([this.state, this.settingsOpen]);
     if (signature === this.lastRenderSignature) return;
     this.lastRenderSignature = signature;
     const locale: UiLocale = this.state.locale === 'en' ? 'en' : 'zh';
@@ -284,36 +362,66 @@ export class GameUi {
     health.setAttribute('aria-valuenow', String(hp));
     health.setAttribute('aria-valuetext', `${hp} / ${maxHp}`);
 
-    const pressure = Math.max(0, Math.min(3, Math.floor(this.state.guardPressure)));
+    const pressure = Math.max(0, Math.min(100, this.state.guardPressure));
     this.required<HTMLElement>('.wake-guard-state').hidden = pressure === 0;
-    this.required<HTMLElement>('.wake-pressure-pips').textContent = 'Ⅰ'.repeat(pressure);
+    this.required<HTMLElement>('.wake-pressure-track i').style.width = `${pressure}%`;
+    this.required<HTMLElement>('.wake-guard-state').setAttribute('aria-label', `${t.pressure} ${Math.ceil(pressure)}%`);
+    this.element.classList.toggle('is-pressured', pressure >= 75);
     this.required<HTMLElement>('.wake-momentum').hidden = !this.state.momentumReady;
+    const touch = window.matchMedia('(pointer: coarse)').matches;
+    this.required<HTMLElement>('[data-copy="momentumHint"]').textContent = this.state.contextAction === 'shove'
+      ? touch ? locale === 'zh' ? '攻：追击 · 推撞：改位置' : 'Cut: follow-up · Shove: reposition' : t.momentumHint
+      : locale === 'zh' ? touch ? '靠近后点「攻」追击 · 也可脱离' : '靠近目标追击 · 也可脱离'
+        : touch ? 'Move closer, then Cut · Or disengage' : 'Close in to follow up · Or disengage';
 
     const pauseButton = this.required<HTMLButtonElement>('[data-command="pause"]');
     pauseButton.textContent = this.state.mode === 'paused' ? t.resume : t.pause;
     pauseButton.setAttribute('aria-pressed', String(this.state.mode === 'paused'));
-    const muteButton = this.required<HTMLButtonElement>('[data-command="mute"]');
-    muteButton.textContent = this.state.muted ? t.unmute : t.mute;
-    muteButton.setAttribute('aria-pressed', String(this.state.muted));
+    for (const muteButton of this.element.querySelectorAll<HTMLButtonElement>('[data-command="mute"]')) {
+      muteButton.textContent = this.state.muted ? t.unmute : t.mute;
+      muteButton.setAttribute('aria-pressed', String(this.state.muted));
+    }
     this.required<HTMLButtonElement>('[data-command="fullscreen"]').setAttribute('aria-label', t.fullscreenLabel);
     this.required<HTMLElement>('.wake-cue').textContent = this.state.cue;
-    this.required<HTMLElement>('.wake-cannon-hint').hidden = !this.state.nearCannon;
-    this.required<HTMLButtonElement>('[data-action="interact"]').hidden = !this.state.nearCannon;
+    const context = this.state.contextAction;
+    const contextLabel = context === 'shove' ? t.shove : t.cannon;
+    const contextTarget = this.state.contextTarget ?? '';
+    this.required<HTMLElement>('.wake-cannon-hint').hidden = context === 'none' || this.state.mode !== 'playing' || this.settingsOpen;
+    this.required<HTMLElement>('.wake-context-label').textContent = contextLabel;
+    this.required<HTMLElement>('.wake-context-target').textContent = contextTarget.includes('sword') ? t.targetSword : contextTarget.includes('musket') ? t.targetMusket : context === 'cannon' ? t.targetCannon : '';
+    const contextButton = this.required<HTMLButtonElement>('[data-action="interact"]');
+    contextButton.hidden = context === 'none';
+    contextButton.textContent = contextLabel;
+    contextButton.dataset.context = context;
+    contextButton.dataset.target = contextTarget;
+    contextButton.setAttribute('aria-label', context === 'none' ? t.contextNone : contextLabel);
+
+    this.required<HTMLElement>('.wake-encounter-time').textContent = `${Math.floor(Math.max(0, this.state.elapsedSeconds) / 60)}:${String(Math.floor(Math.max(0, this.state.elapsedSeconds)) % 60).padStart(2, '0')}`;
+    const effectsButton = this.required<HTMLButtonElement>('[data-command="effects"]');
+    effectsButton.textContent = this.state.effectsEnabled ? t.enabled : t.disabled;
+    effectsButton.setAttribute('aria-pressed', String(this.state.effectsEnabled));
+    this.required<HTMLElement>('[data-setting="effects"]').hidden = !this.callbacks.effects;
+    this.required<HTMLElement>('[data-setting="display"]').hidden = !this.callbacks.display;
+    for (const button of this.element.querySelectorAll<HTMLButtonElement>('[data-display]')) {
+      button.setAttribute('aria-pressed', String(button.dataset.display === this.state.displayMode));
+    }
+    this.required<HTMLElement>('.wake-settings').hidden = !this.settingsOpen;
 
     for (const button of this.element.querySelectorAll<HTMLButtonElement>('[data-action]')) {
       const action = button.dataset.action as UiAction;
-      button.setAttribute('aria-label', t[action]);
-      button.disabled = this.state.mode !== 'playing';
+      if (action !== 'interact') button.setAttribute('aria-label', t[action]);
+      button.disabled = this.state.mode !== 'playing' || this.settingsOpen;
     }
 
     const mode = this.state.mode;
     const isTitle = mode === 'title' || mode === 'ready' || mode === 'menu';
-    const hasCard = isTitle || mode === 'paused' || mode === 'dead' || mode === 'complete';
+    const isVictory = mode === 'complete' || mode === 'victory';
+    const hasCard = !this.settingsOpen && (isTitle || mode === 'paused' || mode === 'dead' || isVictory);
     this.required<HTMLElement>('.wake-scene-overlay').hidden = !hasCard;
     this.required<HTMLElement>('.wake-loading').hidden = mode !== 'loading';
     if (hasCard) {
-      const title = mode === 'paused' ? t.paused : mode === 'dead' ? t.dead : mode === 'complete' ? t.complete : t.title;
-      const note = mode === 'paused' ? t.pausedNote : mode === 'dead' ? t.deadNote : mode === 'complete' ? t.completeNote : t.titleNote;
+      const title = mode === 'paused' ? t.paused : mode === 'dead' ? t.dead : isVictory ? t.complete : t.title;
+      const note = mode === 'paused' ? t.pausedNote : mode === 'dead' ? t.deadNote : isVictory ? t.completeNote : t.titleNote;
       this.required<HTMLElement>('.wake-card-title').textContent = title;
       this.required<HTMLElement>('.wake-card-note').textContent = note;
       this.required<HTMLButtonElement>('[data-command="primary"]').textContent = mode === 'paused' ? t.resume : isTitle ? t.start : t.restart;
@@ -349,10 +457,25 @@ export class GameUi {
   private command(name: string): void {
     if (name === 'primary') {
       if (this.state.mode === 'paused') this.callbacks.pause();
-      else if (this.state.mode === 'dead' || this.state.mode === 'complete') this.callbacks.restart();
+      else if (this.state.mode === 'dead' || this.state.mode === 'complete' || this.state.mode === 'victory') this.callbacks.restart();
       else this.callbacks.start();
       return;
     }
+    if (name === 'settings') {
+      this.settingsOpen = true;
+      this.releaseAll();
+      if (this.state.mode === 'playing') this.callbacks.pause();
+      this.update({});
+      this.required<HTMLButtonElement>('[data-command="close-settings"]').focus({ preventScroll: true });
+      return;
+    }
+    if (name === 'close-settings') {
+      this.settingsOpen = false;
+      this.update({});
+      this.required<HTMLButtonElement>('[data-command="settings"]').focus({ preventScroll: true });
+      return;
+    }
+    if (name === 'effects') { this.callbacks.effects?.(!this.state.effectsEnabled); return; }
     if (name === 'restart') this.releaseAll();
     if (name === 'pause') this.callbacks.pause();
     else if (name === 'restart') this.callbacks.restart();
@@ -362,7 +485,7 @@ export class GameUi {
   }
 
   private press(event: PointerEvent, button: HTMLButtonElement): void {
-    if (this.state.mode !== 'playing' || event.button !== 0) return;
+    if (this.state.mode !== 'playing' || this.settingsOpen || event.button !== 0) return;
     event.preventDefault();
     if (this.pointers.has(event.pointerId)) this.release(event.pointerId);
     const action = button.dataset.action as UiAction;
@@ -400,4 +523,17 @@ export class GameUi {
       this.callbacks.pause();
     }
   };
+
+  private trapSettingsFocus(event: KeyboardEvent): void {
+    const nodes = [...this.required<HTMLElement>('.wake-settings').querySelectorAll<HTMLButtonElement>('button')]
+      .filter((button) => !button.disabled && button.getClientRects().length > 0);
+    const first = nodes[0];
+    const last = nodes.at(-1);
+    if (!first || !last) return;
+    if (event.shiftKey && (document.activeElement === first || !this.required<HTMLElement>('.wake-settings').contains(document.activeElement))) {
+      event.preventDefault(); last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault(); first.focus();
+    }
+  }
 }
