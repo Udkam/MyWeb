@@ -1,0 +1,260 @@
+{
+  "schema_version": 1,
+  "checked_date_shanghai": "2026-10-24",
+  "scope": "动作与美术样片的6个音效候选。没有购买、登录、音乐下载或音频合成。",
+  "verification": {
+    "official_pages_checked": true,
+    "downloaded_from_official_public_links": true,
+    "kenney_archive_licenses_read": true,
+    "decode_and_duration_checked_with_ffmpeg_ffprobe": true,
+    "actual_listening_performed": false,
+    "in_browser_audition_performed": false,
+    "quality_acceptance": "尚待实际试听，不能以文件名或响度分析代替听感验收。",
+    "distinct_sources": "6个输出对应6个不同的原始文件及SHA256；普通格挡与精准招架不是同文件变调。"
+  },
+  "downloads": [
+    {
+      "official_page": "https://kenney.nl/assets/impact-sounds",
+      "download_url": "https://kenney.nl/media/pages/assets/impact-sounds/87b4ddecda-1677589768/kenney_impact-sounds.zip",
+      "local_file": ".local/assets/raw/kenney-impact-sounds.zip",
+      "sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+      "license_file": ".local/assets/extracted/kenney-impact-sounds/License.txt"
+    },
+    {
+      "official_page": "https://kenney.nl/assets/rpg-audio",
+      "download_url": "https://kenney.nl/media/pages/assets/rpg-audio/8e99002d76-1677590336/kenney_rpg-audio.zip",
+      "local_file": ".local/assets/raw/kenney-rpg-audio.zip",
+      "sha256": "6dbeaf8544da958d8f2adcb4a4a4b76c1ade34a05f8ab9edccd327da7375f38b",
+      "license_file": ".local/assets/extracted/kenney-rpg-audio/License.txt"
+    },
+    {
+      "official_page": "https://opengameart.org/content/cannon-hit-cannon",
+      "download_url": "https://opengameart.org/sites/default/files/cannon_hit_cannon_0.ogg",
+      "local_file": ".local/assets/raw/cannon_hit_cannon_0.ogg",
+      "sha256": "4b4f7eba89368d9495a2d880d6a68bc6a75a85465e2cb165ba036f904bd3d7e0",
+      "license_source": "OGA作者上传页明确CC0。"
+    }
+  ],
+  "assets": [
+    {
+      "id": "slash",
+      "author": "Kenney Vleugels",
+      "pack": "RPG Audio",
+      "official_url": "https://kenney.nl/assets/rpg-audio",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "public_repository_redistribution": "allowed_under_CC0",
+      "source_file": ".local/assets/extracted/kenney-rpg-audio/Audio/knifeSlice2.ogg",
+      "source": {
+        "duration_seconds": 0.571458,
+        "codec": "vorbis",
+        "sample_rate": 48000,
+        "channels": 2,
+        "peak_dbfs": -0.0,
+        "mean_dbfs": -19.1,
+        "bytes": 15099,
+        "sha256": "6c2064d0ef988d1ec3d56868e823ea8823a5cac00f2742560052633529407def"
+      },
+      "output_file": "public/assets/audio/slash.ogg",
+      "output": {
+        "duration_seconds": 0.574125,
+        "codec": "vorbis",
+        "sample_rate": 48000,
+        "channels": 2,
+        "peak_dbfs": -3.2,
+        "mean_dbfs": -23.4,
+        "bytes": 14525,
+        "sha256": "7d334390a4e72fd1ee959dff356fd82f14d4446849b8f7826b4496e90c44c2b0"
+      },
+      "edits": "重新编码为 Ogg Vorbis quality 5；统一降低4dB留余量；不剪切，保留采样率与声道；编码填充可使容器时长增加约3ms。无变调、无合成、无混音。",
+      "purpose": "斩击挥动候选；按作者 knifeSlice2 文件命名选择，尚待实机听感确认。",
+      "status": "已下载并技术解码检查；未实际试听；待用户或浏览器试听确认。",
+      "archive_file": ".local/assets/raw/kenney-rpg-audio.zip",
+      "archive_sha256": "6dbeaf8544da958d8f2adcb4a4a4b76c1ade34a05f8ab9edccd327da7375f38b"
+    },
+    {
+      "id": "guard",
+      "author": "Kenney",
+      "pack": "Impact Sounds 1.0",
+      "official_url": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "public_repository_redistribution": "allowed_under_CC0",
+      "source_file": ".local/assets/extracted/kenney-impact-sounds/Audio/impactMetal_medium_000.ogg",
+      "source": {
+        "duration_seconds": 0.274671,
+        "codec": "vorbis",
+        "sample_rate": 44100,
+        "channels": 2,
+        "peak_dbfs": -1.2,
+        "mean_dbfs": -21.5,
+        "bytes": 7117,
+        "sha256": "a96f879fec0864a8938e0c745b6996a6c5679c16a234ce31a01cc995e8401003"
+      },
+      "output_file": "public/assets/audio/guard.ogg",
+      "output": {
+        "duration_seconds": 0.274671,
+        "codec": "vorbis",
+        "sample_rate": 44100,
+        "channels": 2,
+        "peak_dbfs": -5.2,
+        "mean_dbfs": -25.5,
+        "bytes": 6816,
+        "sha256": "f6cae00b4d9544ca24d8bac28357c447f48ec16701b1c638ba45d12713ea55cb"
+      },
+      "edits": "重新编码为 Ogg Vorbis quality 5；统一降低4dB留余量；不剪切，保留采样率与声道；编码填充可使容器时长增加约3ms。无变调、无合成、无混音。",
+      "purpose": "普通金属格挡候选；中等金属撞击。",
+      "status": "已下载并技术解码检查；未实际试听；待用户或浏览器试听确认。",
+      "archive_file": ".local/assets/raw/kenney-impact-sounds.zip",
+      "archive_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8"
+    },
+    {
+      "id": "parry",
+      "author": "Kenney",
+      "pack": "Impact Sounds 1.0",
+      "official_url": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "public_repository_redistribution": "allowed_under_CC0",
+      "source_file": ".local/assets/extracted/kenney-impact-sounds/Audio/impactMetal_light_003.ogg",
+      "source": {
+        "duration_seconds": 0.484943,
+        "codec": "vorbis",
+        "sample_rate": 44100,
+        "channels": 2,
+        "peak_dbfs": -1.5,
+        "mean_dbfs": -20.7,
+        "bytes": 9023,
+        "sha256": "92d5db6bfc672d9dc1b4f390b2900504f013187fa36335472554fafefa9050b1"
+      },
+      "output_file": "public/assets/audio/parry.ogg",
+      "output": {
+        "duration_seconds": 0.487846,
+        "codec": "vorbis",
+        "sample_rate": 44100,
+        "channels": 2,
+        "peak_dbfs": -6.0,
+        "mean_dbfs": -24.8,
+        "bytes": 8537,
+        "sha256": "6139ff19971c19494bc7068ad7b54d074b2e2e6937fb458d26d8986e45bda4bf"
+      },
+      "edits": "重新编码为 Ogg Vorbis quality 5；统一降低4dB留余量；不剪切，保留采样率与声道；编码填充可使容器时长增加约3ms。无变调、无合成、无混音。",
+      "purpose": "精准招架候选；独立的轻金属源文件，与 guard 并非同源变调。是否足够清亮明确待试听。",
+      "status": "已下载并技术解码检查；未实际试听；待用户或浏览器试听确认。",
+      "archive_file": ".local/assets/raw/kenney-impact-sounds.zip",
+      "archive_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8"
+    },
+    {
+      "id": "hurt",
+      "author": "Kenney",
+      "pack": "Impact Sounds 1.0",
+      "official_url": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "public_repository_redistribution": "allowed_under_CC0",
+      "source_file": ".local/assets/extracted/kenney-impact-sounds/Audio/impactPunch_medium_001.ogg",
+      "source": {
+        "duration_seconds": 0.407506,
+        "codec": "vorbis",
+        "sample_rate": 44100,
+        "channels": 2,
+        "peak_dbfs": -1.1,
+        "mean_dbfs": -16.9,
+        "bytes": 8701,
+        "sha256": "e71d23abcc3f10d9d6bc9615b2a431fff70b12333a5fcdd9964457564ace4349"
+      },
+      "output_file": "public/assets/audio/hurt.ogg",
+      "output": {
+        "duration_seconds": 0.407506,
+        "codec": "vorbis",
+        "sample_rate": 44100,
+        "channels": 2,
+        "peak_dbfs": -5.1,
+        "mean_dbfs": -20.8,
+        "bytes": 8362,
+        "sha256": "baa824e3a53eab7eb57e56c3f99223a31f643c5e881235cb1323b534bef77cbd"
+      },
+      "edits": "重新编码为 Ogg Vorbis quality 5；统一降低4dB留余量；不剪切，保留采样率与声道；编码填充可使容器时长增加约3ms。无变调、无合成、无混音。",
+      "purpose": "主角受伤／身体命中候选；中等拳击源。",
+      "status": "已下载并技术解码检查；未实际试听；待用户或浏览器试听确认。",
+      "archive_file": ".local/assets/raw/kenney-impact-sounds.zip",
+      "archive_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8"
+    },
+    {
+      "id": "shove",
+      "author": "Kenney",
+      "pack": "Impact Sounds 1.0",
+      "official_url": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "public_repository_redistribution": "allowed_under_CC0",
+      "source_file": ".local/assets/extracted/kenney-impact-sounds/Audio/impactPunch_heavy_000.ogg",
+      "source": {
+        "duration_seconds": 0.651927,
+        "codec": "vorbis",
+        "sample_rate": 44100,
+        "channels": 2,
+        "peak_dbfs": -1.0,
+        "mean_dbfs": -18.0,
+        "bytes": 11617,
+        "sha256": "b33a8f14068aec24ec69ba85e5e87fdc41228975f6a1a3e44a6e7d6fc3d9f8d8"
+      },
+      "output_file": "public/assets/audio/shove.ogg",
+      "output": {
+        "duration_seconds": 0.65483,
+        "codec": "vorbis",
+        "sample_rate": 44100,
+        "channels": 2,
+        "peak_dbfs": -4.9,
+        "mean_dbfs": -22.0,
+        "bytes": 11029,
+        "sha256": "0cc51d370d1458c078d6df73188e6d87777b0143127b3d78b2237d39a3e2842c"
+      },
+      "edits": "重新编码为 Ogg Vorbis quality 5；统一降低4dB留余量；不剪切，保留采样率与声道；编码填充可使容器时长增加约3ms。无变调、无合成、无混音。",
+      "purpose": "夺势推击接触候选；独立重拳击源。",
+      "status": "已下载并技术解码检查；未实际试听；待用户或浏览器试听确认。",
+      "archive_file": ".local/assets/raw/kenney-impact-sounds.zip",
+      "archive_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8"
+    },
+    {
+      "id": "cannon-impact",
+      "author": "Thimras",
+      "pack": "Cannon hit cannon",
+      "official_url": "https://opengameart.org/content/cannon-hit-cannon",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "public_repository_redistribution": "allowed_under_CC0",
+      "source_file": ".local/assets/raw/cannon_hit_cannon_0.ogg",
+      "source": {
+        "duration_seconds": 2.810708,
+        "codec": "vorbis",
+        "sample_rate": 48000,
+        "channels": 2,
+        "peak_dbfs": -2.4,
+        "mean_dbfs": -21.3,
+        "bytes": 195015,
+        "sha256": "4b4f7eba89368d9495a2d880d6a68bc6a75a85465e2cb165ba036f904bd3d7e0"
+      },
+      "output_file": "public/assets/audio/cannon-impact.ogg",
+      "output": {
+        "duration_seconds": 2.813375,
+        "codec": "vorbis",
+        "sample_rate": 48000,
+        "channels": 2,
+        "peak_dbfs": -6.7,
+        "mean_dbfs": -25.5,
+        "bytes": 65402,
+        "sha256": "78870df93629ca91e8641e2a482fd6fa4118bbebd9e49183786142c1281b33c3"
+      },
+      "edits": "重新编码为 Ogg Vorbis quality 5；统一降低4dB留余量；不剪切，保留采样率与声道；编码填充可使容器时长增加约3ms。无变调、无合成、无混音。",
+      "purpose": "炮弹撞击金属候选。作者描述为远处一门炮击中另一门炮的夸张铃响；不是发炮爆鸣、炮烟或落水全套。",
+      "status": "已下载并技术解码检查；未实际试听；待用户或浏览器试听确认。"
+    }
+  ],
+  "remaining_gaps": [
+    "专用火炮发射爆鸣尚未落实；cannon-impact仅能作撞击候选。",
+    "普通格挡／招架／受伤的独立源已区分，但实际声音辨识度、音量与叠加混音仍需真实听感确认。",
+    "没有完成章节音乐或3至5首配乐试听，本轮未扩大范围。"
+  ],
+  "maintenance": "原始ZIP与完整解包留在.local供溯源，保持Git忽略；公开目录仅6个实际候选导出；可依据本JSON中的作者、来源和CC0许可写入游戏鸣谢。"
+}

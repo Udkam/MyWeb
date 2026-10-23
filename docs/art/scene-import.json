@@ -1,0 +1,151 @@
+{
+  "date": "2026-10-24",
+  "tool": "built-in imagegen",
+  "status": "working art; user review pending",
+  "background": {
+    "source_size": [
+      1672,
+      941
+    ],
+    "runtime_size": [
+      640,
+      360
+    ],
+    "source_sha256": "b77afb477614f63823dc43a7edaf47a79a5fb4e1722ee3361413c5c8b0e5d30e",
+    "floor_edge_y": 255
+  },
+  "props": [
+    {
+      "name": "cannon-idle",
+      "source_region": [
+        0,
+        170,
+        520,
+        570
+      ],
+      "source_alpha_bbox": [
+        32,
+        83,
+        495,
+        363
+      ],
+      "runtime_size": [
+        64,
+        38
+      ],
+      "sha256": "4d990ec22d65365652ce56e149ad24b22f2eba45efa18506e268d5db91eef6ed",
+      "modifications": "alpha128 cutoff, silhouette extraction, explicit native-size sampling; no painted additions"
+    },
+    {
+      "name": "cannon-fire",
+      "source_region": [
+        530,
+        170,
+        1030,
+        570
+      ],
+      "source_alpha_bbox": [
+        50,
+        93,
+        492,
+        363
+      ],
+      "runtime_size": [
+        64,
+        38
+      ],
+      "sha256": "e423a3451174f57295bf3f50ac997c7b76d87ee5d490818ce69dba5e5b1987fe",
+      "modifications": "alpha128 cutoff, silhouette extraction, explicit native-size sampling; no painted additions"
+    },
+    {
+      "name": "cannon-recover",
+      "source_region": [
+        1030,
+        170,
+        1536,
+        570
+      ],
+      "source_alpha_bbox": [
+        24,
+        89,
+        478,
+        363
+      ],
+      "runtime_size": [
+        64,
+        38
+      ],
+      "sha256": "cff778ff8b8a9991e95dbf5a6282e3d2aa3fd177535747b25d9ac988db82b4c0",
+      "modifications": "alpha128 cutoff, silhouette extraction, explicit native-size sampling; no painted additions"
+    },
+    {
+      "name": "crate",
+      "source_region": [
+        0,
+        590,
+        480,
+        960
+      ],
+      "source_alpha_bbox": [
+        52,
+        73,
+        442,
+        292
+      ],
+      "runtime_size": [
+        48,
+        24
+      ],
+      "sha256": "3b38040d5f24ad9afcbf88d81a90b2fcfd16dfa236e2cc378f900fcb827c91e3",
+      "modifications": "alpha128 cutoff, silhouette extraction, explicit native-size sampling; no painted additions"
+    },
+    {
+      "name": "barrel",
+      "source_region": [
+        490,
+        580,
+        735,
+        970
+      ],
+      "source_alpha_bbox": [
+        18,
+        32,
+        223,
+        319
+      ],
+      "runtime_size": [
+        24,
+        32
+      ],
+      "sha256": "a4ee0c7beba513eda84cf3f82e2d4929cf42d077fb77160e261a92d448cc8f6e",
+      "modifications": "alpha128 cutoff, silhouette extraction, explicit native-size sampling; no painted additions"
+    },
+    {
+      "name": "platform",
+      "source_region": [
+        740,
+        600,
+        1536,
+        960
+      ],
+      "source_alpha_bbox": [
+        20,
+        96,
+        780,
+        282
+      ],
+      "runtime_size": [
+        112,
+        28
+      ],
+      "sha256": "cc4ee5e63935a0e813497c12b5d1fc5f6bc3066e801ad4bc83b9764e7bedb709",
+      "modifications": "alpha128 cutoff, silhouette extraction, explicit native-size sampling; no painted additions"
+    }
+  ],
+  "props_source_sha256": "e8b44a61bd43e26f6d5aad4c18614912ddf31772097abae1bfd14258cc474c6d",
+  "limitations": [
+    "Source dimensions are not the prompt's requested grid.",
+    "Generated detail is sampled into a native grid; it is not a claim that every source pixel was a uniform 4x4 cluster.",
+    "Cannon frames need live recoil/pivot review; no complete action-animation claim."
+  ]
+}

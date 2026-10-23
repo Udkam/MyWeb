@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.astro/
+.local/
+.qa/
+.vercel/
+.env
+.env.*
+*.log
+*.tsbuildinfo
+coverage/
