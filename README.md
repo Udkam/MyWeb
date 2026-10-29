@@ -7,6 +7,10 @@ source is `E:\Proj\Active\MyWeb\TetraMorph`, on branch `codex/tetramorph`.
 The full accepted history is preserved; the former `Udkam/TetraMorph` repository
 is archived read-only and remains available through the local `legacy` remote.
 
+`codex/tetramorph` is also the default branch of `Udkam/MyWeb`. The repository
+keeps three independent website branches; see [MyWeb workspaces](docs/MYWEB-WORKSPACES.md)
+for their local folders, production links and maintenance boundaries.
+
 Vercel project `tetramorph` is connected to `Udkam/MyWeb`, with production branch
 `codex/tetramorph`, and keeps the existing public domain. The source migration
 commit `ac7afcea` was verified Ready with working Classic and Endgame routes.

@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-10-30 — Retire rejected game and simplify MyWeb branches
+
+- The user rejected Cutlass Wake / IRONMOLT and stopped production. Its Goal is
+  paused and its production chat is marked rejected and archived.
+- Removed the independent game workspace and the remote `codex/cutlass-wake`,
+  `codex/game-next` and directory-only `main` branches. The default branch is now
+  `codex/tetramorph`; Cinder Below and SpriteLab remain independent branches.
+- Moved the current workspace directory into `docs/MYWEB-WORKSPACES.md`; MyWeb's
+  local parent contains only the three published website workspaces.
+- This is repository/documentation cleanup. Product sources and deployed portal
+  snapshots are unchanged; inherited TetraMorph working changes are preserved.
+
+
 ## 2026-10-18 — Source-map dependency security gate repair
 
 - Patched the single transitive `source-map-js` lock from 1.2.1 to the official
