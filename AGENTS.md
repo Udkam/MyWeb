@@ -3,13 +3,13 @@
 This folder is the standalone Cinder Below game checkout. The shared GitHub
 repository is `https://github.com/Udkam/MyWeb.git`; this website belongs to
 `codex/cinder-below`. The portal belongs to the separate repository
-`Udkam/personal-web`, on `main` in its own checkout. The MyWeb `main` branch is
-the directory of website branches.
+`Udkam/personal-web`, on `main` in its own checkout. MyWeb keeps only the three
+published website branches; its default branch is `codex/tetramorph`.
 
 Canonical local source: `E:\Proj\Active\MyWeb\cinder-below`. The parent MyWeb
 folder groups the separate website checkouts; it is not an additional Git root.
 
-- Keep game work on `codex/cinder-below`; never push the game tree to the directory `main` branch.
+- Keep game work on `codex/cinder-below`; never push this game tree to another website's branch.
 - `src` contains the deployable HTML, JavaScript, CSS, art and audio.
 - Preserve asset licenses, source credits and the existing local-save contract.
 - Use UTF-8 for text and keep `.qa`, `dist`, dependencies and secrets untracked.

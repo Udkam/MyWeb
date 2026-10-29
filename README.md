@@ -14,7 +14,7 @@
 
 ## Repository
 
-MyWeb uses a separate branch for each website. Its `main` branch is the website directory; `codex/cinder-below` contains this complete standalone game, including its original Git history. The 4c portal has its own repository, `Udkam/personal-web`, and is maintained separately. Work on the game branch from its own folder:
+MyWeb uses a separate branch for each website. Its default branch is `codex/tetramorph`; `codex/cinder-below` contains this complete standalone game, including its original Git history. The repository keeps only TetraMorph, Cinder Below and SpriteLab. See the [workspace directory](https://github.com/Udkam/MyWeb/blob/codex/tetramorph/docs/MYWEB-WORKSPACES.md). The 4c portal has its own repository, `Udkam/personal-web`, and is maintained separately. Work on the game branch from its own folder:
 
 ```bash
 git clone --branch codex/cinder-below --single-branch https://github.com/Udkam/MyWeb.git cinder-below
@@ -25,7 +25,7 @@ npm test
 npm run build
 ```
 
-本机独立开发目录为 `E:\Proj\Active\MyWeb\cinder-below`，与 TetraMorph、SpriteLab 一起归入 MyWeb 本地站点目录。后续提交推送到 `origin/codex/cinder-below`。个人入口站单独维护于 `Udkam/personal-web`；各网站源码不合并到 MyWeb 的目录分支。
+本机独立开发目录为 `E:\Proj\Active\MyWeb\cinder-below`，与 TetraMorph、SpriteLab 一起归入 MyWeb 本地站点目录。后续提交推送到 `origin/codex/cinder-below`。个人入口站单独维护于 `Udkam/personal-web`；各网站源码不跨分支合并。2026-10-30 退役分支清理后不再保留 MyWeb 的目录专用 `main`，本游戏代码与已发布快照未因此改变。
 
 The existing public ChatGPT Sites project and stable URL are retained. The old Focus Desk / Mosslight Post URL slug is not the game's title. This game replaces Mosslight Post; its complete earlier source remains in Git at `fb20b88e4e7c564eb9912d390c69678d52bdd5af`.
 
