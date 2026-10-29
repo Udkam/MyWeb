@@ -8,7 +8,7 @@
 
 源码：[Udkam/MyWeb · codex/spritelab](https://github.com/Udkam/MyWeb/tree/codex/spritelab)。本地目录为 `E:\Proj\Active\MyWeb\spritelab`，`origin` 指向 `https://github.com/Udkam/MyWeb.git`，当前分支跟踪 `origin/codex/spritelab`。
 
-MyWeb 的每个网站使用独立目录和分支；仓库的 `main` 仅用于网站目录，不合并 SpriteLab 的产品树。2026-10-22 将本地原 `main` 更名为 `codex/spritelab` 并接入远端，保留原有全部提交历史。4c 入口站继续独立使用 `Udkam/personal-web` 的 `main`，公开快照仍由下述导入流程发布。
+MyWeb 的每个网站使用独立目录和分支；仓库只保留 TetraMorph、Cinder Below、SpriteLab 三个网站分支，默认分支为 `codex/tetramorph`，不再保留目录专用 `main`。当前入口见[工作区目录](https://github.com/Udkam/MyWeb/blob/codex/tetramorph/docs/MYWEB-WORKSPACES.md)。2026-10-22 将本地原 `main` 更名为 `codex/spritelab` 并接入远端，保留原有全部提交历史。4c 入口站继续独立使用 `Udkam/personal-web` 的 `main`，公开快照仍由下述导入流程发布。
 
 ```sh
 git clone --branch codex/spritelab --single-branch https://github.com/Udkam/MyWeb.git spritelab

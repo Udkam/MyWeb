@@ -1,5 +1,10 @@
 # SpriteLab Changelog
 
+## 2026-10-30
+
+- 按用户要求清理 MyWeb 退役项目后，更新 README 的当前分支说明：仓库只保留三个正式网站分支，默认分支为 `codex/tetramorph`，工作区目录说明位于该分支的 `docs/MYWEB-WORKSPACES.md`。
+- 本轮只更新仓库说明，没有修改 SpriteLab 产品源码或个人门户的已发布快照。
+
 ## 2026-10-22
 
 - 将独立源码目录 `E:\Proj\Active\MyWeb\spritelab` 的本地 `main` 分支更名为 `codex/spritelab`，接入 `https://github.com/Udkam/MyWeb.git` 的同名远端分支。保留原有 `87309d8`、`14cd2b0` 两条提交及其完整历史，不将产品树合并到 MyWeb 的目录分支。
